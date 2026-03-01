@@ -30,10 +30,6 @@ public class LocalSponsorPdfService {
         this.baseDir = new File(System.getProperty("user.home"), "EventFlow_PDF");
     }
 
-    /**
-     * PDF local “Contrat” basé sur ce qui s'affiche dans Details,
-     * MAIS sans afficher IDs, sans URL logo/contrat, et avec logos + cachet.
-     */
     public File generateSponsorContractPdf(Sponsor s, String eventTitle) throws Exception {
         if (s == null) throw new IllegalArgumentException("Sponsor null");
 
@@ -55,23 +51,20 @@ public class LocalSponsorPdfService {
 
                 float y = pageH - margin;
 
-                // ====== LOGOS (EventFlow à gauche, Entreprise à droite) ======
+                // ====== LOGOS ======
                 float logoBoxH = 52f;
                 float logoBoxW = 52f;
 
-                // EventFlow logo (classpath) : /com/example/pidev/icons/logo.png
                 PDImageXObject eventflowLogo = loadClasspathImage(doc, "/com/example/pidev/icons/logo.png");
                 if (eventflowLogo != null) {
                     cs.drawImage(eventflowLogo, margin, y - logoBoxH, logoBoxW, logoBoxH);
                 }
 
-                // Company logo (depuis sponsor.logo_url) => on l'EMBED (pas afficher URL)
                 PDImageXObject companyLogo = loadCompanyLogo(doc, s.getLogo_url());
                 if (companyLogo != null) {
                     cs.drawImage(companyLogo, pageW - margin - 78f, y - 58f, 78f, 58f);
                 }
 
-                // Descendre sous les logos
                 y -= (logoBoxH + 16f);
 
                 // ====== TITRE ======
@@ -83,12 +76,12 @@ public class LocalSponsorPdfService {
                 y = line(cs, "Date: " + date, margin, y, PDType1Font.HELVETICA, 11);
                 y -= 8;
 
-                // ====== EVENEMENT (sans ID) ======
+                // ====== ÉVÉNEMENT ======
                 String ev = (eventTitle == null || eventTitle.isBlank()) ? "—" : eventTitle;
                 y = line(cs, "Evenement: " + ev, margin, y, PDType1Font.HELVETICA, 11);
                 y -= 12;
 
-                // ====== INFOS (comme Details, sans URLs) ======
+                // ====== INFOS ======
                 y = line(cs, "Informations:", margin, y, PDType1Font.HELVETICA_BOLD, 12);
                 y -= 2;
 
@@ -96,32 +89,36 @@ public class LocalSponsorPdfService {
                 y = line(cs, "Email: " + nv(s.getContact_email()), margin, y, PDType1Font.HELVETICA, 11);
                 y = line(cs, "Contribution: " + fmt(s.getContribution_name()) + " DT", margin, y, PDType1Font.HELVETICA, 11);
 
+                // Ajout du numéro fiscal
+                if (s.getTax_id() != null && !s.getTax_id().isBlank()) {
+                    y = line(cs, "Numéro fiscal: " + s.getTax_id(), margin, y, PDType1Font.HELVETICA, 11);
+                }
+                // Mention du justificatif
+                if (s.getDocument_url() != null && !s.getDocument_url().isBlank()) {
+                    y = line(cs, "Justificatif: fourni", margin, y, PDType1Font.HELVETICA, 11);
+                }
+
                 y -= 16;
 
-                // ====== CLAUSES SIMPLE ======
+                // ====== CLAUSES ======
                 y = line(cs, "Contrat Sponsor:", margin, y, PDType1Font.HELVETICA_BOLD, 12);
                 y -= 4;
 
                 y = paragraph(cs,
-                        "Le sponsor confirme sa contribution a l'evenement mentionne ci-dessus. "
-                                + "La contribution sera utilisee pour les besoins organisationnels de l'evenement.",
+                        "Le sponsor confirme sa contribution à l'événement mentionné ci-dessus. "
+                                + "La contribution sera utilisée pour les besoins organisationnels de l'événement.",
                         margin, y, usableW, PDType1Font.HELVETICA, 11, 14);
 
                 y -= 12;
-                // ====== SIGNATURES (gauche/droite, sans ligne) ======
-                float sigY = y;
 
-// labels sur la même ligne
+                // ====== SIGNATURES ======
+                float sigY = y;
                 drawAt(cs, "Signature Organisateur:", margin, sigY, PDType1Font.HELVETICA, 11);
                 drawAt(cs, "Signature Sponsor:", margin + (usableW / 2f) + 20f, sigY, PDType1Font.HELVETICA, 11);
 
-// espace vide pour signer (pas de trait)
                 y = sigY - 60f;
 
-
-
-
-                // ====== CACHET OFFICIEL (dessin) ======
+                // ====== CACHET OFFICIEL ======
                 drawOfficialStamp(cs, pageW - margin - 180f, margin + 70f, 180f, 70f, date);
             }
 
@@ -154,12 +151,6 @@ public class LocalSponsorPdfService {
         }
     }
 
-    /**
-     * Logo entreprise: on EMBED l'image.
-     * - si logo_url est un chemin local -> lire fichier
-     * - si logo_url est http(s) -> télécharger l'image (sans afficher URL dans PDF)
-     * - sinon -> null
-     */
     private PDImageXObject loadCompanyLogo(PDDocument doc, String logoUrlOrPath) {
         try {
             if (logoUrlOrPath == null || logoUrlOrPath.isBlank()) return null;
@@ -261,6 +252,7 @@ public class LocalSponsorPdfService {
     private static String fmt(double v) {
         return String.format("%,.2f", v);
     }
+
     private static void drawAt(PDPageContentStream cs, String text, float x, float y,
                                PDType1Font font, int size) throws Exception {
         cs.beginText();
@@ -269,8 +261,6 @@ public class LocalSponsorPdfService {
         cs.showText(text == null ? "" : text);
         cs.endText();
     }
-
-
 
     private static String safeFilePart(String s) {
         String v = (s == null || s.isBlank()) ? "SPONSOR" : s;

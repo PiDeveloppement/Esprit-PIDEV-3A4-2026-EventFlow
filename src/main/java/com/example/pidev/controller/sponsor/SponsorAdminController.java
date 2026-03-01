@@ -142,7 +142,8 @@ public class SponsorAdminController implements Initializable {
     private void setupFiltersCombos() {
         try {
             if (companyFilter != null) {
-                companyFilter.getItems().setAll(sponsorService.getCompanyNamesByContactEmail(null)); // ou autre méthode
+                // Récupérer toutes les entreprises distinctes
+                companyFilter.getItems().setAll(sponsorService.getAllCompanyNames());
                 companyFilter.setValue(null);
             }
             if (eventFilter != null) {

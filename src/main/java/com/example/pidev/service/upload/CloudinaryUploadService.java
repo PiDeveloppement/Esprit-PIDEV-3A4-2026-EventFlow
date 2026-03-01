@@ -30,6 +30,13 @@ public class CloudinaryUploadService {
         return upload(file, PRESET_CONTRACT, "raw");
     }
 
+    // Nouvelle méthode pour uploader un document justificatif (image ou PDF)
+    public String uploadDocument(File file) throws IOException, InterruptedException {
+        // On utilise le preset logo (ou on pourrait en créer un spécifique)
+        // Le resourceType "auto" permet à Cloudinary de détecter le type
+        return upload(file, PRESET_LOGO, "auto");
+    }
+
     private String upload(File file, String preset, String resourceType) throws IOException, InterruptedException {
         if (file == null || !file.exists()) throw new IOException("Fichier introuvable");
 

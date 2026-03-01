@@ -1,6 +1,7 @@
 package com.example.pidev.controller.sponsor;
 
 import com.example.pidev.MainController;
+import com.example.pidev.model.event.Event;
 import com.example.pidev.model.sponsor.Sponsor;
 import com.example.pidev.service.sponsor.SponsorService;
 import com.example.pidev.service.upload.CloudinaryUploadService;
@@ -39,11 +40,16 @@ public class SponsorFormController {
     @FXML private Label convertedAmountLabel;
     @FXML private TextField phoneField;
     @FXML private TextField industryField;
+    @FXML private TextField taxIdField;          // NOUVEAU
+    @FXML private Button uploadDocBtn;            // NOUVEAU
+    @FXML private Label docFileLabel;             // NOUVEAU
+    @FXML private Button importDocBtn;  // (optionnel)
 
     private Sponsor editing;
     private Sponsor result;
     private String fixedEmail;
     private File selectedLogoFile;
+    private File selectedDocFile;                  // NOUVEAU
 
     private Runnable onFormDone;
     private Consumer<Sponsor> onSaved;
@@ -52,6 +58,8 @@ public class SponsorFormController {
     private final SponsorService sponsorService = new SponsorService();
 
     private static final Pattern EMAIL_RX = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    // Regex pour numéro fiscal tunisien : 7 chiffres + une lettre (ex: 1234567A)
+    private static final Pattern TAX_ID_RX = Pattern.compile("^[0-9]{7}[A-Za-z]$");
 
     public void setOnFormDone(Runnable callback) { this.onFormDone = callback; }
     public void setOnSaved(Consumer<Sponsor> callback) { this.onSaved = callback; }
@@ -95,6 +103,32 @@ public class SponsorFormController {
                 String filtered = n.replaceAll("[^0-9]", "");
                 if (!filtered.equals(n)) phoneField.setText(filtered);
             });
+        }
+
+        // Gestionnaire pour le bouton d'upload de document
+        if (uploadDocBtn != null) {
+            uploadDocBtn.setOnAction(e -> onChooseDocument());
+        }
+
+        // Validation en temps réel du numéro fiscal (optionnel)
+        if (taxIdField != null) {
+            taxIdField.focusedProperty().addListener((obs, old, focused) -> {
+                if (!focused) {
+                    validateTaxId();
+                }
+            });
+        }
+    }
+
+    private void validateTaxId() {
+        String taxId = safe(taxIdField.getText());
+        if (!taxId.isEmpty() && !TAX_ID_RX.matcher(taxId).matches()) {
+            // Afficher un indicateur d'erreur (bordure rouge)
+            taxIdField.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2;");
+            error("Format de numéro fiscal invalide (ex: 1234567A)");
+        } else {
+            taxIdField.setStyle("-fx-border-color: #cbd5e1; -fx-border-width: 1.5;");
+            clearErrors();
         }
     }
 
@@ -153,15 +187,17 @@ public class SponsorFormController {
         contributionField.clear();
         industryField.clear();
         phoneField.clear();
+        taxIdField.clear();          // nouveau
 
         selectedLogoFile = null;
+        selectedDocFile = null;      // nouveau
         logoField.clear();
         logoPreview.setImage(null);
         if (visionResultArea != null) visionResultArea.clear();
         if (currencyComboBox != null) currencyComboBox.setValue("TND");
         if (convertedAmountLabel != null) convertedAmountLabel.setText("");
-
         if (logoFileLabel != null) logoFileLabel.setText("Aucun fichier choisi");
+        if (docFileLabel != null) docFileLabel.setText("Aucun fichier choisi");
 
         if (fixedEmail == null) {
             emailField.clear();
@@ -190,9 +226,11 @@ public class SponsorFormController {
         contributionField.setText(String.valueOf(s.getContribution_name()));
         industryField.setText(s.getIndustry());
         phoneField.setText(s.getPhone());
+        taxIdField.setText(s.getTax_id());          // nouveau
 
         logoField.setText(s.getLogo_url() == null ? "" : s.getLogo_url());
         selectedLogoFile = null;
+        selectedDocFile = null;                      // nouveau
 
         try {
             if (s.getLogo_url() != null && !s.getLogo_url().isBlank()) {
@@ -205,6 +243,7 @@ public class SponsorFormController {
         }
 
         if (logoFileLabel != null) logoFileLabel.setText("Garder logo actuel (ou choisir nouveau)");
+        if (docFileLabel != null) docFileLabel.setText("Garder document actuel (ou choisir nouveau)");
         if (visionResultArea != null) visionResultArea.clear();
         if (currencyComboBox != null) currencyComboBox.setValue("TND");
         if (convertedAmountLabel != null) convertedAmountLabel.setText("");
@@ -237,6 +276,24 @@ public class SponsorFormController {
                 logoPreview.setImage(img);
                 logoField.clear();
             } catch (Exception ignored) {}
+        }
+    }
+
+    @FXML
+    private void onChooseDocument() {                // NOUVELLE MÉTHODE
+        clearErrors();
+
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Choisir un justificatif (image ou PDF)");
+        fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg"),
+                new FileChooser.ExtensionFilter("PDF", "*.pdf")
+        );
+
+        File f = fc.showOpenDialog(getStage());
+        if (f != null) {
+            selectedDocFile = f;
+            if (docFileLabel != null) docFileLabel.setText(f.getName());
         }
     }
 
@@ -330,6 +387,7 @@ public class SponsorFormController {
         String contribTxt = safe(contributionField.getText()).replace(",", ".");
         String industry = safe(industryField.getText());
         String phone = safe(phoneField.getText());
+        String taxId = safe(taxIdField.getText());   // nouveau
 
         if (fixedEmail != null && !fixedEmail.isEmpty()) email = fixedEmail;
 
@@ -351,6 +409,12 @@ public class SponsorFormController {
 
         if (email.isEmpty()) { error("Email obligatoire"); return; }
         if (!EMAIL_RX.matcher(email).matches()) { error("Email invalide"); return; }
+
+        // Validation du numéro fiscal (optionnel mais si présent, doit être valide)
+        if (!taxId.isEmpty() && !TAX_ID_RX.matcher(taxId).matches()) {
+            error("Format de numéro fiscal invalide (7 chiffres + lettre)");
+            return;
+        }
 
         String currency = (currencyComboBox == null) ? "TND" : currencyComboBox.getValue();
         double originalAmount;
@@ -384,6 +448,16 @@ public class SponsorFormController {
             return;
         }
 
+        String docUrlFinal = null;
+        try {
+            if (selectedDocFile != null) {
+                docUrlFinal = cloud.uploadDocument(selectedDocFile);
+            }
+        } catch (Exception ex) {
+            error("Upload document échoué: " + ex.getMessage());
+            return;
+        }
+
         Sponsor out = new Sponsor();
         if (editing != null) out.setId(editing.getId());
 
@@ -394,6 +468,8 @@ public class SponsorFormController {
         out.setLogo_url(logoUrlFinal.isEmpty() ? null : logoUrlFinal);
         out.setIndustry(industry);
         out.setPhone(phone);
+        out.setTax_id(taxId);                // nouveau
+        out.setDocument_url(docUrlFinal);     // nouveau
 
         out.setContract_url(editing == null ? null : editing.getContract_url());
         out.setAccess_code(editing == null ? null : editing.getAccess_code());
@@ -430,7 +506,7 @@ public class SponsorFormController {
     @FXML
     private void onCancel() {
         if (onFormDone != null) {
-            onFormDone.run(); // Retour à la liste des sponsors
+            onFormDone.run();
         } else {
             closeWindowIfModal();
         }
@@ -444,13 +520,12 @@ public class SponsorFormController {
         } catch (Exception ignored) {}
     }
 
-    public void preSelectEvent(com.example.pidev.model.event.Event event) {
+    public void preSelectEvent(Event event) {
         if (event != null) {
             String title = event.getTitle();
             if (eventComboBox.getItems().contains(title)) {
                 eventComboBox.setValue(title);
             } else {
-                // Si le titre n'est pas dans la liste (cas rare), on peut essayer de le recharger
                 try {
                     ObservableList<String> titles = sponsorService.getAllEventTitles();
                     if (titles.contains(title)) {

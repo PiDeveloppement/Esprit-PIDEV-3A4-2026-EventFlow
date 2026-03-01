@@ -21,8 +21,8 @@ public class SponsorService {
 
     // ==================== CRUD ====================
     public boolean addSponsor(Sponsor sponsor) {
-        String sql = "INSERT INTO sponsor (event_id, company_name, logo_url, contribution_name, contact_email, contract_url, industry, phone) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO sponsor (event_id, company_name, logo_url, contribution_name, contact_email, contract_url, industry, phone, tax_id, document_url) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, sponsor.getEvent_id());
             pstmt.setString(2, sponsor.getCompany_name());
@@ -32,6 +32,8 @@ public class SponsorService {
             pstmt.setString(6, sponsor.getContract_url());
             pstmt.setString(7, sponsor.getIndustry());
             pstmt.setString(8, sponsor.getPhone());
+            pstmt.setString(9, sponsor.getTax_id());
+            pstmt.setString(10, sponsor.getDocument_url());
 
             int affected = pstmt.executeUpdate();
             if (affected > 0) {
@@ -88,7 +90,7 @@ public class SponsorService {
     }
 
     public boolean updateSponsor(Sponsor sponsor) throws SQLException {
-        String sql = "UPDATE sponsor SET event_id=?, company_name=?, logo_url=?, contribution_name=?, contact_email=?, contract_url=?, industry=?, phone=? WHERE id=?";
+        String sql = "UPDATE sponsor SET event_id=?, company_name=?, logo_url=?, contribution_name=?, contact_email=?, contract_url=?, industry=?, phone=?, tax_id=?, document_url=? WHERE id=?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, sponsor.getEvent_id());
             pstmt.setString(2, sponsor.getCompany_name());
@@ -98,7 +100,9 @@ public class SponsorService {
             pstmt.setString(6, sponsor.getContract_url());
             pstmt.setString(7, sponsor.getIndustry());
             pstmt.setString(8, sponsor.getPhone());
-            pstmt.setInt(9, sponsor.getId());
+            pstmt.setString(9, sponsor.getTax_id());
+            pstmt.setString(10, sponsor.getDocument_url());
+            pstmt.setInt(11, sponsor.getId());
 
             return pstmt.executeUpdate() > 0;
         }
@@ -123,6 +127,8 @@ public class SponsorService {
         s.setContract_url(rs.getString("contract_url"));
         s.setIndustry(rs.getString("industry"));
         s.setPhone(rs.getString("phone"));
+        s.setTax_id(rs.getString("tax_id"));
+        s.setDocument_url(rs.getString("document_url"));
         try {
             s.setUser_id(rs.getInt("user_id"));
             s.setAccess_code(rs.getString("access_code"));
@@ -182,6 +188,18 @@ public class SponsorService {
             }
         }
         return emails;
+    }
+
+    public ObservableList<String> getAllCompanyNames() throws SQLException {
+        ObservableList<String> list = FXCollections.observableArrayList();
+        String sql = "SELECT DISTINCT company_name FROM sponsor WHERE company_name IS NOT NULL ORDER BY company_name";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(rs.getString("company_name"));
+            }
+        }
+        return list;
     }
 
     public int getMySponsorsCountDemo(String email) throws SQLException {
@@ -279,7 +297,7 @@ public class SponsorService {
         return list;
     }
 
-    // ==================== MÉTHODES SUPPLÉMENTAIRES POUR LES CONTRATS ====================
+    // ==================== MÉTHODES SUPPLÉMENTAIRES ====================
     public void updateContractUrl(int sponsorId, String contractUrl) throws SQLException {
         String sql = "UPDATE sponsor SET contract_url = ? WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {

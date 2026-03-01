@@ -8,7 +8,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pidev.controller.sponsor.SponsorDetailsController"
             style="-fx-background-color: #f8fafc;"
-            prefWidth="900" prefHeight="540">
+            prefWidth="900" prefHeight="600">
 
     <top>
         <HBox spacing="14" alignment="CENTER_LEFT"
@@ -49,11 +49,19 @@
                     <Label fx:id="contributionLabel" text="—"
                            style="-fx-text-fill:#059669; -fx-font-weight:800;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                    <Label text="Logo URL :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <Label fx:id="logoUrlLabel" text="—" wrapText="true" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    <!-- Numéro fiscal -->
+                    <Label text="Numéro fiscal :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <Label fx:id="taxIdLabel" text="—" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                    <Label text="Contract URL :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                    <Label fx:id="contractUrlLabel" text="—" wrapText="true" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                    <!-- Justificatif -->
+                    <Label text="Justificatif :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <Hyperlink fx:id="documentLink" text="Aucun justificatif" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <Label text="Logo URL :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <Label fx:id="logoUrlLabel" text="—" wrapText="true" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                    <Label text="Contract URL :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <Label fx:id="contractUrlLabel" text="—" wrapText="true" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
                 </GridPane>
             </VBox>
 
