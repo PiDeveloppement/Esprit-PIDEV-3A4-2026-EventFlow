@@ -56,6 +56,17 @@ public class ReservationController implements Initializable {
         currentUserId = session.getUserId();
         userRole = session.getRole();
 
+        if (sortCombo != null) {
+            sortCombo.setItems(FXCollections.observableArrayList("Plus récent", "Plus ancien"));
+            sortCombo.setOnAction(e -> {
+                String selection = sortCombo.getValue();
+                if ("Plus récent".equals(selection)) {
+                    trierParDate(false); // DESC
+                } else if ("Plus ancien".equals(selection)) {
+                    trierParDate(true);  // ASC
+                }
+            });
+        }
         // Afficher les informations utilisateur
         if (session.isLoggedIn()) {
             if (welcomeLabel != null) {
@@ -219,6 +230,26 @@ public class ReservationController implements Initializable {
             filterCombo.setValue("Toutes");
             filterCombo.setOnAction(e -> applyFilter());
         }
+    }
+    private void trierParDate(boolean ascendant) {
+        if (masterData == null || masterData.isEmpty()) return;
+
+        if (ascendant) {
+            // Tri ASC : a compareTo b
+            masterData.sort((a, b) -> {
+                if (a.getStartTimedate() == null || b.getStartTimedate() == null) return 0;
+                return a.getStartTimedate().compareTo(b.getStartTimedate());
+            });
+        } else {
+            // Tri DESC : b compareTo a
+            masterData.sort((a, b) -> {
+                if (a.getStartTimedate() == null || b.getStartTimedate() == null) return 0;
+                return b.getStartTimedate().compareTo(a.getStartTimedate());
+            });
+        }
+
+        // Optionnel : rafraîchir visuellement le tableau
+        reservationTable.refresh();
     }
 
     private void applyFilter() {
