@@ -11,7 +11,7 @@
     <HBox alignment="CENTER_LEFT" spacing="20">
         <Label style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="Gestion des Réservations" />
         <Region HBox.hgrow="ALWAYS" />
-        <Button onAction="#goToAddForm" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8;" text="+ Nouvelle Réservation" />
+        <Button onAction="#goToAdd" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8;" text="+ Nouvelle Réservation" />
     </HBox>
 
     <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10; -fx-border-color: #e2e8f0;">

@@ -9,7 +9,7 @@ public class DBConnection {
     // Configuration de votre base de données pidev
     private static final String URL = "jdbc:mysql://127.0.0.1:3306/pidev";
     private static final String USER = "root";
-    private static final String PASSWORD = "arijj";
+    private static final String PASSWORD = "souhail123";
 
     private static Connection connection = null;
     private static DBConnection instance;

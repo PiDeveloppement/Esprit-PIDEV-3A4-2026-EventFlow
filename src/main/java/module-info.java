@@ -16,6 +16,9 @@ module com.example.pidev {
     requires java.mail;
     requires org.apache.pdfbox;
 
+    // --- AJOUTS POUR LA VOIX ET VOSK ---
+    requires org.json;    // Pour parser les résultats JSON de Vosk
+    requires vosk;        // Pour le moteur de reconnaissance vocale
 
     // Exportez tous les packages nécessaires
     exports com.example.pidev;
@@ -31,8 +34,12 @@ module com.example.pidev {
     exports com.example.pidev.controller.role;
     exports com.example.pidev.controller.questionnaire;
     exports com.example.pidev.service.user;
-    // Ouvrez tous les packages à javafx.fxml
 
+    // Ajout de l'export pour le service de ressource (Vosk)
+    exports com.example.pidev.service.resource;
+    exports com.example.pidev.controller.resource;
+
+    // Ouvrez tous les packages à javafx.fxml
     opens com.example.pidev to javafx.fxml;
     opens com.example.pidev.controller.dashboard to javafx.fxml;
     opens com.example.pidev.controller.event to javafx.fxml;
@@ -45,4 +52,7 @@ module com.example.pidev {
     opens com.example.pidev.controller.budget to javafx.fxml;
     opens com.example.pidev.controller.depense to javafx.fxml;
     opens com.example.pidev.service.user to javafx.fxml;
+
+    // Ouverture du service ressource pour permettre l'accès si nécessaire
+    opens com.example.pidev.service.resource to javafx.fxml;
 }

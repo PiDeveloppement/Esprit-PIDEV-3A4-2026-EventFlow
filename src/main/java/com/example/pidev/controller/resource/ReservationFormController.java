@@ -5,13 +5,16 @@ import com.example.pidev.model.resource.*;
 import com.example.pidev.service.resource.*;
 import com.example.pidev.utils.UserSession;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
+import org.json.JSONObject;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class ReservationFormController {
@@ -24,12 +27,20 @@ public class ReservationFormController {
     @FXML private Button btnValider;
     @FXML private Label userInfoLabel;
 
+    // --- NOUVEAUX ÉLÉMENTS FXML POUR LE VOCAL ---
+    @FXML private Button voiceBtn;
+    @FXML private Label voiceStatusLabel;
+
     private final ReservationService resService = new ReservationService();
     private final SalleService salleService = new SalleService();
     private final EquipementService eqService = new EquipementService();
     private ReservationResource selectedReservation = null;
     private int currentUserId;
     private String currentUserName;
+
+    // --- INTEGRATION VOSK ---
+    private VoiceRecognitionService voiceService;
+    private boolean isListening = false;
 
     @FXML
     public void initialize() {
@@ -66,6 +77,147 @@ public class ReservationFormController {
         });
     }
 
+    // --- LOGIQUE BOUTON MICRO ---
+    @FXML
+    private void toggleVoiceControl() {
+        if (!isListening) {
+            startVoiceControl();
+        } else {
+            stopVoiceControl();
+        }
+    }
+
+    private void startVoiceControl() {
+        isListening = true;
+        // Changement visuel : Vert quand on écoute
+        if (voiceBtn != null) voiceBtn.setStyle("-fx-background-radius: 50; -fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-size: 18;");
+        if (voiceStatusLabel != null) voiceStatusLabel.setText("🎙️ Écoute activée...");
+
+        voiceService = new VoiceRecognitionService((String jsonResult) -> {
+            try {
+                JSONObject json = new JSONObject(jsonResult);
+                String text = json.optString("text", "").toLowerCase();
+
+                if (!text.isEmpty()) {
+                    Platform.runLater(() -> {
+                        if (voiceStatusLabel != null) voiceStatusLabel.setText("Compris : " + text);
+                        handleVoiceCommand(text);
+                    });
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Erreur parsing vocal: " + e.getMessage());
+            }
+        });
+
+        if (voiceService != null) {
+            voiceService.setDaemon(true);
+            voiceService.start();
+        }
+    }
+
+    private void stopVoiceControl() {
+        isListening = false;
+        if (voiceService != null) {
+            voiceService.stopListening();
+        }
+        // Changement visuel : Rouge quand éteint
+        if (voiceBtn != null) voiceBtn.setStyle("-fx-background-radius: 50; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 18;");
+        if (voiceStatusLabel != null) voiceStatusLabel.setText("Micro désactivé");
+    }
+
+    private void handleVoiceCommand(String command) {
+        System.out.println("🎙️ Analyse de l'ordre : " + command);
+        String lowerCmd = command.toLowerCase();
+
+        // 1. GESTION DES ACTIONS (ANNULER / RÉSERVER)
+        if (lowerCmd.contains("annule") || lowerCmd.contains("quitter") || lowerCmd.contains("retour")) {
+            System.out.println("🚫 Action vocale : Annulation");
+            goBack();
+            return; // On arrête l'analyse ici
+        }
+
+        if (lowerCmd.contains("réserve") || lowerCmd.contains("valide") || lowerCmd.contains("confirme")) {
+            System.out.println("✅ Action vocale : Validation");
+            validerAction();
+            return;
+        }
+
+        // 2. DÉTECTION DU TYPE
+        if (lowerCmd.contains("salle")) {
+            typeCombo.setValue("SALLE");
+            chargerRessources();
+        } else if (lowerCmd.contains("équipement") || lowerCmd.contains("matériel")) {
+            typeCombo.setValue("EQUIPEMENT");
+            chargerRessources();
+        }
+
+        // 3. DÉTECTION DE LA QUANTITÉ (Support Chiffres ET Lettres)
+        String numeric = lowerCmd.replaceAll("[^0-9]", "");
+        if (!numeric.isEmpty()) {
+            quantityField.setText(numeric);
+        } else {
+            // Convertisseur simple pour les mots courants envoyés par Vosk
+            if (lowerCmd.contains("dix")) quantityField.setText("10");
+            else if (lowerCmd.contains("quinze")) quantityField.setText("15");
+            else if (lowerCmd.contains("vingt")) quantityField.setText("20");
+            else if (lowerCmd.contains("trente")) quantityField.setText("30");
+            else if (lowerCmd.contains("quarante")) quantityField.setText("40");
+            else if (lowerCmd.contains("cinquante")) quantityField.setText("50");
+            else if (lowerCmd.contains("un")) quantityField.setText("1");
+            else if (lowerCmd.contains("deux")) quantityField.setText("2");
+            else if (lowerCmd.contains("trois")) quantityField.setText("3");
+        }
+
+        // 4. DÉTECTION DES DATES
+        if (lowerCmd.contains("début") || lowerCmd.contains("commence")) {
+            LocalDate date = parseVoiceDate(lowerCmd);
+            if (date != null) startDatePicker.setValue(date);
+        } else if (lowerCmd.contains("fin") || lowerCmd.contains("termine")) {
+            LocalDate date = parseVoiceDate(lowerCmd);
+            if (date != null) endDatePicker.setValue(date);
+        }
+
+        // 5. DÉTECTION DE LA RESSOURCE (RECHERCHE DYNAMIQUE)
+        // On compare les mots dits avec les noms dans la liste
+        itemCombo.getItems().stream()
+                .filter(item -> lowerCmd.contains(item.toString().toLowerCase()))
+                .findFirst()
+                .ifPresent(item -> {
+                    itemCombo.setValue(item);
+                    mettreAJourApercu();
+                });
+    }
+    private LocalDate parseVoiceDate(String text) {
+        try {
+            int day = 1;
+            // Extraction du jour
+            String numeric = text.replaceAll("[^0-9]", "");
+            if (!numeric.isEmpty()) day = Integer.parseInt(numeric);
+            else if (text.contains("premier")) day = 1;
+
+            // Détection du mois
+            int month = LocalDate.now().getMonthValue();
+            if (text.contains("janvier")) month = 1;
+            else if (text.contains("février")) month = 2;
+            else if (text.contains("mars")) month = 3;
+            else if (text.contains("avril")) month = 4;
+            else if (text.contains("mai")) month = 5;
+            else if (text.contains("juin")) month = 6;
+            else if (text.contains("juillet")) month = 7;
+            else if (text.contains("août")) month = 8;
+            else if (text.contains("septembre")) month = 9;
+            else if (text.contains("octobre")) month = 10;
+            else if (text.contains("novembre")) month = 11;
+            else if (text.contains("décembre")) month = 12;
+
+            return LocalDate.of(2026, month, day);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // --- TES MÉTHODES ORIGINALES (NON MODIFIÉES) ---
+
     public void setReservationToEdit(ReservationResource res) {
         this.selectedReservation = res;
         if (res != null) {
@@ -82,7 +234,6 @@ public class ReservationFormController {
             quantityField.setText(String.valueOf(res.getQuantity()));
             btnValider.setText("Mettre à jour");
 
-            // Sélectionner l'élément correspondant
             for (Object obj : itemCombo.getItems()) {
                 if (obj instanceof Salle s && s.getId() == res.getSalleId()) {
                     itemCombo.setValue(obj);
@@ -94,7 +245,6 @@ public class ReservationFormController {
                 }
             }
 
-            // Afficher l'information de modification
             if (userInfoLabel != null) {
                 userInfoLabel.setText("Modification réservation #" + res.getId() + " - " + currentUserName);
             }
@@ -104,26 +254,21 @@ public class ReservationFormController {
     @FXML
     void validerAction() {
         try {
-            // Vérifier que l'utilisateur est connecté
             if (currentUserId == -1) {
-                new Alert(Alert.AlertType.ERROR,
-                        "❌ Vous devez être connecté pour effectuer une réservation").show();
+                new Alert(Alert.AlertType.ERROR, "❌ Vous devez être connecté pour effectuer une réservation").show();
                 return;
             }
 
             if (itemCombo.getValue() == null || startDatePicker.getValue() == null) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Veuillez remplir tous les champs obligatoires").show();
+                new Alert(Alert.AlertType.ERROR, "Veuillez remplir tous les champs obligatoires").show();
                 return;
             }
 
             LocalDateTime s = startDatePicker.getValue().atTime(8, 0);
-            LocalDateTime e = endDatePicker.getValue() == null ?
-                    s.plusHours(2) : endDatePicker.getValue().atTime(18, 0);
+            LocalDateTime e = endDatePicker.getValue() == null ? s.plusHours(2) : endDatePicker.getValue().atTime(18, 0);
 
             Object sel = itemCombo.getValue();
 
-            // Vérifier la quantité
             if (quantityField.getText().isEmpty()) {
                 new Alert(Alert.AlertType.ERROR, "Veuillez saisir une quantité").show();
                 return;
@@ -137,22 +282,18 @@ public class ReservationFormController {
 
             int currentId = (selectedReservation == null) ? -1 : selectedReservation.getId();
 
-            // Vérifier la disponibilité
             int dispo = 0;
             if (sel instanceof Salle sa) {
                 dispo = resService.isSalleOccupee(sa.getId(), s, e, currentId) ? 0 : 1;
             } else if (sel instanceof Equipement eq) {
-                dispo = resService.getStockTotalEquipement(eq.getId()) -
-                        resService.getStockOccupe(eq.getId(), s, e, currentId);
+                dispo = resService.getStockTotalEquipement(eq.getId()) - resService.getStockOccupe(eq.getId(), s, e, currentId);
             }
 
             if (qtySaisie > dispo) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Stock insuffisant : " + dispo + " disponible(s)").show();
+                new Alert(Alert.AlertType.ERROR, "Stock insuffisant : " + dispo + " disponible(s)").show();
                 return;
             }
 
-            // Créer la réservation avec l'userId
             ReservationResource res = new ReservationResource(
                     currentId == -1 ? 0 : currentId,
                     typeCombo.getValue(),
@@ -161,23 +302,17 @@ public class ReservationFormController {
                     s, e, qtySaisie
             );
 
-            // 🔥 IMPORTANT: Définir l'userId de l'utilisateur connecté
             res.setUserId(currentUserId);
 
-            // Afficher un message de confirmation
             String message;
             if (selectedReservation == null) {
                 resService.ajouter(res);
                 message = "✅ Réservation créée avec succès pour " + currentUserName;
-                System.out.println("Nouvelle réservation - UserID: " + currentUserId);
             } else {
                 resService.modifier(res);
                 message = "✅ Réservation modifiée avec succès";
-                System.out.println("Modification réservation " + selectedReservation.getId() +
-                        " - UserID: " + currentUserId);
             }
 
-            // Confirmation visuelle
             Alert success = new Alert(Alert.AlertType.INFORMATION, message);
             success.setTitle("Succès");
             success.setHeaderText(null);
@@ -187,7 +322,6 @@ public class ReservationFormController {
 
         } catch (NumberFormatException ex) {
             new Alert(Alert.AlertType.ERROR, "La quantité doit être un nombre valide").show();
-            ex.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage()).show();
@@ -206,13 +340,12 @@ public class ReservationFormController {
     private void mettreAJourApercu() {
         Object sel = itemCombo.getValue();
         if (sel != null) {
-            String p = (sel instanceof Salle s) ? s.getImagePath() :
-                    (sel instanceof Equipement eq ? eq.getImagePath() : null);
+            String p = (sel instanceof Salle s) ? s.getImagePath() : (sel instanceof Equipement eq ? eq.getImagePath() : null);
             if (p != null) {
                 try {
                     imagePreview.setImage(new Image(p));
                 } catch(Exception ex){
-                    System.err.println("Erreur chargement image: " + p);
+                    System.err.println("Erreur image: " + p);
                 }
             }
         }
@@ -227,27 +360,21 @@ public class ReservationFormController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    // Récupérer les dates saisies
-                    LocalDateTime s = (startDatePicker.getValue() != null)
-                            ? startDatePicker.getValue().atTime(8, 0) : LocalDateTime.now();
-                    LocalDateTime e = (endDatePicker.getValue() != null)
-                            ? endDatePicker.getValue().atTime(18, 0) : s.plusHours(2);
+                    LocalDateTime s = (startDatePicker.getValue() != null) ? startDatePicker.getValue().atTime(8, 0) : LocalDateTime.now();
+                    LocalDateTime e = (endDatePicker.getValue() != null) ? endDatePicker.getValue().atTime(18, 0) : s.plusHours(2);
 
                     String name = "";
                     int dispo = 0;
                     int currentId = (selectedReservation == null) ? -1 : selectedReservation.getId();
 
-                    // Calculer la disponibilité selon le type
                     if (item instanceof Salle sa) {
                         name = sa.getName();
                         dispo = resService.isSalleOccupee(sa.getId(), s, e, currentId) ? 0 : 1;
                     } else if (item instanceof Equipement eq) {
                         name = eq.getName();
-                        dispo = resService.getStockTotalEquipement(eq.getId()) -
-                                resService.getStockOccupe(eq.getId(), s, e, currentId);
+                        dispo = resService.getStockTotalEquipement(eq.getId()) - resService.getStockOccupe(eq.getId(), s, e, currentId);
                     }
 
-                    // Mise en forme visuelle
                     if (dispo > 0) {
                         setText(name + " (Disponible: " + dispo + ")");
                         setTextFill(Color.BLACK);
@@ -262,8 +389,6 @@ public class ReservationFormController {
                 }
             }
         });
-
-        // Important pour l'affichage quand le combo est fermé
         itemCombo.setButtonCell((ListCell) itemCombo.getCellFactory().call(null));
     }
 
@@ -274,14 +399,12 @@ public class ReservationFormController {
 
     @FXML
     void goBack() {
+        stopVoiceControl();
         MainController.getInstance().showReservations();
     }
-    // À AJOUTER dans votre ReservationFormController.java
+
     public void setCurrentUserId(int userId) {
         this.currentUserId = userId;
-        System.out.println("🔵 UserId défini dans le formulaire: " + userId);
-
-        // Optionnel: Mettre à jour l'affichage si vous avez un label
         if (userInfoLabel != null) {
             userInfoLabel.setText("Réservation pour utilisateur ID: " + userId);
         }

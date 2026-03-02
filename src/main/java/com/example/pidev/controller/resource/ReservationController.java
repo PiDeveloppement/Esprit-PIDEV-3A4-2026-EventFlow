@@ -242,6 +242,7 @@ public class ReservationController implements Initializable {
         goToForm(null);
     }
 
+    @FXML
     private void goToForm(ReservationResource res) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/resource/reservation_form.fxml"));
