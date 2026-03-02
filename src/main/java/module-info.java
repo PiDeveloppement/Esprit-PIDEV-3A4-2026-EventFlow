@@ -1,3 +1,7 @@
+/**
+ * Module descriptor for PiDev application
+ * Fixed: Added proper module exports and opens for JavaFX FXML controller access
+ */
 module com.example.pidev {
     requires javafx.controls;
     requires org.slf4j;
@@ -12,12 +16,12 @@ module com.example.pidev {
     requires java.net.http;
     requires kernel;
     requires layout;
+    requires io;
     requires itextpdf;
     requires java.mail;
     requires org.apache.pdfbox;
 
-
-    // Exportez tous les packages nécessaires
+    // Export all necessary packages
     exports com.example.pidev;
     exports com.example.pidev.model.event;
     exports com.example.pidev.model.resource;
@@ -30,9 +34,10 @@ module com.example.pidev {
     exports com.example.pidev.controller.user;
     exports com.example.pidev.controller.role;
     exports com.example.pidev.controller.questionnaire;
+    exports com.example.pidev.controller.front;
     exports com.example.pidev.service.user;
-    // Ouvrez tous les packages à javafx.fxml
 
+    // Open all controller packages to javafx.fxml for FXML controller instantiation
     opens com.example.pidev to javafx.fxml;
     opens com.example.pidev.controller.dashboard to javafx.fxml;
     opens com.example.pidev.controller.event to javafx.fxml;
@@ -42,6 +47,7 @@ module com.example.pidev {
     opens com.example.pidev.controller.resource to javafx.fxml;
     opens com.example.pidev.controller.questionnaire to javafx.fxml;
     opens com.example.pidev.controller.sponsor to javafx.fxml;
+    opens com.example.pidev.controller.front to javafx.fxml;
     opens com.example.pidev.controller.budget to javafx.fxml;
     opens com.example.pidev.controller.depense to javafx.fxml;
     opens com.example.pidev.service.user to javafx.fxml;

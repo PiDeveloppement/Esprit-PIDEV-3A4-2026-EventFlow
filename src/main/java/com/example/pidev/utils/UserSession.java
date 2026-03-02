@@ -10,6 +10,9 @@ public class UserSession {
     // Utilisateur connecté
     private UserModel currentUser;
 
+    // Événement en attente de participation (avant connexion)
+    private Integer pendingEventId;
+
     // Constructeur privé (empêche l'instanciation directe)
     private UserSession() {}
 
@@ -133,5 +136,25 @@ public class UserSession {
         } else {
             System.out.println("❌ Aucun utilisateur connecté");
         }
+    }
+
+    // ===== Gestion de l'événement en attente =====
+
+    public void setPendingEventId(int eventId) {
+        this.pendingEventId = eventId;
+        System.out.println("📌 Événement en attente: " + eventId);
+    }
+
+    public Integer getPendingEventId() {
+        return pendingEventId;
+    }
+
+    public boolean hasPendingEvent() {
+        return pendingEventId != null;
+    }
+
+    public void clearPendingEventId() {
+        System.out.println("🗑️ Nettoyage événement en attente: " + pendingEventId);
+        this.pendingEventId = null;
     }
 }

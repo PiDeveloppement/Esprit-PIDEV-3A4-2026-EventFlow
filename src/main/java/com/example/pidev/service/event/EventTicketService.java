@@ -3,6 +3,8 @@ package com.example.pidev.service.event;
 import com.example.pidev.model.event.EventTicket;
 import com.example.pidev.utils.DBConnection;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,14 +46,16 @@ public class EventTicketService {
         }
 
         String ticketCode = EventTicket.generateTicketCode(eventId, userId);
+        String qrUrl = buildQrUrl(ticketCode);
 
-        String sql = "INSERT INTO event_ticket (ticket_code, event_id, user_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO event_ticket (ticket_code, event_id, user_id, qr_code) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, ticketCode);
             pstmt.setInt(2, eventId);
             pstmt.setInt(3, userId);
+            pstmt.setString(4, qrUrl);
 
             int rowsAffected = pstmt.executeUpdate();
 
@@ -62,6 +66,8 @@ public class EventTicketService {
                         EventTicket ticket = new EventTicket(ticketCode, eventId, userId);
                         ticket.setId(rs.getInt(1));
                         ticket.setCreatedAt(LocalDateTime.now());
+                        ticket.setQrCode(qrUrl);
+
                         System.out.println("✅ Ticket créé: " + ticketCode);
                         return ticket;
                     }
@@ -74,6 +80,23 @@ public class EventTicketService {
         }
 
         return null;
+    }
+
+    private String buildQrUrl(String ticketCode) {
+        try {
+            // URL qui ouvrira le PDF du billet quand scanné
+            String pdfUrl = "http://localhost:8080/ticket/" +
+                    URLEncoder.encode(ticketCode, StandardCharsets.UTF_8) + "/pdf";
+
+            // Encoder l'URL dans le QR
+            String encodedUrl = URLEncoder.encode(pdfUrl, StandardCharsets.UTF_8);
+
+            // QuickChart génère le QR contenant l'URL du PDF
+            return "https://quickchart.io/qr?text=" + encodedUrl + "&size=200&margin=2";
+        } catch (Exception e) {
+            System.err.println("❌ Erreur génération QR URL: " + e.getMessage());
+            return null;
+        }
     }
 
     // ==================== READ ====================

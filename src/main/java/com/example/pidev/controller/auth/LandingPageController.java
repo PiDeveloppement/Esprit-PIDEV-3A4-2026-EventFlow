@@ -1,7 +1,9 @@
 package com.example.pidev.controller.auth;
 
 import com.example.pidev.HelloApplication;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -14,8 +16,9 @@ import javafx.geometry.Insets;
 import javafx.concurrent.Worker;
 
 import java.net.URL;
+import java.util.ResourceBundle;
 
-public class LandingPageController {
+public class LandingPageController implements Initializable {
 
     @FXML
     private ScrollPane mainScrollPane;
@@ -27,6 +30,11 @@ public class LandingPageController {
     private VBox featuresSection;
     @FXML
     private VBox contactSection;
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        System.out.println("✅ LandingPageController initialisé");
+    }
 
     // ==================== MÉTHODES DE NAVIGATION ====================
 
@@ -40,6 +48,12 @@ public class LandingPageController {
     private void handleSignup() {
         System.out.println("📂 Redirection vers la page d'inscription");
         HelloApplication.loadSignupPage();
+    }
+
+    @FXML
+    private void handleGoToEvents() {
+        System.out.println("📂 Redirection vers la page des événements");
+        HelloApplication.loadPublicEventsPage();
     }
 
     // ==================== MÉTHODES DE SCROLL ====================

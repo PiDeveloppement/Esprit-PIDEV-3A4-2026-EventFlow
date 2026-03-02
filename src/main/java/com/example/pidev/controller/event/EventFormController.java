@@ -1,7 +1,6 @@
 package com.example.pidev.controller.event;
 
 import com.example.pidev.MainController;
-import com.example.pidev.MainController;
 import com.example.pidev.model.event.Event;
 import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.service.event.EventService;
@@ -23,7 +22,10 @@ import java.util.Locale;
 
 /**
  * Controller pour le formulaire d'ajout/modification d'événement
+ * Structure identique à CategoryFormController
+ *
  * @author Ons Abdesslem
+ * @version 2.0 - Avec validation progressive
  */
 public class EventFormController {
 
@@ -46,8 +48,16 @@ public class EventFormController {
     @FXML private TextField priceField;
     @FXML private Button backBtn;
     @FXML private Button saveBtn;
+
+    // Labels d'erreur
     @FXML private Label titleError;
+    @FXML private Label descriptionError;
+    @FXML private Label descriptionCounter;
     @FXML private Label dateError;
+    @FXML private Label locationError;
+    @FXML private Label capacityError;
+    @FXML private Label categoryError;
+    @FXML private Label priceError;
 
     // ==================== NAVBAR ELEMENTS ====================
     @FXML private Label dateLabel;
@@ -61,6 +71,24 @@ public class EventFormController {
     private Event currentEvent;
     private List<EventCategory> allCategories;
 
+    // ==================== VALIDATION CONSTANTS ====================
+    private static final int TITLE_MIN_LENGTH = 5;
+    private static final int TITLE_MAX_LENGTH = 100;
+    private static final int DESC_MIN_LENGTH = 10;
+    private static final int DESC_MAX_LENGTH = 1000;
+    private static final int LOCATION_MIN_LENGTH = 3;
+    private static final int LOCATION_MAX_LENGTH = 100;
+
+    // ==================== PRISTINE FLAGS ====================
+    private boolean titlePristine = true;
+    private boolean descriptionPristine = true;
+    private boolean startDatePristine = true;
+    private boolean endDatePristine = true;
+    private boolean locationPristine = true;
+    private boolean capacityPristine = true;
+    private boolean categoryPristine = true;
+    private boolean pricePristine = true;
+
     // ==================== INITIALIZATION ====================
 
     @FXML
@@ -71,8 +99,12 @@ public class EventFormController {
         categoryService = new EventCategoryService();
 
         loadCategories();
-        setupListeners();
+        setupSpinners();
+        setupValidationListeners();
         setDefaultValues();
+
+        // Initialiser l'état du bouton save
+        saveBtn.setDisable(true);
 
         // Initialiser la date et l'heure
         updateDateTime();
@@ -95,15 +127,73 @@ public class EventFormController {
             String dateText = now.format(dateFormatter);
             dateLabel.setText(dateText.substring(0, 1).toUpperCase() + dateText.substring(1));
         }
+
         if (timeLabel != null) {
             timeLabel.setText(now.format(timeFormatter));
         }
     }
 
+    public void setMainController(MainController helloController) {
+        this.helloController = helloController;
+    }
+
+    public void setEvent(Event event) {
+        this.currentEvent = event;
+
+        if (event != null) {
+            // Mode modification
+            titleLabel.setText("Modifier l'Événement");
+            saveBtn.setText("💾 Mettre à jour");
+
+            titleField.setText(event.getTitle());
+            descriptionArea.setText(event.getDescription());
+
+            if (event.getStartDate() != null) {
+                startDatePicker.setValue(event.getStartDate().toLocalDate());
+                startHourSpinner.getValueFactory().setValue(event.getStartDate().getHour());
+                startMinuteSpinner.getValueFactory().setValue(event.getStartDate().getMinute());
+            }
+
+            if (event.getEndDate() != null) {
+                endDatePicker.setValue(event.getEndDate().toLocalDate());
+                endHourSpinner.getValueFactory().setValue(event.getEndDate().getHour());
+                endMinuteSpinner.getValueFactory().setValue(event.getEndDate().getMinute());
+            }
+
+            locationField.setText(event.getLocation());
+            capacityField.setText(String.valueOf(event.getCapacity()));
+            imageUrlField.setText(event.getImageUrl());
+
+            EventCategory cat = findCategoryById(event.getCategoryId());
+            if (cat != null) {
+                categoryCombo.setValue(cat.getName());
+            }
+
+            freeCheckbox.setSelected(event.isFree());
+            priceField.setText(String.valueOf(event.getTicketPrice()));
+            priceField.setDisable(event.isFree());
+
+            // Réinitialiser tous les flags pristine en mode édition
+            resetPristineFlags();
+
+            System.out.println("✏️ Mode modification: " + event.getTitle());
+        } else {
+            // Mode création
+            titleLabel.setText("Nouvel Événement");
+            saveBtn.setText("💾 Enregistrer");
+
+            System.out.println("➕ Mode création");
+        }
+
+        // Valider le formulaire après le chargement
+        validateForm();
+    }
+
+    // ==================== SETUP ====================
+
     private void loadCategories() {
         try {
             allCategories = categoryService.getAllCategories();
-
             categoryCombo.getItems().clear();
 
             if (allCategories != null) {
@@ -113,11 +203,14 @@ public class EventFormController {
             }
 
             configureCategoryComboCells();
-
             System.out.println("✅ " + (allCategories != null ? allCategories.size() : 0) + " catégories chargées");
         } catch (Exception e) {
             System.err.println("❌ Erreur chargement catégories: " + e.getMessage());
         }
+    }
+
+    private void setupSpinners() {
+        // Les spinners sont déjà configurés dans le FXML avec valueFactory
     }
 
     private void configureCategoryComboCells() {
@@ -187,23 +280,189 @@ public class EventFormController {
         return null;
     }
 
-    private void setupListeners() {
+    /**
+     * Réinitialise tous les flags pristine (utilisé en mode édition)
+     */
+    private void resetPristineFlags() {
+        titlePristine = true;
+        descriptionPristine = true;
+        startDatePristine = true;
+        endDatePristine = true;
+        locationPristine = true;
+        capacityPristine = true;
+        categoryPristine = true;
+        pricePristine = true;
+    }
+
+    /**
+     * Configuration des validations en temps réel
+     */
+    private void setupValidationListeners() {
+        // ==================== TITRE ====================
+        titleField.textProperty().addListener((obs, oldVal, newVal) -> {
+            titlePristine = false;
+            validateForm();
+        });
+
+        titleField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && titleField.getText().trim().isEmpty()) {
+                titlePristine = false;
+                validateForm();
+            }
+        });
+
+        // ==================== DESCRIPTION ====================
+        descriptionArea.textProperty().addListener((obs, oldVal, newVal) -> {
+            descriptionPristine = false;
+            updateDescriptionCounter();
+            validateForm();
+        });
+
+        descriptionArea.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && descriptionArea.getText().trim().isEmpty()) {
+                descriptionPristine = false;
+                validateForm();
+            }
+        });
+
+        // ==================== DATES ====================
+        startDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            startDatePristine = false;
+            validateForm();
+        });
+
+        startDatePicker.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && startDatePicker.getValue() == null) {
+                startDatePristine = false;
+                validateForm();
+            }
+        });
+
+        endDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            endDatePristine = false;
+            validateForm();
+        });
+
+        endDatePicker.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && endDatePicker.getValue() == null) {
+                endDatePristine = false;
+                validateForm();
+            }
+        });
+
+        // Spinners heures/minutes
+        startHourSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+            startDatePristine = false;
+            validateForm();
+        });
+
+        startMinuteSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+            startDatePristine = false;
+            validateForm();
+        });
+
+        endHourSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+            endDatePristine = false;
+            validateForm();
+        });
+
+        endMinuteSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+            endDatePristine = false;
+            validateForm();
+        });
+
+        // ==================== LIEU ====================
+        locationField.textProperty().addListener((obs, oldVal, newVal) -> {
+            locationPristine = false;
+            validateForm();
+        });
+
+        locationField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && locationField.getText().trim().isEmpty()) {
+                locationPristine = false;
+                validateForm();
+            }
+        });
+
+        // ==================== CAPACITÉ ====================
+        capacityField.textProperty().addListener((obs, oldVal, newVal) -> {
+            capacityPristine = false;
+            // Limiter aux chiffres seulement
+            if (!newVal.matches("\\d*")) {
+                capacityField.setText(newVal.replaceAll("[^\\d]", ""));
+            }
+            validateForm();
+        });
+
+        capacityField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && capacityField.getText().trim().isEmpty()) {
+                capacityPristine = false;
+                validateForm();
+            }
+        });
+
+        // ==================== CATÉGORIE ====================
+        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            categoryPristine = false;
+            validateForm();
+        });
+
+        // ==================== PRIX ====================
         freeCheckbox.selectedProperty().addListener((obs, old, isFree) -> {
             priceField.setDisable(isFree);
             if (isFree) {
                 priceField.setText("0");
+                priceError.setVisible(false);
+                clearFieldStyles(priceField);
+            } else {
+                pricePristine = false;
+            }
+            validateForm();
+        });
+
+        priceField.textProperty().addListener((obs, oldVal, newVal) -> {
+            pricePristine = false;
+            // Limiter au format décimal
+            if (!newVal.matches("\\d*\\.?\\d*")) {
+                priceField.setText(oldVal);
+            }
+            validateForm();
+        });
+
+        priceField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal && !freeCheckbox.isSelected() && priceField.getText().trim().isEmpty()) {
+                pricePristine = false;
+                validateForm();
             }
         });
+    }
+
+    /**
+     * Met à jour le compteur de caractères de la description
+     */
+    private void updateDescriptionCounter() {
+        if (descriptionCounter != null) {
+            int length = descriptionArea.getText().length();
+            descriptionCounter.setText(length + "/" + DESC_MAX_LENGTH);
+
+            // Changer la couleur si dépassement
+            if (length > DESC_MAX_LENGTH) {
+                descriptionCounter.setStyle("-fx-text-fill: #ef4444;");
+            } else if (length >= DESC_MAX_LENGTH - 100) {
+                descriptionCounter.setStyle("-fx-text-fill: #f59e0b;");
+            } else {
+                descriptionCounter.setStyle("-fx-text-fill: #6c757d;");
+            }
+        }
     }
 
     private void setDefaultValues() {
         startDatePicker.setValue(LocalDate.now());
         endDatePicker.setValue(LocalDate.now().plusDays(1));
 
-        // Valeurs par défaut pour les Spinner
-        startHourSpinner.getValueFactory().setValue(9);       // 09:00
+        startHourSpinner.getValueFactory().setValue(9);
         startMinuteSpinner.getValueFactory().setValue(0);
-        endHourSpinner.getValueFactory().setValue(17);        // 17:00
+        endHourSpinner.getValueFactory().setValue(17);
         endMinuteSpinner.getValueFactory().setValue(0);
 
         capacityField.setText("50");
@@ -216,125 +475,249 @@ public class EventFormController {
         }
     }
 
-    public void setMainController(MainController helloController) {
-        this.helloController = helloController;
-    }
-
-    public void setEvent(Event event) {
-        this.currentEvent = event;
-
-        if (event != null) {
-            // Mode modification
-            titleLabel.setText("Modifier l'Événement");
-            saveBtn.setText("💾 Mettre à jour");
-
-            titleField.setText(event.getTitle());
-            descriptionArea.setText(event.getDescription());
-
-            if (event.getStartDate() != null) {
-                startDatePicker.setValue(event.getStartDate().toLocalDate());
-                startHourSpinner.getValueFactory().setValue(event.getStartDate().getHour());
-                startMinuteSpinner.getValueFactory().setValue(event.getStartDate().getMinute());
-            }
-
-            if (event.getEndDate() != null) {
-                endDatePicker.setValue(event.getEndDate().toLocalDate());
-                endHourSpinner.getValueFactory().setValue(event.getEndDate().getHour());
-                endMinuteSpinner.getValueFactory().setValue(event.getEndDate().getMinute());
-            }
-
-            locationField.setText(event.getLocation());
-            capacityField.setText(String.valueOf(event.getCapacity()));
-            imageUrlField.setText(event.getImageUrl());
-
-            EventCategory cat = findCategoryById(event.getCategoryId());
-            if (cat != null) {
-                categoryCombo.setValue(cat.getName());
-            }
-
-            freeCheckbox.setSelected(event.isFree());
-            priceField.setText(String.valueOf(event.getTicketPrice()));
-            priceField.setDisable(event.isFree());
-
-            System.out.println("✏️ Mode modification: " + event.getTitle());
-        } else {
-            // Mode création
-            titleLabel.setText("Nouvel Événement");
-            saveBtn.setText("💾 Enregistrer");
-            System.out.println("➕ Mode création");
-        }
-    }
-
     // ==================== VALIDATION ====================
 
     private boolean validateForm() {
         boolean isValid = true;
 
-        titleError.setVisible(false);
-        dateError.setVisible(false);
-        titleField.setStyle(titleField.getStyle().replace("-fx-border-color: #ef4444;", ""));
-        startDatePicker.setStyle(startDatePicker.getStyle().replace("-fx-border-color: #ef4444;", ""));
-        endDatePicker.setStyle(endDatePicker.getStyle().replace("-fx-border-color: #ef4444;", ""));
+        // Réinitialiser tous les erreurs
+        resetValidationUI();
 
-        // Validation titre
-        String title = titleField.getText().trim();
-        if (title.isEmpty()) {
-            titleError.setText("❌ Le titre est obligatoire");
-            titleError.setVisible(true);
-            titleField.setStyle(titleField.getStyle() + "-fx-border-color: #ef4444; -fx-border-width: 2;");
-            isValid = false;
-        } else if (title.length() > 200) {
-            titleError.setText("❌ Le titre ne doit pas dépasser 200 caractères");
-            titleError.setVisible(true);
-            titleField.setStyle(titleField.getStyle() + "-fx-border-color: #ef4444; -fx-border-width: 2;");
-            isValid = false;
-        }
-
-        // Validation dates
-        if (startDatePicker.getValue() == null) {
-            dateError.setText("❌ La date de début est obligatoire");
-            dateError.setVisible(true);
-            startDatePicker.setStyle(startDatePicker.getStyle() + "-fx-border-color: #ef4444; -fx-border-width: 2;");
-            isValid = false;
-        }
-
-        if (endDatePicker.getValue() == null) {
-            dateError.setText("❌ La date de fin est obligatoire");
-            dateError.setVisible(true);
-            endDatePicker.setStyle(endDatePicker.getStyle() + "-fx-border-color: #ef4444; -fx-border-width: 2;");
-            isValid = false;
-        }
-
-        // Les Spinner gèrent déjà la validation des heures avec min/max
-
-        // Validation capacité
-        try {
-            int capacity = Integer.parseInt(capacityField.getText());
-            if (capacity <= 0) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
-            isValid = false;
-        }
-
-        // Validation prix
-        if (!freeCheckbox.isSelected()) {
-            try {
-                double price = Double.parseDouble(priceField.getText());
-                if (price < 0) {
-                    throw new NumberFormatException();
-                }
-            } catch (NumberFormatException e) {
+        // ==================== 1. VALIDATION DU TITRE ====================
+        if (!titlePristine) {
+            String title = titleField.getText().trim();
+            if (title.isEmpty()) {
+                titleError.setText("❌ Le titre est requis");
+                titleError.setVisible(true);
+                applyErrorStyle(titleField);
                 isValid = false;
+            } else if (title.length() < TITLE_MIN_LENGTH) {
+                titleError.setText("❌ Min " + TITLE_MIN_LENGTH + " caractères");
+                titleError.setVisible(true);
+                applyErrorStyle(titleField);
+                isValid = false;
+            } else if (title.length() > TITLE_MAX_LENGTH) {
+                titleError.setText("❌ Max " + TITLE_MAX_LENGTH + " caractères");
+                titleError.setVisible(true);
+                applyErrorStyle(titleField);
+                isValid = false;
+            } else {
+                applySuccessStyle(titleField);
             }
         }
 
-        // Validation catégorie
-        if (categoryCombo.getValue() == null) {
-            isValid = false;
+        // ==================== 2. VALIDATION DE LA DESCRIPTION ====================
+        if (!descriptionPristine) {
+            String description = descriptionArea.getText().trim();
+            if (description.isEmpty()) {
+                descriptionError.setText("❌ La description est requise");
+                descriptionError.setVisible(true);
+                applyErrorStyle(descriptionArea);
+                isValid = false;
+            } else if (description.length() < DESC_MIN_LENGTH) {
+                descriptionError.setText("❌ Min " + DESC_MIN_LENGTH + " caractères");
+                descriptionError.setVisible(true);
+                applyErrorStyle(descriptionArea);
+                isValid = false;
+            } else if (description.length() > DESC_MAX_LENGTH) {
+                descriptionError.setText("❌ Max " + DESC_MAX_LENGTH + " caractères");
+                descriptionError.setVisible(true);
+                applyErrorStyle(descriptionArea);
+                isValid = false;
+            } else {
+                applySuccessStyle(descriptionArea);
+            }
         }
+
+        // ==================== 3. VALIDATION DES DATES ====================
+        if (!startDatePristine || !endDatePristine) {
+            if (startDatePicker.getValue() == null) {
+                dateError.setText("❌ La date de début est requise");
+                dateError.setVisible(true);
+                applyErrorStyle(startDatePicker);
+                isValid = false;
+            } else if (endDatePicker.getValue() == null) {
+                dateError.setText("❌ La date de fin est requise");
+                dateError.setVisible(true);
+                applyErrorStyle(endDatePicker);
+                isValid = false;
+            } else {
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime startDateTime = LocalDateTime.of(
+                        startDatePicker.getValue(),
+                        LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue())
+                );
+                LocalDateTime endDateTime = LocalDateTime.of(
+                        endDatePicker.getValue(),
+                        LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue())
+                );
+
+                // Vérifier que la date de début n'est pas dans le passé (pour les nouveaux événements)
+                if (currentEvent == null && startDateTime.isBefore(now)) {
+                    dateError.setText("❌ La date ne peut pas être dans le passé");
+                    dateError.setVisible(true);
+                    applyErrorStyle(startDatePicker);
+                    isValid = false;
+                }
+                // Vérifier que la date de fin est après la date de début
+                else if (endDateTime.isBefore(startDateTime) || endDateTime.isEqual(startDateTime)) {
+                    dateError.setText("❌ La fin doit être après le début");
+                    dateError.setVisible(true);
+                    applyErrorStyle(endDatePicker);
+                    isValid = false;
+                } else {
+                    applySuccessStyle(startDatePicker);
+                    applySuccessStyle(endDatePicker);
+                }
+            }
+        }
+
+        // ==================== 4. VALIDATION DU LIEU ====================
+        if (!locationPristine) {
+            String location = locationField.getText().trim();
+            if (location.isEmpty()) {
+                locationError.setText("❌ Le lieu est requis");
+                locationError.setVisible(true);
+                applyErrorStyle(locationField);
+                isValid = false;
+            } else if (location.length() < LOCATION_MIN_LENGTH) {
+                locationError.setText("❌ Min " + LOCATION_MIN_LENGTH + " caractères");
+                locationError.setVisible(true);
+                applyErrorStyle(locationField);
+                isValid = false;
+            } else if (location.length() > LOCATION_MAX_LENGTH) {
+                locationError.setText("❌ Max " + LOCATION_MAX_LENGTH + " caractères");
+                locationError.setVisible(true);
+                applyErrorStyle(locationField);
+                isValid = false;
+            } else {
+                applySuccessStyle(locationField);
+            }
+        }
+
+        // ==================== 5. VALIDATION DE LA CAPACITÉ ====================
+        if (!capacityPristine) {
+            String capacity = capacityField.getText().trim();
+            if (capacity.isEmpty()) {
+                capacityError.setText("❌ La capacité est requise");
+                capacityError.setVisible(true);
+                applyErrorStyle(capacityField);
+                isValid = false;
+            } else {
+                try {
+                    int cap = Integer.parseInt(capacity);
+                    if (cap < 1) {
+                        capacityError.setText("❌ Minimum 1 place");
+                        capacityError.setVisible(true);
+                        applyErrorStyle(capacityField);
+                        isValid = false;
+                    } else {
+                        applySuccessStyle(capacityField);
+                    }
+                } catch (NumberFormatException e) {
+                    capacityError.setText("❌ Doit être un nombre entier");
+                    capacityError.setVisible(true);
+                    applyErrorStyle(capacityField);
+                    isValid = false;
+                }
+            }
+        }
+
+        // ==================== 6. VALIDATION DE LA CATÉGORIE ====================
+        if (!categoryPristine) {
+            if (categoryCombo.getValue() == null || categoryCombo.getValue().isEmpty()) {
+                categoryError.setText("❌ La catégorie est requise");
+                categoryError.setVisible(true);
+                applyErrorStyle(categoryCombo);
+                isValid = false;
+            } else {
+                applySuccessStyle(categoryCombo);
+            }
+        }
+
+        // ==================== 7. VALIDATION DU PRIX ====================
+        if (!pricePristine && !freeCheckbox.isSelected()) {
+            String price = priceField.getText().trim();
+            if (price.isEmpty()) {
+                priceError.setText("❌ Le prix est requis si non gratuit");
+                priceError.setVisible(true);
+                applyErrorStyle(priceField);
+                isValid = false;
+            } else {
+                try {
+                    double priceValue = Double.parseDouble(price);
+                    if (priceValue < 0) {
+                        priceError.setText("❌ Le prix ne peut pas être négatif");
+                        priceError.setVisible(true);
+                        applyErrorStyle(priceField);
+                        isValid = false;
+                    } else {
+                        applySuccessStyle(priceField);
+                    }
+                } catch (NumberFormatException e) {
+                    priceError.setText("❌ Format invalide (ex: 25.50)");
+                    priceError.setVisible(true);
+                    applyErrorStyle(priceField);
+                    isValid = false;
+                }
+            }
+        }
+
+        // Activer/désactiver le bouton save
+        saveBtn.setDisable(!isValid);
 
         return isValid;
+    }
+
+    /**
+     * Réinitialise tous les messages d'erreur et styles
+     */
+    private void resetValidationUI() {
+        titleError.setVisible(false);
+        descriptionError.setVisible(false);
+        dateError.setVisible(false);
+        locationError.setVisible(false);
+        capacityError.setVisible(false);
+        categoryError.setVisible(false);
+        priceError.setVisible(false);
+
+        clearFieldStyles(titleField);
+        clearFieldStyles(descriptionArea);
+        clearFieldStyles(startDatePicker);
+        clearFieldStyles(endDatePicker);
+        clearFieldStyles(locationField);
+        clearFieldStyles(capacityField);
+        clearFieldStyles(categoryCombo);
+        clearFieldStyles(priceField);
+    }
+
+    /**
+     * Applique le style d'erreur (bordure rouge)
+     */
+    private void applyErrorStyle(Control field) {
+        if (field instanceof TextArea) {
+            field.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;");
+        } else {
+            field.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;");
+        }
+    }
+
+    /**
+     * Applique le style de succès (bordure verte)
+     */
+    private void applySuccessStyle(Control field) {
+        if (field instanceof TextArea) {
+            field.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;");
+        } else {
+            field.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;");
+        }
+    }
+
+    /**
+     * Efface les styles personnalisés d'un champ
+     */
+    private void clearFieldStyles(Control field) {
+        field.setStyle("-fx-border-color: #ced4da; -fx-background-color: #f8f9fa;");
     }
 
     // ==================== ACTIONS ====================
@@ -362,6 +745,16 @@ public class EventFormController {
 
     @FXML
     private void handleSave() {
+        // Marquer tous les champs comme non-pristine pour forcer la validation complète
+        titlePristine = false;
+        descriptionPristine = false;
+        startDatePristine = false;
+        endDatePristine = false;
+        locationPristine = false;
+        capacityPristine = false;
+        categoryPristine = false;
+        pricePristine = false;
+
         if (!validateForm()) {
             return;
         }
@@ -382,7 +775,6 @@ public class EventFormController {
         boolean isFree = freeCheckbox.isSelected();
         double price = isFree ? 0 : Double.parseDouble(priceField.getText());
 
-        // Créer les dates avec les Spinner
         LocalDateTime startDate = LocalDateTime.of(
                 startDatePicker.getValue(),
                 LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue())
@@ -392,13 +784,6 @@ public class EventFormController {
                 endDatePicker.getValue(),
                 LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue())
         );
-
-        // Vérifier que startDate < endDate
-        if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
-            dateError.setText("❌ La date de fin doit être après la date de début");
-            dateError.setVisible(true);
-            return;
-        }
 
         try {
             boolean success;
@@ -412,6 +797,12 @@ public class EventFormController {
 
                 if (success) {
                     showSuccess("Succès", "Événement créé avec succès!");
+
+                    // Rafraîchir les KPI après création
+                    if (helloController != null) {
+                        helloController.refreshKPIs();
+                    }
+
                     handleBack();
                 } else {
                     showError("Erreur", "Impossible de créer l'événement");
@@ -434,6 +825,12 @@ public class EventFormController {
 
                 if (success) {
                     showSuccess("Succès", "Événement mis à jour avec succès!");
+
+                    // Rafraîchir les KPI après modification
+                    if (helloController != null) {
+                        helloController.refreshKPIs();
+                    }
+
                     handleBack();
                 } else {
                     showError("Erreur", "Impossible de mettre à jour l'événement");
@@ -465,3 +862,4 @@ public class EventFormController {
         alert.showAndWait();
     }
 }
+

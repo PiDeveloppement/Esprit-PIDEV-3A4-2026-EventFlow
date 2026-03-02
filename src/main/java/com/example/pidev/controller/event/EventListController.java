@@ -6,6 +6,16 @@ import com.example.pidev.model.event.Event;
 import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.event.EventCategoryService;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -15,8 +25,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -396,7 +408,7 @@ public class EventListController {
             System.out.println("✅ " + allEvents.size() + " événements chargés");
         } catch (Exception e) {
             System.err.println("❌ Erreur: " + e.getMessage());
-            showError("Erreur", "Impossible de charger les événements");
+
         }
     }
 
@@ -568,6 +580,11 @@ public class EventListController {
                 if (eventService.deleteEvent(event.getId())) {
                     showSuccess("Succès", "Événement supprimé !");
                     loadEvents();
+
+                    // Rafraîchir les KPI après suppression
+                    if (helloController != null) {
+                        helloController.refreshKPIs();
+                    }
                 } else {
                     showError("Erreur", "Impossible de supprimer");
                 }
@@ -705,4 +722,202 @@ public class EventListController {
             updatePaginationUI();
         }
     }
+
+    /**
+     * Export des événements en PDF
+     */
+    @FXML
+    private void handleExportPDF() {
+        try {
+            // Ouvrir un FileChooser pour choisir l'emplacement
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le PDF");
+
+            // Nom du fichier avec date et heure
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            fileChooser.setInitialFileName("evenements_" + timestamp + ".pdf");
+
+            // Filtrer uniquement les PDF
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf")
+            );
+
+            // Afficher le dialogue
+            File file = fileChooser.showSaveDialog(eventTable.getScene().getWindow());
+
+            if (file != null) {
+                // Créer le PDF
+                PdfWriter writer = new PdfWriter(file.getAbsolutePath());
+                PdfDocument pdfDoc = new PdfDocument(writer);
+                Document document = new Document(pdfDoc);
+
+                // En-tête
+                Paragraph header = new Paragraph("EventFlow - Liste des Événements")
+                        .setFontSize(20)
+                        .setBold()
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(13, 71, 161));
+                document.add(header);
+
+                // Date d'exportation
+                String dateExport = LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm", Locale.FRENCH)
+                );
+                Paragraph dateInfo = new Paragraph("Exporté le " + dateExport)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(ColorConstants.GRAY);
+                document.add(dateInfo);
+
+                // Espacement
+                document.add(new Paragraph("\n"));
+
+                // Statistiques
+                int totalEvts = allEvents.size();
+                long upcoming = allEvents.stream()
+                        .filter(e -> e.getStartDate().isAfter(LocalDateTime.now()))
+                        .count();
+                long ongoing = allEvents.stream()
+                        .filter(e -> e.getStartDate().isBefore(LocalDateTime.now()) &&
+                                e.getEndDate().isAfter(LocalDateTime.now()))
+                        .count();
+                long finished = totalEvts - upcoming - ongoing;
+
+                Paragraph stats = new Paragraph(
+                        String.format("Total: %d événements | À venir: %d | En cours: %d | Terminés: %d",
+                                totalEvts, upcoming, ongoing, finished))
+                        .setFontSize(11)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setItalic();
+                document.add(stats);
+
+                document.add(new Paragraph("\n"));
+
+                // Créer le tableau
+                float[] columnWidths = {3, 2, 2, 3, 2, 2, 1.5f};
+                Table table = new Table(UnitValue.createPercentArray(columnWidths))
+                        .useAllAvailableWidth();
+
+                // En-têtes de colonnes
+                String[] headers = {"Titre", "Début", "Fin", "Lieu", "Catégorie", "Statut", "Prix"};
+                for (String headerText : headers) {
+                    Cell headerCell = new Cell()
+                            .add(new Paragraph(headerText).setBold())
+                            .setBackgroundColor(new DeviceRgb(33, 150, 243))
+                            .setFontColor(ColorConstants.WHITE)
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(8);
+                    table.addHeaderCell(headerCell);
+                }
+
+                // Ajouter les données
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.FRENCH);
+
+                for (Event event : allEvents) {
+                    // Titre
+                    table.addCell(new Cell()
+                            .add(new Paragraph(event.getTitle()))
+                            .setPadding(6));
+
+                    // Date début
+                    String startDate = event.getStartDate() != null
+                            ? event.getStartDate().format(dateFormatter)
+                            : "-";
+                    table.addCell(new Cell()
+                            .add(new Paragraph(startDate))
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+
+                    // Date fin
+                    String endDate = event.getEndDate() != null
+                            ? event.getEndDate().format(dateFormatter)
+                            : "-";
+                    table.addCell(new Cell()
+                            .add(new Paragraph(endDate))
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+
+                    // Lieu
+                    String location = event.getLocation();
+                    if (location == null || location.isEmpty()) location = "-";
+                    if (location.length() > 40) location = location.substring(0, 37) + "...";
+                    table.addCell(new Cell()
+                            .add(new Paragraph(location))
+                            .setPadding(6));
+
+                    // Catégorie
+                    String category = getCategoryName(event.getCategoryId());
+                    table.addCell(new Cell()
+                            .add(new Paragraph(category))
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+
+                    // Statut
+                    String status;
+                    DeviceRgb statusColor;
+                    LocalDateTime now = LocalDateTime.now();
+
+                    if (event.getStartDate().isAfter(now)) {
+                        status = "À venir";
+                        statusColor = new DeviceRgb(33, 150, 243); // Bleu
+                    } else if (event.getEndDate().isAfter(now)) {
+                        status = "En cours";
+                        statusColor = new DeviceRgb(76, 175, 80); // Vert
+                    } else {
+                        status = "Terminé";
+                        statusColor = new DeviceRgb(158, 158, 158); // Gris
+                    }
+
+                    table.addCell(new Cell()
+                            .add(new Paragraph(status))
+                            .setFontColor(statusColor)
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+
+                    // Prix
+                    String price = !event.isFree() && event.getTicketPrice() > 0
+                            ? String.format("%.2f €", event.getTicketPrice())
+                            : "Gratuit";
+                    table.addCell(new Cell()
+                            .add(new Paragraph(price))
+                            .setTextAlignment(TextAlignment.RIGHT)
+                            .setPadding(6));
+                }
+
+                document.add(table);
+
+                // Footer
+                document.add(new Paragraph("\n"));
+                Paragraph footer = new Paragraph("© 2026 EventFlow - Gestion des événements")
+                        .setFontSize(9)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(ColorConstants.LIGHT_GRAY);
+                document.add(footer);
+
+                // Fermer le document
+                document.close();
+
+                // Afficher un message de succès
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Export réussi");
+                alert.setHeaderText(null);
+                alert.setContentText("Le PDF a été exporté avec succès !\n\n" +
+                        totalEvts + " événements exportés.\nFichier: " + file.getName());
+                alert.showAndWait();
+
+                System.out.println("✅ PDF exporté: " + file.getAbsolutePath());
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur export PDF: " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur d'export");
+            alert.setHeaderText("Impossible d'exporter le PDF");
+            alert.setContentText("Erreur: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
 }
+

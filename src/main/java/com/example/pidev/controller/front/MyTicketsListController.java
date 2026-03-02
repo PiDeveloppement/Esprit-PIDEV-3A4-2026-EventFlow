@@ -75,14 +75,14 @@ public class MyTicketsListController {
 
         // Effet hover
         card.setOnMouseEntered(e -> card.setStyle(
-            "-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12; " +
-            "-fx-padding: 25; -fx-border-color: #0D47A1; -fx-border-width: 2; " +
-            "-fx-effect: dropshadow(gaussian, rgba(13,71,161,0.15), 16, 0, 0, 4); -fx-cursor: hand;"
+                "-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12; " +
+                        "-fx-padding: 25; -fx-border-color: #0D47A1; -fx-border-width: 2; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(13,71,161,0.15), 16, 0, 0, 4); -fx-cursor: hand;"
         ));
         card.setOnMouseExited(e -> card.setStyle(
-            "-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12; " +
-            "-fx-padding: 25; -fx-border-color: #e2e8f0; -fx-border-width: 1; " +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2); -fx-cursor: hand;"
+                "-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12; " +
+                        "-fx-padding: 25; -fx-border-color: #e2e8f0; -fx-border-width: 1; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2); -fx-cursor: hand;"
         ));
 
         // QR Code Section
@@ -204,8 +204,8 @@ public class MyTicketsListController {
                 alert.setTitle("PDF Généré");
                 alert.setHeaderText("✅ Votre billet est prêt !");
                 alert.setContentText("Le PDF a été généré et ouvert.\n\n" +
-                                   "Scannez le QR code du PDF avec votre téléphone pour l'ouvrir.\n" +
-                                   "Présentez ce PDF le jour de l'événement.");
+                        "Scannez le QR code du PDF avec votre téléphone pour l'ouvrir.\n" +
+                        "Présentez ce PDF le jour de l'événement.");
                 alert.showAndWait();
             } else {
                 showAlert("Erreur", "Impossible de générer le PDF", Alert.AlertType.ERROR);

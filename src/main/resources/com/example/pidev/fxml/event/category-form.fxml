@@ -15,18 +15,20 @@
 
     <!-- ===================== SCROLLPANE ===================== -->
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                hbarPolicy="AS_NEEDED"
+                vbarPolicy="AS_NEEDED"
                 style="-fx-background-color: transparent; -fx-border-color: transparent;">
 
         <VBox spacing="0">
 
             <!-- ===================== HEADER FORMULAIRE ===================== -->
-            <HBox style="-fx-background-color: white; -fx-padding: 20 30; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0;"
+            <HBox style="-fx-background-color: white; -fx-padding: 15 40; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
                   alignment="CENTER_LEFT" spacing="20">
 
                 <Button fx:id="backBtn" text="⬅ Retour" onAction="#handleBack"
-                        style="-fx-background-color: #f8f9fa; -fx-text-fill: #495057; -fx-font-size: 14px;
-                               -fx-background-radius: 8; -fx-padding: 10 20; -fx-border-color: #dee2e6;
-                               -fx-border-width: 1; -fx-cursor: hand; -fx-font-weight: 500;"/>
+                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px;
+                               -fx-background-radius: 8; -fx-padding: 8 15; -fx-border-color: #cbd5e1;
+                               -fx-border-width: 1; -fx-cursor: hand;"/>
 
                 <VBox spacing="5">
                     <Label fx:id="titleLabel" text="Nouvelle Catégorie"
@@ -39,12 +41,12 @@
 
                 <HBox spacing="12">
                     <Button text="✖ Annuler" onAction="#handleCancel"
-                            style="-fx-background-color: white; -fx-text-fill: #6c757d; -fx-font-size: 14px;
-                                   -fx-border-color: #ced4da; -fx-border-radius: 8; -fx-padding: 10 24;
-                                   -fx-cursor: hand; -fx-font-weight: 500;"/>
+                            style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px;
+                                   -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-padding: 8 20;
+                                   -fx-cursor: hand;"/>
                     <Button fx:id="saveBtn" text="✔ Enregistrer" onAction="#handleSave"
-                            style="-fx-background-color: #0d47a1; -fx-text-fill: white; -fx-font-size: 14px;
-                                   -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px;
+                                   -fx-background-radius: 8; -fx-padding: 8 20; -fx-cursor: hand;
                                    -fx-font-weight: 600;"/>
                 </HBox>
             </HBox>
@@ -85,8 +87,12 @@
 
                         <!-- Description avec largeur identique au Nom -->
                         <VBox spacing="6">
-                            <Label text="Description"
-                                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Description"
+                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label fx:id="descriptionCounter" text="(0/200)"
+                                       style="-fx-text-fill: #6c757d; -fx-font-size: 12px;"/>
+                            </HBox>
                             <TextArea fx:id="descriptionArea" promptText="Décrivez cette catégorie..."
                                       prefRowCount="4"
                                       wrapText="true"
@@ -95,6 +101,8 @@
                                       prefHeight="100"
                                       prefWidth="400"
                                       maxWidth="400"/>
+                            <Label fx:id="descriptionError" text=""
+                                   style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                         </VBox>
                     </VBox>
 
@@ -170,9 +178,18 @@
                             </RadioButton>
                             <RadioButton fx:id="inactiveRadio" text="Inactif" toggleGroup="$statusGroup"/>
                         </HBox>
+                        <Label fx:id="statusError" text=""
+                               style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                     </VBox>
 
                 </VBox> <!-- Fin VBox CARD PRINCIPALE -->
+
+                <!-- Footer -->
+                <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
+                    <Label text="© 2026 EventFlow - Gestion des catégories"
+                           style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+                </HBox>
+
             </VBox> <!-- Fin VBox FORMULAIRE -->
         </VBox> <!-- Fin VBox SCROLLPANE CONTENT -->
     </ScrollPane> <!-- Fin ScrollPane -->

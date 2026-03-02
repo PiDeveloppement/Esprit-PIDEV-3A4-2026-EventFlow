@@ -7,211 +7,135 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pidev.controller.event.CategoryListController"
       spacing="0"
-      styleClass="page-background"
-      stylesheets="@../../css/atlantafx-custom.css">
+      style="-fx-background-color: #f8fafc;">
 
 
 
-    <!-- ===================== ZONE SCROLLABLE (TOUTE LA PAGE) ===================== -->
+    <!-- Barre de filtres (FIXE) -->
+    <HBox style="-fx-background-color: #f1f5f9; -fx-padding: 15 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+          spacing="15" alignment="CENTER_LEFT" prefHeight="70">
+
+        <TextField fx:id="searchField"
+                   promptText="🔍 Rechercher une catégorie..."
+                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15; -fx-pref-width: 300;
+                          -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+        <ComboBox fx:id="statusFilter"
+                  promptText="📊 Statut"
+                  visibleRowCount="3"
+                  prefWidth="150"
+                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15;
+                         -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+        <ComboBox fx:id="colorFilter"
+                  promptText="🎨 Couleur"
+                  visibleRowCount="8"
+                  prefWidth="180"
+                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15;
+                         -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+        <ComboBox fx:id="sortOrder"
+                  promptText="🔽 Ordre"
+                  visibleRowCount="5"
+                  prefWidth="150"
+                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15;
+                         -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="📄 Exporter PDF"
+                onAction="#handleExportPDF"
+                style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-padding: 8 20;
+                       -fx-background-radius: 8; -fx-cursor: hand;"
+                minWidth="140"/>
+
+        <Button fx:id="addBtn" text="➕ Créer une catégorie"
+                onAction="#handleAdd"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 20;
+                       -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;"
+                minWidth="180"/>
+    </HBox>
+
+    <!-- SCROLLPANE GLOBAL - Tout le contenu peut défiler -->
     <ScrollPane fitToWidth="true"
-                VBox.vgrow="ALWAYS"
-                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                vbarPolicy="AS_NEEDED"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                VBox.vgrow="ALWAYS">
 
-        <VBox spacing="0">
+        <!-- Contenu principal qui défile -->
+        <VBox spacing="20" style="-fx-padding: 20 30;">
 
-            <!-- ===================== HEADER GESTION CATÉGORIES (DANS LE SCROLL) ===================== -->
-            <HBox style="-fx-background-color: white;
-                         -fx-padding: 15 30;
-                         -fx-border-color: #e9ecef;
-                         -fx-border-width: 0 0 1 0;"
-                  alignment="CENTER_LEFT">
+            <!-- Barre de filtres secondaire -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button onAction="#handleFilter"
+                        style="-fx-background-color: #1565C0; -fx-text-fill: white; -fx-padding: 8 20;
+                               -fx-background-radius: 8; -fx-cursor: hand;">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER">
+                            <Label text="⏷" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                            <Label text="Filtrer" style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 600;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
 
-
+                <Button onAction="#handleRefresh"
+                        style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 15;
+                               -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                               -fx-cursor: hand;">
+                    <graphic>
+                        <Label text="🔄" style="-fx-font-size: 16px;"/>
+                    </graphic>
+                </Button>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- KPI Cards -->
-                <HBox spacing="15" alignment="CENTER">
-                    <VBox alignment="CENTER" spacing="4"
-                          style="-fx-padding: 15 28; -fx-background-color: #d1f4e0;
-                                 -fx-background-radius: 10; -fx-border-color: #95d5b2;
-                                 -fx-border-width: 1.5; -fx-border-radius: 10; -fx-min-width: 130;">
-                        <Label fx:id="totalLabel" text="0"
-                               style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
-                        <Label text="Catégories"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #2d6a4f;"/>
-                    </VBox>
-
-                    <VBox alignment="CENTER" spacing="4"
-                          style="-fx-padding: 15 28; -fx-background-color: #cfe2ff;
-                                 -fx-background-radius: 10; -fx-border-color: #9ec5fe;
-                                 -fx-border-width: 1.5; -fx-border-radius: 10; -fx-min-width: 130;">
-                        <Label fx:id="eventsLabel" text="0"
-                               style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #004085;"/>
-                        <Label text="Événements"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #0056b3;"/>
-                    </VBox>
-                </HBox>
+                <Label fx:id="resultLabel"
+                       text="0 résultat(s) trouvé(s)"
+                       style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
             </HBox>
 
-            <!-- ===================== CONTENU PRINCIPAL ===================== -->
-            <VBox styleClass="page-content" style="-fx-padding: 25 30;">
+            <!-- Table avec hauteur fixe et SANS SCROLL INTERNE -->
+            <TableView fx:id="categoryTable"
+                       VBox.vgrow="NEVER"
+                       prefHeight="400"
+                       style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                <columns>
+                    <TableColumn fx:id="categoryCol" text="📂 Catégorie" prefWidth="180"/>
+                    <TableColumn fx:id="descriptionCol" text="📝 Description" prefWidth="480"/>
+                    <TableColumn fx:id="colorCol" text="🎨 Couleur" prefWidth="140"/>
+                    <TableColumn fx:id="statusCol" text="📊 Statut" prefWidth="120"/>
+                    <TableColumn fx:id="actionsCol" text="⚡ Actions" prefWidth="200"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
 
-                <!-- CARD BLANCHE -->
-                <VBox styleClass="content-card">
+            <!-- Pagination CORRIGÉE -->
+            <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                <HBox spacing="8" alignment="CENTER">
+                    <!-- Garde le bouton Précédent -->
+                    <Button fx:id="prevBtn" text="« Précédent" onAction="#handlePrevPage"
+                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 16;
+                       -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-radius: 8; -fx-cursor: hand;"/>
 
-                    <!-- En-tête -->
-                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="section-header">
-                        <Label text="📋" style="-fx-font-size: 18px;"/>
-                        <Label text="Liste des Catégories" styleClass="section-title"/>
+                    <!-- Le conteneur qui recevra TOUS les boutons de pagination (pages + Suivant) -->
+                    <HBox fx:id="paginationContainer" spacing="4" alignment="CENTER">
+                        <!-- Les boutons seront générés par le controller -->
                     </HBox>
+                </HBox>
 
-                    <!-- TOOLBAR LIGNE 1 -->
-                    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="toolbar">
+                <Region HBox.hgrow="ALWAYS"/>
 
-                        <!-- Recherche -->
-                        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-pref-width: 400px;">
-                            <TextField fx:id="searchField"
-                                       promptText="Recherche"
-                                       HBox.hgrow="ALWAYS"
-                                       styleClass="filter-input"/>
-                        </HBox>
+                <Label fx:id="pageInfoLabel" text="Page 1 sur 1"
+                       style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+            </HBox>
+            <!-- Footer -->
+            <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
+                <Label text="© 2026 EventFlow - Gestion des catégories"
+                       style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+            </HBox>
 
-                        <!-- Statut -->
-                        <ComboBox fx:id="statusFilter"
-                                  promptText="▼ Statut"
-                                  visibleRowCount="3"
-                                  editable="false"
-                                  prefWidth="200"
-                                  styleClass="filter-input"/>
-
-                        <!-- Couleur -->
-                        <ComboBox fx:id="colorFilter"
-                                  promptText="▼ Couleur"
-                                  visibleRowCount="8"
-                                  editable="false"
-                                  prefWidth="220"
-                                  styleClass="filter-input"/>
-
-                        <Region HBox.hgrow="ALWAYS"/>
-
-                        <!-- Boutons Actions -->
-                        <Button text="📄 Exporter PDF"
-                                styleClass="btn-export"
-                                minWidth="160"/>
-
-                        <Button fx:id="addBtn"
-                                text="➕ Créer une nouvelle catégorie"
-                                onAction="#handleAdd"
-                                styleClass="btn-primary"
-                                minWidth="260"/>
-                    </HBox>
-
-                    <!-- TOOLBAR LIGNE 2 -->
-                    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="toolbar-secondary">
-
-                        <!-- Ordre (Tri) -->
-                        <ComboBox fx:id="sortOrder"
-                                  promptText="▼ Ordre"
-                                  visibleRowCount="5"
-                                  editable="false"
-                                  prefWidth="200"
-                                  styleClass="filter-input"/>
-
-                        <!-- Bouton Filtrer -->
-                        <Button onAction="#handleFilter" styleClass="btn-filter">
-                            <graphic>
-                                <HBox spacing="8" alignment="CENTER">
-                                    <Label text="⏷" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-                                    <Label text="Filtrer" style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 600;"/>
-                                </HBox>
-                            </graphic>
-                        </Button>
-
-                        <!-- Bouton Refresh -->
-                        <Button onAction="#handleRefresh" styleClass="btn-refresh-icon">
-                            <graphic>
-                                <Label text="🔄" style="-fx-font-size: 16px;"/>
-                            </graphic>
-                        </Button>
-
-                        <Region HBox.hgrow="ALWAYS"/>
-
-                        <Label fx:id="resultLabel"
-                               text="0 resultat(s) trouvé(s)"
-                               styleClass="result-label"/>
-                    </HBox>
-
-                    <!-- TABLEAU (hauteur fixe pour 10 lignes exactement, pas de scroll interne) -->
-                    <TableView fx:id="categoryTable"
-                               fixedCellSize="60"
-                               prefHeight="660"
-                               minHeight="660"
-                               maxHeight="660"
-                               styleClass="data-table"
-                               style="-fx-background-color: white;"
-                               VBox.vgrow="NEVER">
-
-                        <columns>
-                            <!-- Catégorie -->
-                            <TableColumn fx:id="categoryCol"
-                                         text="Catégorie"
-                                         prefWidth="180"
-                                         minWidth="150"
-                                         maxWidth="200"/>
-
-                            <!-- Description -->
-                            <TableColumn fx:id="descriptionCol"
-                                         text="Description"
-                                         prefWidth="480"
-                                         minWidth="350"/>
-
-                            <!-- Couleur -->
-                            <TableColumn fx:id="colorCol"
-                                         text="Couleur"
-                                         prefWidth="140"
-                                         minWidth="120"
-                                         style="-fx-alignment: CENTER;"/>
-
-                            <!-- Statut -->
-                            <TableColumn fx:id="statusCol"
-                                         text="Statut"
-                                         prefWidth="120"
-                                         minWidth="100"
-                                         style="-fx-alignment: CENTER;"/>
-
-                            <!-- Actions -->
-                            <TableColumn fx:id="actionsCol"
-                                         text="Actions"
-                                         prefWidth="200"
-                                         minWidth="180"
-                                         style="-fx-alignment: CENTER;"/>
-                        </columns>
-
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
-                    </TableView>
-
-                    <!-- FOOTER PAGINATION -->
-                    <HBox spacing="20" alignment="CENTER" styleClass="table-footer">
-                        <Region HBox.hgrow="ALWAYS"/>
-
-                        <HBox fx:id="paginationContainer" spacing="8" alignment="CENTER">
-                            <Button fx:id="prevBtn" text="« Précédent" styleClass="btn-pagination" onAction="#handlePrevPage"/>
-                            <!-- Les boutons de page seront générés dynamiquement -->
-                        </HBox>
-
-                        <Region HBox.hgrow="ALWAYS"/>
-
-                        <!-- Info pagination -->
-                        <Label fx:id="pageInfoLabel" text="Page 1 sur 1"
-                               style="-fx-text-fill: #6c757d; -fx-font-size: 12px;"/>
-                    </HBox>
-
-                </VBox>
-            </VBox>
-        </VBox>
-    </ScrollPane>
-
-</VBox>
+        </VBox> <!-- FIN du VBox contenu -->
+    </ScrollPane> <!-- FIN du ScrollPane -->
+</VBox> <!-- FIN du VBox principal -->

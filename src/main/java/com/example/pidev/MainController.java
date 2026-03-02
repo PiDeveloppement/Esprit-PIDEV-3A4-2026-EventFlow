@@ -12,6 +12,9 @@ import com.example.pidev.model.event.Event;
 import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.model.event.EventTicket;
 import com.example.pidev.model.role.Role;
+import com.example.pidev.service.event.EventCategoryService;
+import com.example.pidev.service.event.EventService;
+import com.example.pidev.service.event.EventTicketService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -76,6 +79,7 @@ public class MainController {
     // ===================== PAGE HEADER =====================
     @FXML private Label pageTitle;
     @FXML private Label pageSubtitle;
+    @FXML private HBox kpiContainer;
 
     // ===================== TOP BAR =====================
     @FXML private Label navDateLabel;
@@ -139,6 +143,11 @@ public class MainController {
     private Button activeButton;
     private DashboardController dashboardController;
 
+    // Services pour les KPI
+    private EventService eventService;
+    private EventCategoryService categoryService;
+    private EventTicketService ticketService;
+
     private static class PageInfo {
         String title;
         String subtitle;
@@ -154,6 +163,11 @@ public class MainController {
         instance = this;
         System.out.println("✅ MainController initialisé");
 
+        // Initialiser les services pour les KPI
+        eventService = new EventService();
+        categoryService = new EventCategoryService();
+        ticketService = new EventTicketService();
+
         UserSession session = UserSession.getInstance();
         System.out.println("👤 Rôle connecté dans MainController: " + session.getRole());
 
@@ -164,6 +178,9 @@ public class MainController {
         configureDateTime();
         loadUserProfileInHeader();
         setupGlobalSearch();
+
+        // Initialiser les KPI (cachés par défaut)
+        hideKPIs();
 
         // Page par défaut : Dashboard
         if (dashboardBtn != null) {
@@ -1143,9 +1160,11 @@ public class MainController {
                 ((EventListController) controller).setMainController(this);
             }
 
+            updatePageHeader("events");
+            showEventKPIs();
+
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-            updatePageHeader("events");
 
         } catch (IOException e) {
             System.err.println("❌ Erreur chargement liste événements: " + e.getMessage());
@@ -1209,9 +1228,11 @@ public class MainController {
                 ((CategoryListController) controller).setMainController(this);
             }
 
+            updatePageHeader("categories");
+            showCategoryKPIs();
+
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-            updatePageHeader("categories");
 
         } catch (IOException e) {
             System.err.println("❌ Erreur chargement liste catégories: " + e.getMessage());
@@ -1275,9 +1296,11 @@ public class MainController {
                 ((EventTicketListController) controller).setMainController(this);
             }
 
+            updatePageHeader("tickets");
+            showTicketKPIs();
+
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-            updatePageHeader("tickets");
 
         } catch (IOException e) {
             System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
@@ -1519,5 +1542,231 @@ public class MainController {
         showBudget();
     }
 
+    // ===========================================
+    // SECTION KPI - GESTION DYNAMIQUE DES KPI
+    // pour Catégories, Événements et Billets
+    // ===========================================
+
+    /**
+     * Cache tous les KPI
+     */
+    private void hideKPIs() {
+        if (kpiContainer != null) {
+            kpiContainer.setVisible(false);
+            kpiContainer.setManaged(false);
+            kpiContainer.getChildren().clear();
+        }
+    }
+
+    /**
+     * Affiche les KPI pour la page des CATÉGORIES
+     * Cartes : [Catégories] [Événements]
+     */
+    public void showCategoryKPIs() {
+        if (kpiContainer == null) return;
+
+        kpiContainer.getChildren().clear();
+
+        VBox categoryCard = createKPICard(
+                "#d1f4e0", "#95d5b2", "#1b5e20", "#2d6a4f",
+                "📁", "totalCategoriesLabel", "Catégories"
+        );
+
+        VBox eventCard = createKPICard(
+                "#cfe2ff", "#9ec5fe", "#004085", "#0056b3",
+                "📅", "totalEventsLabel", "Événements"
+        );
+
+        kpiContainer.getChildren().addAll(categoryCard, eventCard);
+        kpiContainer.setVisible(true);
+        kpiContainer.setManaged(true);
+
+        loadCategoryData();
+    }
+
+    /**
+     * Affiche les KPI pour la page des ÉVÉNEMENTS
+     * Cartes : [Événements] [Tickets]
+     */
+    public void showEventKPIs() {
+        if (kpiContainer == null) return;
+
+        kpiContainer.getChildren().clear();
+
+        VBox eventCard = createKPICard(
+                "#cfe2ff", "#9ec5fe", "#004085", "#0056b3",
+                "📅", "totalEventsLabel", "Événements"
+        );
+
+        VBox ticketCard = createKPICard(
+                "#fff3cd", "#ffecb5", "#856404", "#856404",
+                "🎫", "totalTicketsLabel", "Billets"
+        );
+
+        kpiContainer.getChildren().addAll(eventCard, ticketCard);
+        kpiContainer.setVisible(true);
+        kpiContainer.setManaged(true);
+
+        loadEventData();
+    }
+
+    /**
+     * Affiche les KPI pour la page des TICKETS
+     * Cartes : [Tickets] [Événements concernés]
+     */
+    public void showTicketKPIs() {
+        if (kpiContainer == null) return;
+
+        kpiContainer.getChildren().clear();
+
+        VBox ticketCard = createKPICard(
+                "#fff3cd", "#ffecb5", "#856404", "#856404",
+                "🎫", "totalTicketsLabel", "Billets"
+        );
+
+        VBox eventCard = createKPICard(
+                "#cfe2ff", "#9ec5fe", "#004085", "#0056b3",
+                "📅", "totalEventsLabel", "Événements"
+        );
+
+        kpiContainer.getChildren().addAll(ticketCard, eventCard);
+        kpiContainer.setVisible(true);
+        kpiContainer.setManaged(true);
+
+        loadTicketData();
+    }
+
+    /**
+     * Crée une carte KPI (méthode utilitaire)
+     */
+    private VBox createKPICard(String bgColor, String borderColor,
+                               String valueColor, String labelColor,
+                               String icon, String labelId, String text) {
+        VBox card = new VBox(5);
+        card.setAlignment(Pos.CENTER);
+        card.setStyle(String.format(
+                "-fx-background-color: %s; -fx-background-radius: 16; -fx-padding: 8 20; " +
+                        "-fx-border-color: %s; -fx-border-radius: 16; -fx-border-width: 1;",
+                bgColor, borderColor
+        ));
+
+        Label iconLabel = new Label(icon);
+        iconLabel.setStyle("-fx-font-size: 20px;");
+
+        Label valueLabel = new Label("0");
+        valueLabel.setId(labelId);
+        valueLabel.setStyle(String.format(
+                "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: %s;", valueColor
+        ));
+
+        Label textLabel = new Label(text);
+        textLabel.setStyle(String.format(
+                "-fx-text-fill: %s; -fx-font-size: 10px;", labelColor
+        ));
+
+        card.getChildren().addAll(iconLabel, valueLabel, textLabel);
+        return card;
+    }
+
+    private void loadCategoryData() {
+        try {
+            java.util.List<EventCategory> categories = categoryService.getAllCategoriesWithCount();
+            int totalCategories = categories.size();
+            int totalEvents = categories.stream().mapToInt(EventCategory::getEventCount).sum();
+
+            updateLabel("totalCategoriesLabel", String.valueOf(totalCategories));
+            updateLabel("totalEventsLabel", String.valueOf(totalEvents));
+            System.out.println("✅ KPI Catégories mis à jour: " + totalCategories + " catégories, " + totalEvents + " événements");
+        } catch (Exception e) {
+            System.err.println("❌ Erreur chargement KPI catégories: " + e.getMessage());
+            updateLabel("totalCategoriesLabel", "0");
+            updateLabel("totalEventsLabel", "0");
+        }
+    }
+
+    private void loadEventData() {
+        try {
+            java.util.List<Event> events = eventService.getAllEvents();
+            int totalEvents = events.size();
+
+            java.util.List<EventTicket> tickets = ticketService.getAllTickets();
+            int totalTickets = tickets.size();
+
+            updateLabel("totalEventsLabel", String.valueOf(totalEvents));
+            updateLabel("totalTicketsLabel", String.valueOf(totalTickets));
+            System.out.println("✅ KPI Événements mis à jour: " + totalEvents + " événements, " + totalTickets + " tickets");
+        } catch (Exception e) {
+            System.err.println("❌ Erreur chargement KPI événements: " + e.getMessage());
+            updateLabel("totalEventsLabel", "0");
+            updateLabel("totalTicketsLabel", "0");
+        }
+    }
+
+    private void loadTicketData() {
+        try {
+            java.util.List<EventTicket> tickets = ticketService.getAllTickets();
+            int totalTickets = tickets.size();
+
+            long totalEvents = tickets.stream()
+                    .map(EventTicket::getEventId)
+                    .distinct()
+                    .count();
+
+            updateLabel("totalTicketsLabel", String.valueOf(totalTickets));
+            updateLabel("totalEventsLabel", String.valueOf(totalEvents));
+            System.out.println("✅ KPI Tickets mis à jour: " + totalTickets + " tickets, " + totalEvents + " événements");
+        } catch (Exception e) {
+            System.err.println("❌ Erreur chargement KPI tickets: " + e.getMessage());
+            updateLabel("totalTicketsLabel", "0");
+            updateLabel("totalEventsLabel", "0");
+        }
+    }
+
+    private void updateLabel(String id, String value) {
+        if (kpiContainer == null || id == null) {
+            return;
+        }
+
+        for (Node node : kpiContainer.getChildren()) {
+            if (node instanceof VBox) {
+                VBox card = (VBox) node;
+                for (Node child : card.getChildren()) {
+                    if (child instanceof Label) {
+                        Label label = (Label) child;
+                        if (id.equals(label.getId())) {
+                            label.setText(value);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Rafraîchit les KPI de la page actuelle
+     * Appelé après ajout/modification/suppression
+     */
+    public void refreshKPIs() {
+        if (kpiContainer == null || !kpiContainer.isVisible()) {
+            return;
+        }
+
+        // Déterminer quelle page est actuellement affichée
+        String currentTitle = pageTitle.getText().toLowerCase();
+
+        if (currentTitle.contains("catégorie")) {
+            System.out.println("🔄 Rafraîchissement KPI Catégories...");
+            loadCategoryData();
+        } else if (currentTitle.contains("événement")) {
+            System.out.println("🔄 Rafraîchissement KPI Événements...");
+            loadEventData();
+        } else if (currentTitle.contains("billet") || currentTitle.contains("ticket")) {
+            System.out.println("🔄 Rafraîchissement KPI Billets...");
+            loadTicketData();
+        }
+    }
 
 }
+
+

@@ -36,7 +36,7 @@
                 <Label text="🎫" style="-fx-font-size: 60px;"/>
                 <Label text="Aucun billet pour le moment" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
                 <Label text="Vous n'avez encore participé à aucun événement.\nCliquez sur 'Retour' pour explorer les événements disponibles."
-                        style="-fx-font-size: 14; -fx-text-fill: #94a3b8; -fx-text-alignment: center;" wrapText="true"/>
+                       style="-fx-font-size: 14; -fx-text-fill: #94a3b8; -fx-text-alignment: center;" wrapText="true"/>
             </VBox>
         </VBox>
     </ScrollPane>

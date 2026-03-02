@@ -37,6 +37,9 @@ public class CategoryFormController {
     @FXML private Button backBtn;
     @FXML private Button saveBtn;
     @FXML private Label nameError;
+    @FXML private Label descriptionError;
+    @FXML private Label statusError;
+    @FXML private Label descriptionCounter;
 
     // ==================== APERÇU DYNAMIQUE ====================
     @FXML private Label iconPreview;
@@ -52,6 +55,11 @@ public class CategoryFormController {
     private MainController helloController;
     private EventCategory currentCategory;
 
+    // ==================== VALIDATION CONSTANTS ====================
+    private static final int NAME_MIN_LENGTH = 3;
+    private static final int NAME_MAX_LENGTH = 50;
+    private static final int DESC_MAX_LENGTH = 200;
+
 
     // ==================== INITIALIZATION ====================
 
@@ -64,8 +72,9 @@ public class CategoryFormController {
         setupIconComboBox();
         setupColorPicker();
         setupPreviewListeners();
+        setupValidationListeners();
 
-        // Initialiser le ToggleGroup pour les RadioButtons
+        // ...existing code...
         if (statusGroup == null) {
             statusGroup = new ToggleGroup();
             activeRadio.setToggleGroup(statusGroup);
@@ -87,6 +96,9 @@ public class CategoryFormController {
         );
         clock.setCycleCount(Timeline.INDEFINITE);
         clock.play();
+
+        // Initialiser l'état du bouton save
+        saveBtn.setDisable(true);
     }
 
     private void updateDateTime() {
@@ -182,15 +194,67 @@ public class CategoryFormController {
     }
 
     private void setupPreviewListeners() {
-        // Mettre à jour l'aperçu de l'icône
+        // Écouter les changements de l'icône
         iconCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
+            if (newVal != null && iconPreview != null) {
                 iconPreview.setText(newVal);
-                System.out.println("Icône changée: " + newVal);
             }
         });
+
+        // Écouter les changements de la couleur via le ColorPicker
+        colorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                String hexColor = String.format("#%02X%02X%02X",
+                        (int) (newVal.getRed() * 255),
+                        (int) (newVal.getGreen() * 255),
+                        (int) (newVal.getBlue() * 255));
+                colorField.setText(hexColor);
+
+                if (colorPreview != null) {
+                    colorPreview.setStyle("-fx-background-color: " + hexColor + ";");
+                }
+            }
+        });
+
+        // ==================== VALIDATION EN TEMPS RÉEL ====================
+        // Les listeners sont configurés dans setupValidationListeners()
     }
 
+    /**
+     * Configuration des validations en temps réel
+     */
+    private void setupValidationListeners() {
+        // Validation du nom (min 3, max 50)
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> validateForm());
+
+        // Validation de la description (max 200) + compteur
+        descriptionArea.textProperty().addListener((obs, oldVal, newVal) -> {
+            updateDescriptionCounter();
+            validateForm();
+        });
+
+        // Validation du statut
+        statusGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> validateForm());
+    }
+
+    /**
+     * Met à jour le compteur de caractères de la description
+     */
+    private void updateDescriptionCounter() {
+        if (descriptionCounter != null) {
+            int length = descriptionArea.getText().length();
+            descriptionCounter.setText(length + "/" + DESC_MAX_LENGTH);
+
+            // Changer la couleur si dépassement
+            if (length > DESC_MAX_LENGTH) {
+                descriptionCounter.setStyle("-fx-text-fill: #ef4444;");
+            } else if (length >= DESC_MAX_LENGTH - 20) {
+                descriptionCounter.setStyle("-fx-text-fill: #f59e0b;");
+            } else {
+                descriptionCounter.setStyle("-fx-text-fill: #6c757d;");
+            }
+        }
+    }
 
     // ==================== COULEUR ====================
 
@@ -234,23 +298,103 @@ public class CategoryFormController {
     private boolean validateForm() {
         boolean isValid = true;
 
-        nameError.setVisible(false);
-        nameField.setStyle(nameField.getStyle().replace("-fx-border-color: #ef4444;", ""));
+        // Réinitialiser tous les erreurs
+        resetValidationUI();
 
+        // ==================== 1. VALIDATION DU NOM ====================
         String name = nameField.getText().trim();
         if (name.isEmpty()) {
-            nameError.setText("❌ Le nom est obligatoire");
+            nameError.setText("❌ Le nom est requis");
             nameError.setVisible(true);
-            nameField.setStyle(nameField.getStyle() + "-fx-border-color: #ef4444; -fx-border-width: 2;");
+            applyErrorStyle(nameField);
             isValid = false;
-        } else if (name.length() > 100) {
-            nameError.setText("❌ Le nom ne doit pas dépasser 100 caractères");
+        } else if (name.length() < NAME_MIN_LENGTH) {
+            nameError.setText("❌ Min " + NAME_MIN_LENGTH + " caractères");
             nameError.setVisible(true);
-            nameField.setStyle(nameField.getStyle() + "-fx-border-color: #ef4444; -fx-border-width: 2;");
+            applyErrorStyle(nameField);
+            isValid = false;
+        } else if (name.length() > NAME_MAX_LENGTH) {
+            nameError.setText("❌ Max " + NAME_MAX_LENGTH + " caractères");
+            nameError.setVisible(true);
+            applyErrorStyle(nameField);
+            isValid = false;
+        } else {
+            applySuccessStyle(nameField);
+        }
+
+        // ==================== 2. VALIDATION DE LA DESCRIPTION ====================
+        String description = descriptionArea.getText().trim();
+        if (description.length() > DESC_MAX_LENGTH) {
+            descriptionError.setText("❌ Max " + DESC_MAX_LENGTH + " caractères");
+            descriptionError.setVisible(true);
+            applyErrorStyle(descriptionArea);
+            isValid = false;
+        } else {
+            if (!description.isEmpty()) {
+                applySuccessStyle(descriptionArea);
+            }
+        }
+
+        // ==================== 3. VALIDATION DU STATUT ====================
+        if (statusGroup.getSelectedToggle() == null) {
+            statusError.setText("❌ Sélectionnez un statut");
+            statusError.setVisible(true);
             isValid = false;
         }
 
+        // Activer/désactiver le bouton save
+        saveBtn.setDisable(!isValid);
+
         return isValid;
+    }
+
+    /**
+     * Réinitialise tous les messages d'erreur et styles
+     */
+    private void resetValidationUI() {
+        nameError.setVisible(false);
+        descriptionError.setVisible(false);
+        statusError.setVisible(false);
+
+        clearFieldStyles(nameField);
+        clearFieldStyles(descriptionArea);
+    }
+
+    /**
+     * Applique le style d'erreur (bordure rouge)
+     */
+    private void applyErrorStyle(Control field) {
+        if (field instanceof TextArea) {
+            field.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;");
+        } else {
+            field.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;");
+        }
+    }
+
+    /**
+     * Applique le style de succès (bordure verte)
+     */
+    private void applySuccessStyle(Control field) {
+        if (field instanceof TextArea) {
+            field.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;");
+        } else {
+            field.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;");
+        }
+    }
+
+    /**
+     * Efface les styles personnalisés d'un champ
+     */
+    private void clearFieldStyles(Control field) {
+        field.setStyle("-fx-border-color: #ced4da; -fx-background-color: #f8f9fa;");
+    }
+
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
 
@@ -299,6 +443,12 @@ public class CategoryFormController {
 
                 if (success) {
                     showSuccess("Succès", "Catégorie créée avec succès!");
+
+                    // Rafraîchir les KPI après création
+                    if (helloController != null) {
+                        helloController.refreshKPIs();
+                    }
+
                     handleBack();
                 } else {
                     showError("Erreur", "Impossible de créer la catégorie (nom déjà existant?)");
@@ -316,6 +466,12 @@ public class CategoryFormController {
 
                 if (success) {
                     showSuccess("Succès", "Catégorie mise à jour avec succès!");
+
+                    // Rafraîchir les KPI après modification
+                    if (helloController != null) {
+                        helloController.refreshKPIs();
+                    }
+
                     handleBack();
                 } else {
                     showError("Erreur", "Impossible de mettre à jour la catégorie");
@@ -348,3 +504,5 @@ public class CategoryFormController {
         alert.showAndWait();
     }
 }
+
+

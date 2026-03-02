@@ -107,8 +107,21 @@ public class LoginController implements Initializable {
                 // Afficher les infos de session
                 UserSession.getInstance().printSessionInfo();
 
-                // Charger le dashboard
-                HelloApplication.loadDashboard();
+                // Vérifier s'il y a un événement en attente de participation
+                handlePendingEventParticipation();
+
+                // Redirection intelligente : pendingEvent -> vitrine, sinon selon rôle
+                if (UserSession.getInstance().hasPendingEvent()) {
+                    HelloApplication.loadPublicEventsPage();
+                } else {
+                    String roleName = user.getRoleName() != null ? user.getRoleName().trim().toLowerCase() : "";
+                    boolean isOrganizer = user.getRole_Id() == 2 || roleName.equals("organisateur");
+                    if (isOrganizer) {
+                        HelloApplication.loadDashboard();
+                    } else {
+                        HelloApplication.loadPublicEventsPage();
+                    }
+                }
 
             } else {
                 // Échec de connexion
@@ -264,6 +277,92 @@ public class LoginController implements Initializable {
         passwordField.clear();
         if (loginMessageLabel != null) {
             loginMessageLabel.setText("");
+        }
+    }
+
+    /**
+     * Gère la participation différée à un événement après connexion
+     */
+    private void handlePendingEventParticipation() {
+        UserSession session = UserSession.getInstance();
+
+        // Vérifier s'il y a un événement en attente
+        if (!session.hasPendingEvent()) {
+            return;
+        }
+
+        Integer eventId = session.getPendingEventId();
+        System.out.println("🎫 Traitement de la participation différée pour l'événement: " + eventId);
+
+        try {
+            // Créer le ticket service
+            com.example.pidev.service.event.EventTicketService ticketService =
+                new com.example.pidev.service.event.EventTicketService();
+
+            // Récupérer l'event service pour obtenir le nom de l'événement
+            com.example.pidev.service.event.EventService eventService =
+                new com.example.pidev.service.event.EventService();
+
+            com.example.pidev.model.event.Event event = eventService.getEventById(eventId);
+
+            if (event == null) {
+                System.err.println("❌ Événement non trouvé: " + eventId);
+                session.clearPendingEventId();
+                return;
+            }
+
+            int userId = session.getCurrentUser().getId_User();
+
+            // Créer le ticket dans la base de données
+            com.example.pidev.model.event.EventTicket ticket = ticketService.createTicket(eventId, userId);
+
+            if (ticket != null) {
+                // Succès : afficher le ticket généré
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.INFORMATION
+                );
+                alert.setTitle("✅ Participation confirmée");
+                alert.setHeaderText("Bienvenue ! Votre participation est enregistrée");
+                alert.setContentText(
+                    "Vous participez à l'événement :\n" +
+                    event.getTitle() + "\n\n" +
+                    "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
+                    "Un email de confirmation vous sera envoyé.\n" +
+                    "Conservez votre code de ticket pour accéder à l'événement."
+                );
+
+                // Style personnalisé
+                alert.getDialogPane().setStyle(
+                    "-fx-background-color: white; " +
+                    "-fx-font-size: 14px;"
+                );
+
+                alert.showAndWait();
+
+                System.out.println("✅ Ticket créé avec succès après connexion: " + ticket.getTicketCode());
+
+            } else {
+                // Erreur de création
+                System.err.println("❌ Échec de la création du ticket différé");
+
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING
+                );
+                alert.setTitle("Participation incomplète");
+                alert.setHeaderText("Impossible de créer votre ticket");
+                alert.setContentText(
+                    "Votre connexion a réussi, mais nous n'avons pas pu créer votre ticket.\n\n" +
+                    "Veuillez réessayer de participer à l'événement depuis la page des événements."
+                );
+                alert.showAndWait();
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de la participation différée: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Toujours nettoyer le pendingEventId
+            session.clearPendingEventId();
         }
     }
 

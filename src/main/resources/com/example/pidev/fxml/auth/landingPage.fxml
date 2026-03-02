@@ -17,10 +17,9 @@
           alignment="CENTER_LEFT" prefHeight="80">
         <!-- Logo -->
         <HBox spacing="10" alignment="CENTER_LEFT">
-            <ImageView fitHeight="40" fitWidth="40" preserveRatio="true">
+            <ImageView fitHeight="140" fitWidth="140" preserveRatio="true">
                 <Image url="@../images/logo.png" />
             </ImageView>
-            <Label text="EventFlow" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;"/>
         </HBox>
 
         <Region HBox.hgrow="ALWAYS"/>
@@ -28,6 +27,8 @@
         <!-- Liens de navigation - scroll vers les sections -->
         <HBox spacing="40" alignment="CENTER">
             <Button text="Accueil" onAction="#scrollToTop"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+            <Button text="Événements" onAction="#handleGoToEvents"
                     style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
             <Button text="Fonctionnalités" onAction="#scrollToFeatures"
                     style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
@@ -68,15 +69,14 @@
                                style="-fx-font-size: 18px; -fx-text-fill: #546e7a; -fx-wrap-text: true;"
                                wrapText="true"/>
                         <HBox spacing="20" style="-fx-padding: 10 0 0 0;">
-                            <Button text="Commencer maintenant" onAction="#handleSignup"
+                            <Button text="Commencer gratuitement" onAction="#handleSignup"
                                     style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;
                                            -fx-background-radius: 10; -fx-padding: 15 35; -fx-cursor: hand;
                                            -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.4), 12, 0, 0, 4);"/>
-                            <!-- Dans la section HERO, modifiez le bouton "Voir la démo" -->
-                            <Button text="Voir la démo" onAction="#handleDemo"
+                            <Button text="Voir la démo"
                                     style="-fx-background-color: white; -fx-text-fill: #1e293b; -fx-font-weight: 500; -fx-font-size: 16px;
-               -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 10;
-               -fx-background-radius: 10; -fx-padding: 15 35; -fx-cursor: hand;"/>
+                                           -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 10;
+                                           -fx-background-radius: 10; -fx-padding: 15 35; -fx-cursor: hand;"/>
                         </HBox>
                         <!-- Stats -->
                         <HBox spacing="50" style="-fx-padding: 30 0 0 0;">
@@ -96,7 +96,7 @@
                     </VBox>
                     <!-- Image ou icône -->
                     <StackPane prefWidth="450" prefHeight="400"
-                               style="-fx-background-color: linear-gradient(135deg, #E3F2FD, #BBDEFB); -fx-background-radius: 30;">
+                               style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #E3F2FD, #BBDEFB); -fx-background-radius: 30;">
                         <Label text="🚀" style="-fx-font-size: 140px;"/>
                     </StackPane>
                 </HBox>

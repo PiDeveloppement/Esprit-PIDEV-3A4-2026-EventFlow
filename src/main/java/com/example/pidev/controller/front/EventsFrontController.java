@@ -58,19 +58,19 @@ public class EventsFrontController {
     private void setupFilters() {
         // Filtre par date
         dateFilter.getItems().addAll(
-            "Toutes les dates",
-            "Aujourd'hui",
-            "Cette semaine",
-            "Ce mois-ci",
-            "À venir"
+                "Toutes les dates",
+                "Aujourd'hui",
+                "Cette semaine",
+                "Ce mois-ci",
+                "À venir"
         );
         dateFilter.setValue("Toutes les dates");
 
         // Filtre par prix
         priceFilter.getItems().addAll(
-            "Tous les prix",
-            "Gratuit",
-            "Payant"
+                "Tous les prix",
+                "Gratuit",
+                "Payant"
         );
         priceFilter.setValue("Tous les prix");
 
@@ -127,57 +127,57 @@ public class EventsFrontController {
         LocalDateTime now = LocalDateTime.now();
 
         filteredEvents = allEvents.stream()
-            .filter(event -> {
-                // Filtre recherche
-                boolean matchSearch = searchText.isEmpty() ||
-                    event.getTitle().toLowerCase().contains(searchText) ||
-                    (event.getDescription() != null && event.getDescription().toLowerCase().contains(searchText)) ||
-                    (event.getLocation() != null && event.getLocation().toLowerCase().contains(searchText));
+                .filter(event -> {
+                    // Filtre recherche
+                    boolean matchSearch = searchText.isEmpty() ||
+                            event.getTitle().toLowerCase().contains(searchText) ||
+                            (event.getDescription() != null && event.getDescription().toLowerCase().contains(searchText)) ||
+                            (event.getLocation() != null && event.getLocation().toLowerCase().contains(searchText));
 
-                // Filtre catégorie
-                boolean matchCategory = category == null || "Toutes les catégories".equals(category);
-                if (!matchCategory) {
-                    String eventCategoryName = getCategoryName(event.getCategoryId());
-                    matchCategory = eventCategoryName.equals(category);
-                }
-
-                // Filtre date
-                boolean matchDate = true;
-                if (date != null && event.getStartDate() != null) {
-                    switch (date) {
-                        case "Aujourd'hui":
-                            matchDate = event.getStartDate().toLocalDate().equals(now.toLocalDate());
-                            break;
-                        case "Cette semaine":
-                            matchDate = event.getStartDate().isAfter(now) &&
-                                       event.getStartDate().isBefore(now.plusWeeks(1));
-                            break;
-                        case "Ce mois-ci":
-                            matchDate = event.getStartDate().getMonth().equals(now.getMonth()) &&
-                                       event.getStartDate().getYear() == now.getYear();
-                            break;
-                        case "À venir":
-                            matchDate = event.getStartDate().isAfter(now);
-                            break;
+                    // Filtre catégorie
+                    boolean matchCategory = category == null || "Toutes les catégories".equals(category);
+                    if (!matchCategory) {
+                        String eventCategoryName = getCategoryName(event.getCategoryId());
+                        matchCategory = eventCategoryName.equals(category);
                     }
-                }
 
-                // Filtre prix
-                boolean matchPrice = true;
-                if (price != null) {
-                    switch (price) {
-                        case "Gratuit":
-                            matchPrice = event.isFree();
-                            break;
-                        case "Payant":
-                            matchPrice = !event.isFree();
-                            break;
+                    // Filtre date
+                    boolean matchDate = true;
+                    if (date != null && event.getStartDate() != null) {
+                        switch (date) {
+                            case "Aujourd'hui":
+                                matchDate = event.getStartDate().toLocalDate().equals(now.toLocalDate());
+                                break;
+                            case "Cette semaine":
+                                matchDate = event.getStartDate().isAfter(now) &&
+                                        event.getStartDate().isBefore(now.plusWeeks(1));
+                                break;
+                            case "Ce mois-ci":
+                                matchDate = event.getStartDate().getMonth().equals(now.getMonth()) &&
+                                        event.getStartDate().getYear() == now.getYear();
+                                break;
+                            case "À venir":
+                                matchDate = event.getStartDate().isAfter(now);
+                                break;
+                        }
                     }
-                }
 
-                return matchSearch && matchCategory && matchDate && matchPrice;
-            })
-            .collect(Collectors.toList());
+                    // Filtre prix
+                    boolean matchPrice = true;
+                    if (price != null) {
+                        switch (price) {
+                            case "Gratuit":
+                                matchPrice = event.isFree();
+                                break;
+                            case "Payant":
+                                matchPrice = !event.isFree();
+                                break;
+                        }
+                    }
+
+                    return matchSearch && matchCategory && matchDate && matchPrice;
+                })
+                .collect(Collectors.toList());
 
         displayEvents(filteredEvents);
     }
@@ -213,23 +213,23 @@ public class EventsFrontController {
         card.setPrefWidth(360);
         card.setMaxWidth(360);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
-                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);");
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);");
 
         // Effet hover
         card.setOnMouseEntered(e -> card.setStyle(
-            "-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
-            "-fx-effect: dropshadow(gaussian, rgba(13,71,161,0.2), 15, 0, 0, 4); -fx-cursor: hand;"
+                "-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(13,71,161,0.2), 15, 0, 0, 4); -fx-cursor: hand;"
         ));
         card.setOnMouseExited(e -> card.setStyle(
-            "-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);"
+                "-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);"
         ));
 
         // Image
         StackPane imageContainer = new StackPane();
         imageContainer.setPrefHeight(200);
         imageContainer.setStyle("-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%); " +
-                               "-fx-background-radius: 16 16 0 0;");
+                "-fx-background-radius: 16 16 0 0;");
 
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
             try {
@@ -253,7 +253,7 @@ public class EventsFrontController {
         String categoryName = getCategoryName(event.getCategoryId());
         Label categoryBadge = new Label(categoryName);
         categoryBadge.setStyle("-fx-background-color: rgba(13,71,161,0.9); -fx-text-fill: white; " +
-                              "-fx-padding: 6 15; -fx-background-radius: 20; -fx-font-size: 12px; -fx-font-weight: bold;");
+                "-fx-padding: 6 15; -fx-background-radius: 20; -fx-font-size: 12px; -fx-font-weight: bold;");
         StackPane.setAlignment(categoryBadge, Pos.TOP_RIGHT);
         StackPane.setMargin(categoryBadge, new Insets(15, 15, 0, 0));
         imageContainer.getChildren().add(categoryBadge);
@@ -283,8 +283,8 @@ public class EventsFrontController {
         Label locationIcon = new Label("📍");
         locationIcon.setStyle("-fx-font-size: 16px;");
         Label locationLabel = new Label(event.getLocation() != null ?
-            (event.getLocation().length() > 40 ? event.getLocation().substring(0, 37) + "..." : event.getLocation())
-            : "Lieu non spécifié");
+                (event.getLocation().length() > 40 ? event.getLocation().substring(0, 37) + "..." : event.getLocation())
+                : "Lieu non spécifié");
         locationLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px;");
         locationBox.getChildren().addAll(locationIcon, locationLabel);
 
@@ -295,7 +295,7 @@ public class EventsFrontController {
         priceIcon.setStyle("-fx-font-size: 16px;");
         Label priceLabel = new Label(event.getPriceDisplay());
         priceLabel.setStyle("-fx-text-fill: " + (event.isFree() ? "#10b981" : "#0D47A1") + "; " +
-                           "-fx-font-size: 16px; -fx-font-weight: bold;");
+                "-fx-font-size: 16px; -fx-font-weight: bold;");
         priceBox.getChildren().addAll(priceIcon, priceLabel);
 
         // Boutons d'action
@@ -305,12 +305,12 @@ public class EventsFrontController {
 
         Button viewDetailsBtn = new Button("Voir détails");
         viewDetailsBtn.setStyle("-fx-background-color: #E3F2FD; -fx-text-fill: #0D47A1; -fx-font-weight: bold; " +
-                               "-fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;");
+                "-fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;");
         viewDetailsBtn.setOnAction(e -> handleViewDetails(event));
 
         Button participateBtn = new Button("Participer");
         participateBtn.setStyle("-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: bold; " +
-                               "-fx-background-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;");
+                "-fx-background-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;");
         participateBtn.setOnAction(e -> handleParticipate(event));
 
         buttonsBox.getChildren().addAll(viewDetailsBtn, participateBtn);
@@ -363,7 +363,7 @@ public class EventsFrontController {
             alert.setTitle("Connexion requise");
             alert.setHeaderText("Vous devez être connecté");
             alert.setContentText("Pour participer à cet événement, veuillez vous connecter ou créer un compte.\n\n" +
-                               "Après connexion, votre participation sera automatiquement enregistrée.");
+                    "Après connexion, votre participation sera automatiquement enregistrée.");
 
             ButtonType loginBtn = new ButtonType("Se connecter");
             ButtonType signupBtn = new ButtonType("S'inscrire");
@@ -394,7 +394,7 @@ public class EventsFrontController {
     private void createTicketForEvent(int eventId, String eventTitle) {
         try {
             com.example.pidev.service.event.EventTicketService ticketService =
-                new com.example.pidev.service.event.EventTicketService();
+                    new com.example.pidev.service.event.EventTicketService();
 
             int userId = UserSession.getInstance().getCurrentUser().getId_User();
 
@@ -407,16 +407,16 @@ public class EventsFrontController {
                 alert.setTitle("✅ Participation confirmée");
                 alert.setHeaderText("Vous participez à l'événement !");
                 alert.setContentText(
-                    "Événement : " + eventTitle + "\n\n" +
-                    "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
-                    "Un email de confirmation vous sera envoyé.\n" +
-                    "Conservez votre code de ticket pour accéder à l'événement."
+                        "Événement : " + eventTitle + "\n\n" +
+                                "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
+                                "Un email de confirmation vous sera envoyé.\n" +
+                                "Conservez votre code de ticket pour accéder à l'événement."
                 );
 
                 // Style personnalisé
                 alert.getDialogPane().setStyle(
-                    "-fx-background-color: white; " +
-                    "-fx-font-size: 14px;"
+                        "-fx-background-color: white; " +
+                                "-fx-font-size: 14px;"
                 );
 
                 alert.showAndWait();
@@ -429,8 +429,8 @@ public class EventsFrontController {
                 alert.setTitle("Erreur");
                 alert.setHeaderText("Impossible de créer le ticket");
                 alert.setContentText(
-                    "Une erreur est survenue lors de la création de votre ticket.\n" +
-                    "Veuillez réessayer plus tard ou contacter le support."
+                        "Une erreur est survenue lors de la création de votre ticket.\n" +
+                                "Veuillez réessayer plus tard ou contacter le support."
                 );
                 alert.showAndWait();
 

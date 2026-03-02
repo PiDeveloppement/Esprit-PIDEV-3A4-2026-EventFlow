@@ -12,10 +12,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.util.Duration;
 
-import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Locale;
 
 /**
@@ -114,15 +112,12 @@ public class EventTicketViewController {
         createdAtLabel.setText(ticket.getFormattedCreatedAt());
         usedAtLabel.setText(ticket.getFormattedUsedAt());
 
-        // Afficher le QR code s'il existe
-        if (ticket.getQrCode() != null && !ticket.getQrCode().isEmpty()) {
-            try {
-                byte[] qrBytes = Base64.getDecoder().decode(ticket.getQrCode());
-                Image qrImage = new Image(new ByteArrayInputStream(qrBytes));
-                qrCodeImage.setImage(qrImage);
-            } catch (Exception e) {
-                System.err.println("❌ Erreur chargement QR: " + e.getMessage());
-            }
+        // Charger le QR code depuis l'URL stockée
+        String qrUrl = ticket.getQrCode();
+        if (qrUrl != null && !qrUrl.isBlank()) {
+            qrCodeImage.setImage(new Image(qrUrl, true));
+        } else {
+            qrCodeImage.setImage(null);
         }
     }
 

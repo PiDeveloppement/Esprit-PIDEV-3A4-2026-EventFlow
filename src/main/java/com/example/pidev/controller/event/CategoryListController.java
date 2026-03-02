@@ -3,6 +3,16 @@ package com.example.pidev.controller.event;
 import com.example.pidev.MainController;
 import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.service.event.EventCategoryService;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -12,8 +22,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -393,7 +405,6 @@ public class CategoryListController {
             System.out.println("✅ " + allCategories.size() + " catégories chargées");
         } catch (Exception e) {
             System.err.println("❌ Erreur: " + e.getMessage());
-            showError("Erreur", "Impossible de charger les catégories");
         }
     }
 
@@ -437,23 +448,6 @@ public class CategoryListController {
         return null;
     }
 
-    private String getColorName(String hex) {
-        if (hex == null) return "Inconnue";
-        switch (hex.toUpperCase()) {
-            case "#FF9800": return "Orange (" + hex + ")";
-            case "#4CAF50": return "Vert (" + hex + ")";
-            case "#2196F3":
-            case "#1976D2": return "Bleu (" + hex + ")";
-            case "#9C27B0": return "Violet (" + hex + ")";
-            case "#F44336": return "Rouge (" + hex + ")";
-            case "#E91E63": return "Rose (" + hex + ")";
-            case "#FFEB3B": return "Jaune (" + hex + ")";
-            case "#795548": return "Marron (" + hex + ")";
-            case "#607D8B": return "Gris (" + hex + ")";
-            default: return hex;
-        }
-    }
-
     private void updateStatistics() {
         if (allCategories == null) return;
         int total = allCategories.size();
@@ -493,10 +487,10 @@ public class CategoryListController {
 
         List<EventCategory> filtered = allCategories.stream()
                 .filter(cat -> {
-                    // RECHERCHE - version ancienne qui fonctionnait
+                    // RECHERCHE - cherche au DÉBUT du nom (startsWith) et dans la description
                     boolean matchSearch = searchText.isEmpty() ||
-                            cat.getName().toLowerCase().contains(searchText) ||
-                            (cat.getDescription() != null && cat.getDescription().toLowerCase().contains(searchText));
+                            cat.getName().toLowerCase().startsWith(searchText) ||
+                            (cat.getDescription() != null && cat.getDescription().toLowerCase().startsWith(searchText));
 
                     boolean matchStatus = status == null || "Tous les statuts".equals(status) ||
                             (status.equals("Actif") && cat.isActive()) ||
@@ -508,9 +502,9 @@ public class CategoryListController {
 
                     // Log détaillé pour chaque catégorie
                     if (!searchText.isEmpty()) {
-                        boolean nameMatch = cat.getName().toLowerCase().contains(searchText);
+                        boolean nameMatch = cat.getName().toLowerCase().startsWith(searchText);
                         boolean descMatch = cat.getDescription() != null &&
-                                           cat.getDescription().toLowerCase().contains(searchText);
+                                cat.getDescription().toLowerCase().startsWith(searchText);
                         if (matchSearch) {
                             String source = nameMatch ? "(nom)" : descMatch ? "(desc)" : "(vide)";
                             System.out.println("   ✅ '" + cat.getName() + "' " + source);
@@ -590,6 +584,11 @@ public class CategoryListController {
                 if (categoryService.deleteCategory(category.getId())) {
                     showSuccess("Succès", "Catégorie supprimée !");
                     loadCategories();
+
+                    // Rafraîchir les KPI après suppression
+                    if (helloController != null) {
+                        helloController.refreshKPIs();
+                    }
                 } else {
                     showError("Erreur", "Impossible de supprimer");
                 }
@@ -727,4 +726,181 @@ public class CategoryListController {
             updatePaginationUI();
         }
     }
+
+    /**
+     * Export des catégories en PDF
+     */
+    @FXML
+    private void handleExportPDF() {
+        try {
+            // Ouvrir un FileChooser pour choisir l'emplacement
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le PDF");
+
+            // Nom du fichier avec date et heure
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            fileChooser.setInitialFileName("categories_" + timestamp + ".pdf");
+
+            // Filtrer uniquement les PDF
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf")
+            );
+
+            // Afficher le dialogue
+            File file = fileChooser.showSaveDialog(categoryTable.getScene().getWindow());
+
+            if (file != null) {
+                // Créer le PDF
+                PdfWriter writer = new PdfWriter(file.getAbsolutePath());
+                PdfDocument pdfDoc = new PdfDocument(writer);
+                Document document = new Document(pdfDoc);
+
+                // En-tête
+                Paragraph header = new Paragraph("EventFlow - Liste des Catégories")
+                        .setFontSize(20)
+                        .setBold()
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(13, 71, 161));
+                document.add(header);
+
+                // Date d'exportation
+                String dateExport = LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm", Locale.FRENCH)
+                );
+                Paragraph dateInfo = new Paragraph("Exporté le " + dateExport)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(ColorConstants.GRAY);
+                document.add(dateInfo);
+
+                // Espacement
+                document.add(new Paragraph("\n"));
+
+                // Statistiques
+                int totalCat = allCategories.size();
+                int activeCat = (int) allCategories.stream().filter(EventCategory::isActive).count();
+                int inactiveCat = totalCat - activeCat;
+                int totalEvents = allCategories.stream().mapToInt(EventCategory::getEventCount).sum();
+
+                Paragraph stats = new Paragraph(
+                        String.format("Total: %d catégories | Actives: %d | Inactives: %d | Événements: %d",
+                                totalCat, activeCat, inactiveCat, totalEvents))
+                        .setFontSize(11)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setItalic();
+                document.add(stats);
+
+                document.add(new Paragraph("\n"));
+
+                // Créer le tableau
+                float[] columnWidths = {3, 5, 2, 2, 2};
+                Table table = new Table(UnitValue.createPercentArray(columnWidths))
+                        .useAllAvailableWidth();
+
+                // En-têtes de colonnes
+                String[] headers = {"Catégorie", "Description", "Couleur", "Statut", "Événements"};
+                for (String headerText : headers) {
+                    Cell headerCell = new Cell()
+                            .add(new Paragraph(headerText).setBold())
+                            .setBackgroundColor(new DeviceRgb(33, 150, 243))
+                            .setFontColor(ColorConstants.WHITE)
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(8);
+                    table.addHeaderCell(headerCell);
+                }
+
+                // Ajouter les données
+                for (EventCategory category : allCategories) {
+                    // Nom
+                    table.addCell(new Cell()
+                            .add(new Paragraph(category.getName()))
+                            .setPadding(6));
+
+                    // Description
+                    String desc = category.getDescription();
+                    if (desc == null || desc.isEmpty()) desc = "-";
+                    if (desc.length() > 80) desc = desc.substring(0, 77) + "...";
+                    table.addCell(new Cell()
+                            .add(new Paragraph(desc))
+                            .setPadding(6));
+
+                    // Couleur
+                    String colorName = getColorName(category.getColor());
+                    table.addCell(new Cell()
+                            .add(new Paragraph(colorName))
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+
+                    // Statut
+                    String status = category.isActive() ? "✓ Actif" : "✗ Inactif";
+                    DeviceRgb statusColor = category.isActive()
+                            ? new DeviceRgb(76, 175, 80)
+                            : new DeviceRgb(244, 67, 54);
+                    table.addCell(new Cell()
+                            .add(new Paragraph(status))
+                            .setFontColor(statusColor)
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+
+                    // Nombre d'événements
+                    table.addCell(new Cell()
+                            .add(new Paragraph(String.valueOf(category.getEventCount())))
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(6));
+                }
+
+                document.add(table);
+
+                // Footer
+                document.add(new Paragraph("\n"));
+                Paragraph footer = new Paragraph("© 2026 EventFlow - Gestion des événements")
+                        .setFontSize(9)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(ColorConstants.LIGHT_GRAY);
+                document.add(footer);
+
+                // Fermer le document
+                document.close();
+
+                // Afficher un message de succès
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Export réussi");
+                alert.setHeaderText(null);
+                alert.setContentText("Le PDF a été exporté avec succès !\n\n" +
+                        totalCat + " catégories exportées.\nFichier: " + file.getName());
+                alert.showAndWait();
+
+                System.out.println("✅ PDF exporté: " + file.getAbsolutePath());
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur export PDF: " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur d'export");
+            alert.setHeaderText("Impossible d'exporter le PDF");
+            alert.setContentText("Erreur: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    /**
+     * Convertit un code couleur hex en nom lisible
+     */
+    private String getColorName(String hex) {
+        if (hex == null) return "Aucune";
+        switch (hex.toLowerCase()) {
+            case "#ff5733": return "Rouge";
+            case "#33ff57": return "Vert";
+            case "#3357ff": return "Bleu";
+            case "#ffff33": return "Jaune";
+            case "#ff33ff": return "Magenta";
+            case "#33ffff": return "Cyan";
+            case "#ff8c00": return "Orange";
+            case "#9932cc": return "Violet";
+            default: return hex;
+        }
+    }
 }
+

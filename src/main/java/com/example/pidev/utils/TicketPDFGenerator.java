@@ -61,33 +61,33 @@ public class TicketPDFGenerator {
 
             // === EN-TÊTE ===
             Paragraph header = new Paragraph("EVENTFLOW")
-                .setFontSize(28)
-                .setBold()
-                .setFontColor(primaryColor)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginBottom(5);
+                    .setFontSize(28)
+                    .setBold()
+                    .setFontColor(primaryColor)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(5);
             document.add(header);
 
             Paragraph subHeader = new Paragraph("Billet d'Événement")
-                .setFontSize(14)
-                .setFontColor(ColorConstants.GRAY)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginBottom(20);
+                    .setFontSize(14)
+                    .setFontColor(ColorConstants.GRAY)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(20);
             document.add(subHeader);
 
             // === TITRE DE L'ÉVÉNEMENT ===
             Paragraph eventTitle = new Paragraph(event.getTitle())
-                .setFontSize(22)
-                .setBold()
-                .setFontColor(primaryColor)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginBottom(20);
+                    .setFontSize(22)
+                    .setBold()
+                    .setFontColor(primaryColor)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(20);
             document.add(eventTitle);
 
             // === INFORMATIONS DU BILLET ===
             Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 2}))
-                .setWidth(UnitValue.createPercentValue(100))
-                .setMarginBottom(20);
+                    .setWidth(UnitValue.createPercentValue(100))
+                    .setMarginBottom(20);
 
             addInfoRow(infoTable, "📅 Date :", event.getFormattedStartDate());
             addInfoRow(infoTable, "📍 Lieu :", event.getLocation());
@@ -102,11 +102,11 @@ public class TicketPDFGenerator {
 
             // === QR CODE ===
             Paragraph qrTitle = new Paragraph("Présentez ce QR Code à l'entrée")
-                .setFontSize(14)
-                .setBold()
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginTop(20)
-                .setMarginBottom(10);
+                    .setFontSize(14)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(20)
+                    .setMarginBottom(10);
             document.add(qrTitle);
 
             // Générer l'URL du QR code via QuickChart
@@ -123,27 +123,27 @@ public class TicketPDFGenerator {
                 System.err.println("⚠️ Impossible de charger le QR code: " + e.getMessage());
                 // Fallback : afficher le code en texte
                 Paragraph codeText = new Paragraph(ticket.getTicketCode())
-                    .setFontSize(16)
-                    .setBold()
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setFontColor(primaryColor);
+                        .setFontSize(16)
+                        .setBold()
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(primaryColor);
                 document.add(codeText);
             }
 
             // === FOOTER ===
             Paragraph footer = new Paragraph("Ce billet est nominatif et valable une seule fois.\nConservez-le précieusement jusqu'au jour de l'événement.")
-                .setFontSize(10)
-                .setFontColor(ColorConstants.GRAY)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginTop(30)
-                .setItalic();
+                    .setFontSize(10)
+                    .setFontColor(ColorConstants.GRAY)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(30)
+                    .setItalic();
             document.add(footer);
 
             Paragraph footerDate = new Paragraph("Généré le : " + java.time.LocalDateTime.now().format(DATE_FORMATTER))
-                .setFontSize(8)
-                .setFontColor(ColorConstants.LIGHT_GRAY)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginTop(10);
+                    .setFontSize(8)
+                    .setFontColor(ColorConstants.LIGHT_GRAY)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(10);
             document.add(footerDate);
 
             // Fermer le document
@@ -167,15 +167,15 @@ public class TicketPDFGenerator {
         DeviceRgb valueColor = new DeviceRgb(33, 33, 33);
 
         table.addCell(new Paragraph(label)
-            .setFontSize(12)
-            .setBold()
-            .setFontColor(labelColor)
-            .setPadding(8));
+                .setFontSize(12)
+                .setBold()
+                .setFontColor(labelColor)
+                .setPadding(8));
 
         table.addCell(new Paragraph(value)
-            .setFontSize(12)
-            .setFontColor(valueColor)
-            .setPadding(8));
+                .setFontSize(12)
+                .setFontColor(valueColor)
+                .setPadding(8));
     }
 
     /**
@@ -185,12 +185,12 @@ public class TicketPDFGenerator {
         try {
             // URL de validation (à adapter selon ton environnement)
             String validationUrl = "http://localhost:8080/validate?code=" +
-                                  URLEncoder.encode(ticketCode, StandardCharsets.UTF_8);
+                    URLEncoder.encode(ticketCode, StandardCharsets.UTF_8);
 
             // Générer le QR via QuickChart
             String qrUrl = "https://quickchart.io/qr?text=" +
-                          URLEncoder.encode(validationUrl, StandardCharsets.UTF_8) +
-                          "&size=200&margin=2";
+                    URLEncoder.encode(validationUrl, StandardCharsets.UTF_8) +
+                    "&size=200&margin=2";
 
             return qrUrl;
         } catch (Exception e) {

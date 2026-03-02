@@ -336,8 +336,11 @@
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
 
-
-
+                    <!-- KPI CONTAINER (caché par défaut, géré dynamiquement) -->
+                    <HBox fx:id="kpiContainer" spacing="20" alignment="CENTER_RIGHT"
+                          visible="false" managed="false">
+                        <!-- Les KPI seront ajoutés dynamiquement par le MainController -->
+                    </HBox>
                 </HBox>
 
                 <!-- CONTENT AREA (Cartes + Table) - Ceci sera chargé dynamiquement -->

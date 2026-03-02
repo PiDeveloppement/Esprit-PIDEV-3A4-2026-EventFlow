@@ -75,15 +75,15 @@ public class EventDetailController {
         if (currentEvent.getStartDate().isAfter(now)) {
             status = "À venir";
             statusStyle = "-fx-background-color: #d1fae5; -fx-text-fill: #065f46; -fx-padding: 8 20; " +
-                         "-fx-background-radius: 20; -fx-font-size: 14px; -fx-font-weight: bold;";
+                    "-fx-background-radius: 20; -fx-font-size: 14px; -fx-font-weight: bold;";
         } else if (currentEvent.getEndDate().isAfter(now)) {
             status = "En cours";
             statusStyle = "-fx-background-color: #fef3c7; -fx-text-fill: #92400e; -fx-padding: 8 20; " +
-                         "-fx-background-radius: 20; -fx-font-size: 14px; -fx-font-weight: bold;";
+                    "-fx-background-radius: 20; -fx-font-size: 14px; -fx-font-weight: bold;";
         } else {
             status = "Terminé";
             statusStyle = "-fx-background-color: #e5e7eb; -fx-text-fill: #4b5563; -fx-padding: 8 20; " +
-                         "-fx-background-radius: 20; -fx-font-size: 14px; -fx-font-weight: bold;";
+                    "-fx-background-radius: 20; -fx-font-size: 14px; -fx-font-weight: bold;";
         }
         statusBadge.setText(status);
         statusBadge.setStyle(statusStyle);
@@ -186,7 +186,7 @@ public class EventDetailController {
             alert.setTitle("Connexion requise");
             alert.setHeaderText("Vous devez être connecté");
             alert.setContentText("Pour participer à cet événement, veuillez vous connecter ou créer un compte.\n\n" +
-                               "Après connexion, votre participation sera automatiquement enregistrée.");
+                    "Après connexion, votre participation sera automatiquement enregistrée.");
 
             ButtonType loginBtn = new ButtonType("Se connecter");
             ButtonType signupBtn = new ButtonType("S'inscrire");
@@ -217,7 +217,7 @@ public class EventDetailController {
     private void createTicketForEvent(int eventId, String eventTitle) {
         try {
             com.example.pidev.service.event.EventTicketService ticketService =
-                new com.example.pidev.service.event.EventTicketService();
+                    new com.example.pidev.service.event.EventTicketService();
 
             int userId = UserSession.getInstance().getCurrentUser().getId_User();
 
@@ -230,16 +230,16 @@ public class EventDetailController {
                 alert.setTitle("✅ Participation confirmée");
                 alert.setHeaderText("Vous participez à l'événement !");
                 alert.setContentText(
-                    "Événement : " + eventTitle + "\n\n" +
-                    "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
-                    "Un email de confirmation vous sera envoyé.\n" +
-                    "Conservez votre code de ticket pour accéder à l'événement."
+                        "Événement : " + eventTitle + "\n\n" +
+                                "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
+                                "Un email de confirmation vous sera envoyé.\n" +
+                                "Conservez votre code de ticket pour accéder à l'événement."
                 );
 
                 // Style personnalisé
                 alert.getDialogPane().setStyle(
-                    "-fx-background-color: white; " +
-                    "-fx-font-size: 14px;"
+                        "-fx-background-color: white; " +
+                                "-fx-font-size: 14px;"
                 );
 
                 alert.showAndWait();
@@ -252,8 +252,8 @@ public class EventDetailController {
                 alert.setTitle("Erreur");
                 alert.setHeaderText("Impossible de créer le ticket");
                 alert.setContentText(
-                    "Une erreur est survenue lors de la création de votre ticket.\n" +
-                    "Veuillez réessayer plus tard ou contacter le support."
+                        "Une erreur est survenue lors de la création de votre ticket.\n" +
+                                "Veuillez réessayer plus tard ou contacter le support."
                 );
                 alert.showAndWait();
 
