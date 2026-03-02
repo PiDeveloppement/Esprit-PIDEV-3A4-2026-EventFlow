@@ -1,41 +1,54 @@
-package com.example.pidev.model.questionnaire;
+package com.example.pidev.service.questionnaire;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class AIService {
-    // REMPLACE PAR TA CLÉ RÉCUPÉRÉE À L'ÉTAPE 1
-    private static final String API_KEY = "TON_API_KEY_ICI";
-    private static final String URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+    // 1. Utilisez la clé que vous avez copiée depuis votre capture d'écran
+    private static final String API_KEY = "AIzaSyCojFSco3MNpm19ef7wYgCKxSXhw3V-YyE";
 
+    // 2. URL Corrigée : v1beta + gemini-1.5-flash (sans -latest)
+    private static final String URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + API_KEY;
     public String appelerIA(String theme) throws Exception {
-        // On demande à l'IA de répondre en JSON pur pour faciliter le parsing
-        String prompt = "Génère une question technique de niveau expert sur : " + theme +
-                ". Réponds uniquement sous ce format JSON strict sans texte autour : " +
-                "{\"question\": \"...\", \"reponse\": \"...\", \"points\": 15}";
+        String prompt = "Génère une question de quiz technique sur le thème : " + theme +
+                ". Réponds UNIQUEMENT avec ce format JSON : {\"question\": \"...\", \"reponse\": \"...\", \"points\": 10}";
 
-        // Construction du corps de la requête (Format exigé par Google Gemini)
-        String jsonBody = "{ \"contents\": [{ \"parts\":[{ \"text\": \"" + prompt + "\" }] }] }";
+        JSONObject textObj = new JSONObject().put("text", prompt);
+        JSONObject contentObj = new JSONObject().put("parts", new JSONArray().put(textObj));
+        JSONObject root = new JSONObject().put("contents", new JSONArray().put(contentObj));
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .POST(HttpRequest.BodyPublishers.ofString(root.toString()))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String body = response.body();
 
-        // Extraction du texte de la réponse
-        JSONObject fullRes = new JSONObject(response.body());
-        return fullRes.getJSONArray("candidates")
+        // LOG pour vérifier la réponse exacte de Google en cas d'échec
+        System.out.println("DEBUG GOOGLE : " + body);
+
+        JSONObject resJson = new JSONObject(body);
+        if (resJson.has("error")) {
+            throw new Exception("Erreur Google : " + resJson.getJSONObject("error").getString("message"));
+        }
+
+        String aiText = resJson.getJSONArray("candidates")
                 .getJSONObject(0)
                 .getJSONObject("content")
                 .getJSONArray("parts")
                 .getJSONObject(0)
                 .getString("text");
+
+        // Nettoyage pour isoler le JSON
+        int start = aiText.indexOf("{");
+        int end = aiText.lastIndexOf("}");
+        return (start != -1 && end != -1) ? aiText.substring(start, end + 1) : aiText;
     }
 }

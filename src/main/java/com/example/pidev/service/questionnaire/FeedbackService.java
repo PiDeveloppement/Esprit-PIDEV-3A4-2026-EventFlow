@@ -1,6 +1,6 @@
 package com.example.pidev.service.questionnaire;
 
-
+import com.example.pidev.model.questionnaire.Feedback;
 import com.example.pidev.model.questionnaire.FeedbackStats;
 import com.example.pidev.model.questionnaire.Question;
 import com.example.pidev.utils.DBConnection;
@@ -8,24 +8,22 @@ import com.example.pidev.utils.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FeedbackService {
-    // Utilisation du nom 'conn' comme défini ici
     private final Connection conn = DBConnection.getInstance().getCnx();
 
     public List<Question> chargerQuestionsAleatoires(int idEvent) throws SQLException {
         List<Question> questions = new ArrayList<>();
         String req = "SELECT id_question, id_event, texte_question, bonne_reponse, points FROM questions WHERE id_event = ? ORDER BY RAND() LIMIT 10";
-
         try (PreparedStatement pst = conn.prepareStatement(req)) {
             pst.setInt(1, idEvent);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     questions.add(new Question(
-                            rs.getInt("id_question"),
-                            rs.getInt("id_event"),
-                            rs.getString("texte_question"),
-                            rs.getString("bonne_reponse"),
+                            rs.getInt("id_question"), rs.getInt("id_event"),
+                            rs.getString("texte_question"), rs.getString("bonne_reponse"),
                             rs.getInt("points")
                     ));
                 }
@@ -34,22 +32,18 @@ public class FeedbackService {
         return questions;
     }
 
-    public int enregistrerFeedbackComplet(int idUser, int idQuest, String rep, String comm, int stars) throws SQLException {
-        String req = "INSERT INTO feedbacks (id_user, id_question, reponse_donnee, comments, etoiles) VALUES (?, ?, ?, ?, ?)";
-        // On ajoute Statement.RETURN_GENERATED_KEYS pour récupérer l'ID
+    public int enregistrerFeedbackComplet(int idUser, int idEvent, int idQuest, String rep, String comm, int stars) throws SQLException {
+        String req = "INSERT INTO feedbacks (id_user, id_event, id_question, reponse_donnee, comments, etoiles) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = conn.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             pst.setInt(1, idUser);
-            pst.setInt(2, idQuest);
-            pst.setString(3, rep);
-            pst.setString(4, comm);
-            pst.setInt(5, stars);
+            pst.setInt(2, idEvent);
+            pst.setInt(3, idQuest);
+            pst.setString(4, rep);
+            pst.setString(5, comm);
+            pst.setInt(6, stars);
             pst.executeUpdate();
-
-            // Récupération de l'ID auto-incrémenté
             try (ResultSet rs = pst.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
+                if (rs.next()) return rs.getInt(1);
             }
         }
         return 0;
@@ -58,30 +52,20 @@ public class FeedbackService {
     public List<FeedbackStats> recupererHistorique() throws SQLException {
         List<FeedbackStats> historique = new ArrayList<>();
         String req = "SELECT f.id_feedback, f.comments, f.etoiles, u.username " +
-                "FROM feedbacks f " +
-                "JOIN users u ON f.id_user = u.id_user";
-
-        try (Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(req)) {
+                "FROM feedbacks f JOIN users u ON f.id_user = u.id_user";
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(req)) {
             while (rs.next()) {
                 historique.add(new FeedbackStats(
-                        rs.getInt("id_feedback"),
-                        rs.getString("username"),
+                        rs.getInt("id_feedback"), rs.getString("username"),
                         rs.getString("comments") != null ? rs.getString("comments") : "Pas de commentaire",
-                        "N/A",
-                        rs.getInt("etoiles")
+                        "N/A", rs.getInt("etoiles")
                 ));
             }
         }
         return historique;
     }
 
-    /**
-     * CORRECTION : Modification par ID de feedback
-     * Table harmonisée sur 'feedbacks' et variable 'conn' utilisée
-     */
     public void modifierFeedback(int idFeedback, String comment, int stars) throws SQLException {
-        // Utilisation de 'conn' (la variable de la ligne 11) et de la table 'feedbacks'
         String query = "UPDATE feedbacks SET comments = ?, etoiles = ? WHERE id_feedback = ?";
         try (PreparedStatement pst = conn.prepareStatement(query)) {
             pst.setString(1, comment);
@@ -91,9 +75,6 @@ public class FeedbackService {
         }
     }
 
-    /**
-     * CORRECTION : Suppression par ID de feedback
-     */
     public void supprimerFeedback(int idFeedback) throws SQLException {
         String query = "DELETE FROM feedbacks WHERE id_feedback = ?";
         try (PreparedStatement pst = conn.prepareStatement(query)) {
@@ -101,4 +82,94 @@ public class FeedbackService {
             pst.executeUpdate();
         }
     }
-}
+
+    public Map<String, Object> getStatistiques() throws SQLException {
+        String sql = "SELECT AVG(etoiles) as moyenne, COUNT(*) as total FROM feedbacks";
+        Map<String, Object> stats = new HashMap<>();
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) {
+                stats.put("moyenne", rs.getDouble("moyenne"));
+                stats.put("total", rs.getInt("total"));
+            }
+        }
+        return stats;
+    }
+
+    public List<Feedback> getListeFeedbacks() throws SQLException {
+        List<Feedback> list = new ArrayList<>();
+        String sql = "SELECT * FROM feedbacks";
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(new Feedback(
+                        rs.getInt("id_feedback"), rs.getInt("id_user"), rs.getInt("id_question"),
+                        rs.getString("reponse_donnee"), rs.getString("comments"), rs.getInt("etoiles")
+                ));
+            }
+        }
+        return list;
+    }
+
+    // ==================== MÉTHODES POUR LA LANDING PAGE ====================
+
+    /**
+     * Récupère les feedbacks avec prénom, nom du user et titre de l'event
+     * JOIN direct feedbacks -> users (id_user) + feedbacks -> event (id_event)
+     */
+    public List<Map<String, Object>> getFeedbacksAvecDetails() throws SQLException {
+        List<Map<String, Object>> liste = new ArrayList<>();
+        // Prendre UN seul feedback par utilisateur (le dernier), groupé par id_user
+        String sql =
+                "SELECT f.id_feedback, f.comments, f.etoiles, f.id_user, " +
+                        "u.First_Name, u.Last_Name " +
+                        "FROM feedbacks f " +
+                        "LEFT JOIN user_model u ON f.id_user = u.Id_User " +
+                        "WHERE f.id_feedback IN (" +
+                        "   SELECT MAX(id_feedback) FROM feedbacks GROUP BY id_user" +
+                        ") " +
+                        "ORDER BY f.etoiles DESC, f.id_feedback DESC";
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("idFeedback", rs.getInt("id_feedback"));
+                String firstName = rs.getString("First_Name");
+                String lastName  = rs.getString("Last_Name");
+                map.put("firstName", firstName != null ? firstName : "Utilisateur");
+                map.put("lastName",  lastName  != null ? lastName  : "");
+                map.put("comments",  rs.getString("comments"));
+                map.put("etoiles",   rs.getInt("etoiles"));
+                map.put("nomEvent",  "EventFlow");
+                liste.add(map);
+            }
+        }
+        return liste;
+    }
+
+    /**
+     * Statistiques globales + répartition par nombre d'étoiles (1 à 5)
+     */
+    public Map<String, Object> getStatistiquesDetaillees() throws SQLException {
+        Map<String, Object> stats = new HashMap<>();
+
+        String sql1 = "SELECT AVG(etoiles) as moyenne, COUNT(*) as total FROM feedbacks";
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql1)) {
+            if (rs.next()) {
+                stats.put("moyenne", rs.getDouble("moyenne"));
+                stats.put("total",   rs.getInt("total"));
+            }
+        }
+
+        String sql2 = "SELECT etoiles, COUNT(*) as nb FROM feedbacks GROUP BY etoiles";
+        Map<Integer, Integer> repartition = new HashMap<>();
+        for (int i = 1; i <= 5; i++) repartition.put(i, 0);
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql2)) {
+            while (rs.next()) {
+                int etoiles = rs.getInt("etoiles");
+                if (etoiles >= 1 && etoiles <= 5)
+                    repartition.put(etoiles, rs.getInt("nb"));
+            }
+        }
+        stats.put("repartition", repartition);
+        return stats;
+    }}

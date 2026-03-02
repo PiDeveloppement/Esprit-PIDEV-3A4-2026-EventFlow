@@ -28,7 +28,7 @@ public class ParticipantController {
     private int etoilesSelectionnees = 0;
 
     // Simulation de l'utilisateur connecté (A remplacer par votre session utilisateur)
-    private final int idParticipantConnecte = 3;
+    private final int idParticipantConnecte = 1;
     private final int idEventActuel = 1;
 
     private final FeedbackService fs = new FeedbackService();
@@ -127,13 +127,13 @@ public class ParticipantController {
 
     private void sauvegarderEtChangerPage() {
         try {
-            int dernierIdFeedback = 0; // Pour stocker l'ID généré
+            int dernierIdFeedback = 0;
 
             // 1. Sauvegarde en base de données
             for (int i = 0; i < listeQuestions.size(); i++) {
-                // On récupère l'ID retourné par la nouvelle méthode du service
                 dernierIdFeedback = fs.enregistrerFeedbackComplet(
                         idParticipantConnecte,
+                        idEventActuel,
                         listeQuestions.get(i).getIdQuestion(),
                         reponsesUtilisateur.get(i),
                         txtCommentaire.getText(),
@@ -141,15 +141,12 @@ public class ParticipantController {
                 );
             }
 
-            // 2. Préparation du changement de vue
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/melocode/pigestion/fxml/Resultat.fxml"));
+            // 2. Charger le FXML Résultat
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/questionnaire/Resultat.fxml"));
             Parent root = loader.load();
 
-            // 3. Injection des données (CORRIGÉ ICI)
+            // 3. Injection des données
             ResultatController resCtrl = loader.getController();
-            resCtrl.setParticipantId(idParticipantConnecte);
-
-            // On passe dernierIdFeedback en premier argument !
             resCtrl.initData(
                     dernierIdFeedback,
                     listeQuestions,
@@ -158,17 +155,25 @@ public class ParticipantController {
                     etoilesSelectionnees
             );
 
-            // 4. Navigation
-            StackPane contentArea = (StackPane) btnSuivant.getScene().lookup("#contentArea");
-            if (contentArea != null) {
-                contentArea.getChildren().clear();
-                contentArea.getChildren().add(root);
+            // 4. Navigation via la scène courante (compatible LandingPage ET MainController)
+            javafx.scene.Scene scene = btnSuivant.getScene();
+            if (com.example.pidev.MainController.getInstance() != null) {
+                // Cas normal : ouvert depuis le MainController
+                com.example.pidev.MainController.getInstance().getPageContentContainer().getChildren().clear();
+                com.example.pidev.MainController.getInstance().getPageContentContainer().getChildren().add(root);
             } else {
-                btnSuivant.getScene().setRoot(root);
+                // Cas LandingPage : remplacer le contenu dans la VBox racine
+                VBox rootVBox = (VBox) scene.getRoot();
+                if (rootVBox.getChildren().size() > 1) {
+                    rootVBox.getChildren().set(1, root);
+                } else {
+                    rootVBox.getChildren().add(root);
+                }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-            afficherAlerte("Erreur", "Une erreur est survenue : " + e.getMessage());
+            afficherAlerte("Erreur", "Problème lors du chargement des résultats : " + e.getMessage());
         }
     }
 

@@ -129,6 +129,7 @@ public class MainController {
     @FXML private Text questionnairesArrow;
     @FXML private Button questionsBtn;
     @FXML private Button reponsesBtn;
+    @FXML private Button participantQuizBtn;
 
     @FXML private Button settingsBtn;
     @FXML private Button logoutBtn;
@@ -170,6 +171,9 @@ public class MainController {
             setActiveButton(dashboardBtn);
             loadDashboardView();
         }
+        participantQuizBtn.setOnAction(event -> {
+            loadParticipantQuizView();
+        });
     }
 
     // ===================== PAGE INFO =====================
@@ -1241,6 +1245,7 @@ public class MainController {
         }
     }
 
+
     public void showCategoryView(EventCategory category) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -1321,17 +1326,47 @@ public class MainController {
         loadQuestionnairePage("/com/example/pidev/fxml/questionnaire/Resultat.fxml",
                 "Résultats", "Statistiques et aperçu global");
     }
+    // 3. Méthode pour charger la vue
+    private void loadParticipantQuizView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/questionnaire/Participant.fxml"));
+            Parent view = loader.load();
 
-    public void loadParticipantQuizView() {
-        loadQuestionnairePage("/com/example/pidev/fxml/questionnaire/Participant.fxml",
-                "Passer le Quiz", "Interface d'examen");
+            // Nettoyer et afficher dans le conteneur principal
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(view);
+
+            // Optionnel : Mettre à jour le header
+            pageTitle.setText("Quiz Participant");
+            pageSubtitle.setText("Répondez aux questions");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void loadHistoriqueView() {
         loadQuestionnairePage("/com/example/pidev/fxml/questionnaire/Historique.fxml",
                 "Historique", "Consultation des anciens scores");
     }
+    // Ajoutez cette méthode dans MainController.java
+    public void loadView(String fxmlPath) {
+        try {
+            URL fileUrl = getClass().getResource(fxmlPath);
+            if (fileUrl == null) {
+                System.err.println("❌ Fichier introuvable : " + fxmlPath);
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(fileUrl);
+            Parent root = loader.load();
 
+            // On réutilise la méthode setContent que nous avons corrigée ensemble
+            setContent(root);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private void loadQuestionnairePage(String fxmlPath, String title, String subtitle) {
         try {
             URL fileUrl = getClass().getResource(fxmlPath);
@@ -1356,7 +1391,9 @@ public class MainController {
             showSimpleAlert("Erreur", "Impossible de charger la page: " + e.getMessage());
         }
     }
-
+    public VBox getPageContentContainer() {
+        return pageContentContainer;
+    }
     @FXML
     public void showQuestionEditor() {
         collapseAllSubmenus();
@@ -1374,7 +1411,8 @@ public class MainController {
     @FXML
     public void showParticipantQuiz() {
         collapseAllSubmenus();
-        loadParticipantQuizView();
+        // Assurez-vous que le chemin est exact par rapport au dossier resources
+        loadView("/com/example/pidev/fxml/questionnaire/Participant.fxml");
     }
 
     @FXML
@@ -1382,6 +1420,7 @@ public class MainController {
         collapseAllSubmenus();
         loadHistoriqueView();
     }
+
 
     // ===================== NAVIGATION - SETTINGS & PROFILE =====================
     public void loadSettingsView() {
@@ -1458,6 +1497,7 @@ public class MainController {
     }
 
     // ===================== CONTENT SETTERS =====================
+    // 1. La méthode de base (celle qui fait le travail réel)
     public void setContent(Parent node) {
         if (pageContentContainer != null) {
             pageContentContainer.getChildren().setAll(node);
@@ -1466,10 +1506,12 @@ public class MainController {
         }
     }
 
+    // 2. La méthode pour ajouter le titre (elle appelle la méthode #1)
     public void setContent(Parent root, String title) {
         setContent(root, title, "");
     }
 
+    // 3. La méthode pour ajouter titre + sous-titre (elle met à jour l'UI et appelle la méthode #1)
     public void setContent(Parent root, String title, String subtitle) {
         if (pageTitle != null) pageTitle.setText(title);
         if (pageSubtitle != null) pageSubtitle.setText(subtitle);

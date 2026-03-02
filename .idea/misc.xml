@@ -8,12 +8,10 @@
       </list>
     </option>
   </component>
-<<<<<<< HEAD
-=======
+
   <component name="ProjectResources">
     <resource url="http://javafx.com/fxml/1" location="$PROJECT_DIR$" />
   </component>
->>>>>>> 467a8f98ef9c9645a7a7df9c10bf5e2b8a572c9a
   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>

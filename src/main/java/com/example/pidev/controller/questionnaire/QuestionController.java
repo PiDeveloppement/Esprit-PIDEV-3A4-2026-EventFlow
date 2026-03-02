@@ -1,5 +1,5 @@
 package com.example.pidev.controller.questionnaire;
-
+import com.example.pidev.service.questionnaire.AIService;
 import com.example.pidev.MainController;
 import com.example.pidev.model.event.Event;
 import com.example.pidev.model.questionnaire.Question;
@@ -53,16 +53,36 @@ public class QuestionController {
     @FXML
     public void initialize() {
         try {
+            // 1. Initialisation du tri
             if (comboSort != null) {
                 comboSort.setItems(FXCollections.observableArrayList(
                         "Points (Croissant)", "Points (Décroissant)", "Texte (A-Z)"
                 ));
             }
 
+            // 2. Chargement des données depuis la base
             List<Event> events = qs.chargerEvenements();
 
+            // 3. Configuration du ComboBox du Formulaire (Ajout/Modification)
             if (comboEvent != null) {
                 comboEvent.setItems(FXCollections.observableArrayList(events));
+
+                // CORRECTION : Formatage de l'affichage (CellFactory et ButtonCell)
+                comboEvent.setCellFactory(lv -> new ListCell<Event>() {
+                    @Override
+                    protected void updateItem(Event item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText((empty || item == null) ? null : item.getTitle());
+                    }
+                });
+                comboEvent.setButtonCell(new ListCell<Event>() {
+                    @Override
+                    protected void updateItem(Event item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText((empty || item == null) ? null : item.getTitle());
+                    }
+                });
+
                 if (questionEnCours != null) {
                     remplirChamps(questionEnCours);
                 }
@@ -72,8 +92,27 @@ public class QuestionController {
                 });
             }
 
+            // 4. Configuration du ComboBox de la Liste (Filtre)
             if (comboEventList != null) {
                 comboEventList.setItems(FXCollections.observableArrayList(events));
+
+                // CORRECTION : Formatage de l'affichage
+                comboEventList.setCellFactory(lv -> new ListCell<Event>() {
+                    @Override
+                    protected void updateItem(Event item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText((empty || item == null) ? null : item.getTitle());
+                    }
+                });
+
+                comboEventList.setButtonCell(new ListCell<Event>() {
+                    @Override
+                    protected void updateItem(Event item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText((empty || item == null) ? null : item.getTitle());
+                    }
+                });
+
                 toutesLesQuestions = qs.afficherTout();
                 questionsFiltrees = new ArrayList<>(toutesLesQuestions);
                 afficherPage();
@@ -83,6 +122,7 @@ public class QuestionController {
                 });
             }
 
+            // 5. Statistiques (PieChart)
             if (pieChartQuestions != null) {
                 afficherStatistiques();
             }
@@ -122,13 +162,12 @@ public class QuestionController {
     private void handleSave() {
         try {
             Event ev = comboEvent.getValue();
-            // Vérification rigoureuse des champs
+
             if (ev == null || txtTexte.getText().trim().isEmpty() || txtReponse.getText().trim().isEmpty()) {
                 afficherAlerte("Champs manquants", "Veuillez sélectionner un événement et remplir l'énoncé et la réponse.");
                 return;
             }
 
-            // Conversion sécurisée des points
             int points;
             try {
                 points = Integer.parseInt(txtPoints.getText().trim());
@@ -137,23 +176,30 @@ public class QuestionController {
                 return;
             }
 
+            // FIX : ID de l'utilisateur Sellami Arij (ID 1 selon votre base de données)
+            int idUtilisateurConnecte = 1;
+
             if (questionEnCours == null) {
-                // AJOUT
-                Question nouvelleQ = new Question(0, ev.getId(), txtTexte.getText(), txtReponse.getText(), points);
+                Question nouvelleQ = new Question();
+                nouvelleQ.setIdEvent(ev.getId());
+                nouvelleQ.setTexte(txtTexte.getText());
+                nouvelleQ.setReponse(txtReponse.getText());
+                nouvelleQ.setPoints(points);
+                nouvelleQ.setIdUser(idUtilisateurConnecte);
+
                 qs.ajouter(nouvelleQ);
-                System.out.println("✅ Question ajoutée avec succès !");
             } else {
-                // MODIFICATION
                 questionEnCours.setIdEvent(ev.getId());
                 questionEnCours.setTexte(txtTexte.getText());
                 questionEnCours.setReponse(txtReponse.getText());
                 questionEnCours.setPoints(points);
+                questionEnCours.setIdUser(idUtilisateurConnecte);
+
                 qs.modifier(questionEnCours);
-                System.out.println("✅ Question modifiée avec succès !");
                 questionEnCours = null; // Reset après modification
             }
 
-            switchToList(); // Retour à la liste
+            switchToList();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -278,6 +324,7 @@ public class QuestionController {
 
     @FXML private void ouvrirPopupStats() { switchToStats(); }
 
+
     private void traduireTexte(Label labelAtraduire) {
         String texte = labelAtraduire.getText();
         labelAtraduire.setText("⌛...");
@@ -330,8 +377,6 @@ public class QuestionController {
         }
     }
 
-    // ==================== MÉTHODES DE NAVIGATION CORRIGÉES ====================
-
     @FXML
     private void switchToList() {
         changeScene("/com/example/pidev/fxml/questionnaire/list_question.fxml", "📋 LISTE DES QUESTIONS");
@@ -344,47 +389,28 @@ public class QuestionController {
 
     @FXML
     private void switchToStats() {
-        changeScene("/com/example/pidev/fxml/questionnaire/Resultat.fxml", "📊 STATISTIQUES");
+        changeScene("/com/example/pidev/fxml/questionnaire/stats_question.fxml", "📊 STATISTIQUES");
     }
 
-    /**
-     * Méthode générique pour changer de scène avec gestion d'erreur améliorée
-     */
     private void changeScene(String fxmlPath, String title) {
         Platform.runLater(() -> {
             try {
-                System.out.println("🔍 Tentative de chargement: " + fxmlPath);
-
-                // Vérifier si le chemin commence par /
                 String resourcePath = fxmlPath.startsWith("/") ? fxmlPath : "/" + fxmlPath;
                 URL resource = getClass().getResource(resourcePath);
 
                 if (resource == null) {
-                    System.err.println("❌ FXML non trouvé: " + resourcePath);
                     afficherAlerte("Erreur", "Fichier introuvable: " + resourcePath);
                     return;
                 }
 
-                System.out.println("✅ FXML trouvé: " + resource);
                 FXMLLoader loader = new FXMLLoader(resource);
                 Parent root = loader.load();
 
-                // Récupérer le contrôleur et lui passer le MainController si nécessaire
-                Object controller = loader.getController();
-                if (controller instanceof QuestionController) {
-                    // Pas besoin de setMainController ici car c'est le même type
-                }
-
                 if (MainController.getInstance() != null) {
                     MainController.getInstance().setContent(root, title);
-                    System.out.println("✅ Navigation vers: " + title);
-                } else {
-                    System.err.println("❌ MainController instance is null");
-                    afficherAlerte("Erreur", "MainController non disponible");
                 }
 
             } catch (IOException e) {
-                System.err.println("❌ Erreur chargement: " + fxmlPath);
                 e.printStackTrace();
                 afficherAlerte("Erreur", "Impossible de charger: " + e.getMessage());
             }
@@ -397,8 +423,6 @@ public class QuestionController {
         if(txtReponse != null) txtReponse.clear();
         if(txtPoints != null) txtPoints.clear();
         if(lblSuggestionIA != null) lblSuggestionIA.setText("");
-        // On ne touche pas à comboEvent pour permettre l'ajout rapide
-        // de plusieurs questions pour le même événement.
         questionEnCours = null;
     }
 
@@ -432,5 +456,57 @@ public class QuestionController {
         alert.setHeaderText(null);
         alert.setContentText(m);
         alert.show();
+    }
+    @FXML
+    private void genererQuestionParIA() {
+        // 1. Vérification si on est sur le formulaire
+        if (txtTexte == null || comboEvent == null) {
+            afficherAlerte("Action requise", "Veuillez d'abord ouvrir l'éditeur pour générer une question.");
+            return;
+        }
+
+        // 2. Récupération de l'événement sélectionné
+        Event selectedEvent = comboEvent.getValue();
+
+        if (selectedEvent == null) {
+            afficherAlerte("Sélection requise", "Veuillez choisir un événement dans la liste pour définir le thème (ex: Java, Sport...).");
+            return;
+        }
+
+        // On utilise le titre de l'événement comme thème
+        String theme = selectedEvent.getTitle();
+
+        new Thread(() -> {
+            try {
+                Platform.runLater(() -> {
+                    lblSuggestionIA.setText("⌛ L'IA génère une question sur l'événement : " + theme + "...");
+                    lblSuggestionIA.setStyle("-fx-text-fill: #4f46e5;");
+                });
+
+                AIService ai = new AIService();
+                String jsonBrut = ai.appelerIA(theme);
+
+                // Extraction du JSON retourné par l'IA
+                org.json.JSONObject json = new org.json.JSONObject(jsonBrut);
+                String question = json.getString("question");
+                String reponse = json.getString("reponse");
+                int points = json.optInt("points", 10);
+
+                Platform.runLater(() -> {
+                    txtTexte.setText(question);
+                    txtReponse.setText(reponse);
+                    txtPoints.setText(String.valueOf(points));
+                    lblSuggestionIA.setText("✨ Question générée pour l'événement '" + theme + "' !");
+                    lblSuggestionIA.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    lblSuggestionIA.setText("❌ Erreur de génération.");
+                    afficherAlerte("Erreur IA", "Détail : " + e.getMessage());
+                });
+            }
+        }).start();
     }
 }

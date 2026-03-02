@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.questionnaire.FeedbackViewController"
+            style="-fx-background-color: #f8fafc;">
+
+    <VBox spacing="30" style="-fx-padding: 40; -fx-background-color: #f8fafc;">
+
+        <HBox spacing="50" alignment="CENTER_LEFT"
+              style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+            <VBox alignment="CENTER" spacing="5">
+                <Label fx:id="lblMoyenne" text="0.0" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <Label fx:id="lblTotalRatings" text="0 Ratings" style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+            </VBox>
+        </HBox>
+
+        <Label text="Recent Feedbacks" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+
+        <VBox fx:id="feedbackListContainer" spacing="20"/>
+
+    </VBox>
+</ScrollPane>

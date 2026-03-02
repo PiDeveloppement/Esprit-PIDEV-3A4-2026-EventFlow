@@ -1,44 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<StackPane stylesheets="@../../css/atlantafx-custom.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.example.pidev.controller.questionnaire.ParticipantController">
+<VBox spacing="20"
+      style="-fx-background-color: #f8fafc; -fx-padding: 40;"
+      VBox.vgrow="ALWAYS"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.questionnaire.ParticipantController">
 
-    <VBox spacing="20" style="-fx-background-color: #f8fafc; -fx-padding: 40;">
-        <children>
-            <HBox alignment="CENTER_LEFT">
-                <Label fx:id="lblProgression" text="Question 1 / 5" style="-fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-font-size: 16px;" />
-            </HBox>
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="lblProgression"
+               text="Question 1 / 5"
+               style="-fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-font-size: 16px;" />
+    </HBox>
 
-            <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
-                <Label fx:id="lblQuestion" text="Chargement de la question..." wrapText="true"
-                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+    <VBox spacing="15"
+          style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
 
-                <TextField fx:id="txtReponseParticipant" promptText="Tapez votre réponse ici..."
-                           style="-fx-pref-height: 50; -fx-font-size: 16px; -fx-background-radius: 8;" />
-            </VBox>
+        <Label fx:id="lblQuestion"
+               text="Chargement de la question..."
+               wrapText="true"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
 
-            <VBox fx:id="vboxEvaluation" spacing="15" alignment="CENTER" style="-fx-padding: 20 0;">
-                <Label text="Notez globalement l'événement :" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-
-                <HBox fx:id="starContainer" spacing="10" alignment="CENTER">
-                    <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-                    <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-                    <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-                    <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-                    <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-                </HBox>
-
-                <TextArea fx:id="txtCommentaire" promptText="Un commentaire additionnel (facultatif)..."
-                          prefHeight="100" wrapText="true" style="-fx-background-radius: 8;" />
-            </VBox>
-
-            <HBox alignment="CENTER_RIGHT">
-                <Button fx:id="btnSuivant" onAction="#handleSuivant" text="SUIVANT →"
-                        style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 8; -fx-cursor: hand;" />
-            </HBox>
-        </children>
+        <TextField fx:id="txtReponseParticipant"
+                   promptText="Tapez votre réponse ici..."
+                   style="-fx-pref-height: 50; -fx-font-size: 16px; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
     </VBox>
-</StackPane>
+
+    <VBox fx:id="vboxEvaluation" spacing="15" alignment="CENTER" style="-fx-padding: 20 0;">
+        <Label text="Notez globalement l'événement :" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+
+        <HBox fx:id="starContainer" spacing="10" alignment="CENTER">
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+        </HBox>
+
+        <TextArea fx:id="txtCommentaire"
+                  promptText="Un commentaire additionnel (facultatif)..."
+                  prefHeight="100"
+                  wrapText="true"
+                  style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
+    </VBox>
+
+    <HBox alignment="CENTER_RIGHT">
+        <Button fx:id="btnSuivant"
+                onAction="#handleSuivant"
+                text="SUIVANT →"
+                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 8; -fx-cursor: hand;" />
+    </HBox>
+
+</VBox>
