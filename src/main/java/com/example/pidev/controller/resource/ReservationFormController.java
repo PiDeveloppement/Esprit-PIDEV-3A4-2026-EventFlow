@@ -254,21 +254,25 @@ public class ReservationFormController {
     @FXML
     void validerAction() {
         try {
+            // 1. Vérification de l'utilisateur
             if (currentUserId == -1) {
                 new Alert(Alert.AlertType.ERROR, "❌ Vous devez être connecté pour effectuer une réservation").show();
                 return;
             }
 
+            // 2. Vérification des champs obligatoires
             if (itemCombo.getValue() == null || startDatePicker.getValue() == null) {
                 new Alert(Alert.AlertType.ERROR, "Veuillez remplir tous les champs obligatoires").show();
                 return;
             }
 
+            // 3. Gestion des dates (Heure par défaut 08:00 à 18:00)
             LocalDateTime s = startDatePicker.getValue().atTime(8, 0);
             LocalDateTime e = endDatePicker.getValue() == null ? s.plusHours(2) : endDatePicker.getValue().atTime(18, 0);
 
             Object sel = itemCombo.getValue();
 
+            // 4. Vérification de la quantité
             if (quantityField.getText().isEmpty()) {
                 new Alert(Alert.AlertType.ERROR, "Veuillez saisir une quantité").show();
                 return;
@@ -282,11 +286,16 @@ public class ReservationFormController {
 
             int currentId = (selectedReservation == null) ? -1 : selectedReservation.getId();
 
+            // 5. Vérification de la disponibilité (Stock/Occupation)
             int dispo = 0;
+            String nomRessource = ""; // On prépare le nom pour l'email
+
             if (sel instanceof Salle sa) {
                 dispo = resService.isSalleOccupee(sa.getId(), s, e, currentId) ? 0 : 1;
+                nomRessource = sa.getName();
             } else if (sel instanceof Equipement eq) {
                 dispo = resService.getStockTotalEquipement(eq.getId()) - resService.getStockOccupe(eq.getId(), s, e, currentId);
+                nomRessource = eq.getName();
             }
 
             if (qtySaisie > dispo) {
@@ -294,6 +303,7 @@ public class ReservationFormController {
                 return;
             }
 
+            // 6. Création de l'objet de réservation
             ReservationResource res = new ReservationResource(
                     currentId == -1 ? 0 : currentId,
                     typeCombo.getValue(),
@@ -304,15 +314,25 @@ public class ReservationFormController {
 
             res.setUserId(currentUserId);
 
+            // 7. Enregistrement et Envoi de l'Email
             String message;
             if (selectedReservation == null) {
+                // AJOUT
                 resService.ajouter(res);
                 message = "✅ Réservation créée avec succès pour " + currentUserName;
+
+                // --- DÉCLENCHEMENT DE L'EMAIL ---
+                System.out.println("📧 Tentative d'envoi d'email pour : " + nomRessource);
+                envoyerEmailConfirmation(res, nomRessource);
+                // --------------------------------
+
             } else {
+                // MODIFICATION
                 resService.modifier(res);
                 message = "✅ Réservation modifiée avec succès";
             }
 
+            // 8. Feedback utilisateur
             Alert success = new Alert(Alert.AlertType.INFORMATION, message);
             success.setTitle("Succès");
             success.setHeaderText(null);
@@ -409,4 +429,53 @@ public class ReservationFormController {
             userInfoLabel.setText("Réservation pour utilisateur ID: " + userId);
         }
     }
-}
+    private void envoyerEmailConfirmation(ReservationResource res, String nomRessource) {
+        // 1. Tes identifiants Gmail
+        final String username = "mecherguisouhail8@gmail.com";
+
+        // ⚠️ ATTENTION : Ne mets pas ton vrai mdp ici.
+        // Génère un code de 16 lettres ici : https://myaccount.google.com/apppasswords
+        final String password = "xknx cbvx piuc upbb";
+
+        java.util.Properties prop = new java.util.Properties();
+        prop.put("mail.smtp.host", "smtp.gmail.com"); // Serveur Gmail
+        prop.put("mail.smtp.port", "587");           // Port TLS
+        prop.put("mail.smtp.auth", "true");
+        prop.put("mail.smtp.starttls.enable", "true");
+
+        javax.mail.Session session = javax.mail.Session.getInstance(prop, new javax.mail.Authenticator() {
+            protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
+                return new javax.mail.PasswordAuthentication(username, password);
+            }
+        });
+
+        new Thread(() -> {
+            try {
+                javax.mail.Message message = new javax.mail.internet.MimeMessage(session);
+                message.setFrom(new javax.mail.internet.InternetAddress(username));
+
+                // Destinataire (ton mail ou celui du client)
+                String emailDestinataire = "mecherguisouhail8@gmail.com";
+
+                message.setRecipients(javax.mail.Message.RecipientType.TO,
+                        javax.mail.internet.InternetAddress.parse(emailDestinataire));
+
+                message.setSubject("📌 Confirmation Réservation : " + nomRessource);
+
+                String corpsMail = "<h2>Réservation Confirmée !</h2>"
+                        + "<p>Bonjour " + currentUserName + ",</p>"
+                        + "<p>Votre réservation pour <strong>" + nomRessource + "</strong> a été enregistrée.</p>"
+                        + "<p>Quantité : " + res.getQuantity() + "</p>";
+
+                message.setContent(corpsMail, "text/html; charset=utf-8");
+
+                javax.mail.Transport.send(message);
+                System.out.println("✅ Email envoyé avec succès de Gmail !");
+
+            } catch (Exception e) {
+                // C'est ici que tu verras l'erreur 535 si le mot de passe est faux
+                System.err.println("❌ Erreur Mail : " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
+    }}
