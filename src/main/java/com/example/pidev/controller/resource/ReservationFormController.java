@@ -48,6 +48,7 @@ public class ReservationFormController {
         UserSession session = UserSession.getInstance();
         currentUserId = session.getUserId();
         currentUserName = session.getFullName();
+        configurerCalendrier();
 
         // Afficher l'information utilisateur
         if (userInfoLabel != null) {
@@ -478,4 +479,23 @@ public class ReservationFormController {
                 e.printStackTrace();
             }
         }).start();
+    }
+    private void configurerCalendrier() {
+        // Création de la règle de restriction
+        javafx.util.Callback<DatePicker, DateCell> dayCellFactory = dp -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+
+                // Désactiver toutes les dates antérieures à aujourd'hui
+                if (item.isBefore(LocalDate.now())) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #eeeeee;"); // Grisage visuel
+                }
+            }
+        };
+
+        // Appliquer la règle aux deux DatePickers
+        startDatePicker.setDayCellFactory(dayCellFactory);
+        endDatePicker.setDayCellFactory(dayCellFactory);
     }}
