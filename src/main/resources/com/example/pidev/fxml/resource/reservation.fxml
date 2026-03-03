@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 
 <VBox spacing="15.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.ReservationController">
     <padding>
@@ -9,33 +11,43 @@
     </padding>
 
     <HBox alignment="CENTER_LEFT" spacing="20">
-        <Label style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="Gestion des Réservations" />
+        <VBox spacing="5">
+            <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <Label fx:id="userInfoLabel" text="Session active" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" />
+        </VBox>
         <Region HBox.hgrow="ALWAYS" />
         <Button onAction="#goToAdd" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="+ Nouvelle Réservation" />
     </HBox>
 
-    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10; -fx-border-color: #e2e8f0;">
-        <TextField fx:id="searchField" prefWidth="300" promptText="🔍 Rechercher une ressource..." style="-fx-background-radius: 20;" />
+    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 5);">
+        <TextField fx:id="searchField" prefWidth="250" promptText="🔍 Rechercher une ressource..." style="-fx-background-radius: 20; -fx-padding: 8 15;" />
 
         <Separator orientation="VERTICAL" />
 
-        <Label text="Trier par :" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" />
-        <ComboBox fx:id="sortCombo" prefWidth="150.0" promptText="Choisir l'ordre" style="-fx-background-radius: 8;" />
+        <Label text="Filtrer :" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" />
+        <ComboBox fx:id="filterCombo" prefWidth="150.0" promptText="Toutes" style="-fx-background-radius: 8;" />
+
+        <Label text="Trier :" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" />
+        <ComboBox fx:id="sortCombo" prefWidth="130.0" promptText="Date" style="-fx-background-radius: 8;" />
 
         <Region HBox.hgrow="ALWAYS" />
 
-        <Button onAction="#exportToPDF" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;" text="📄 Exporter PDF" />
+        <HBox spacing="10">
+            <Button onAction="#goToStats" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;" text="📊 Statistiques" />
+            <Button onAction="#exportToPDF" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;" text="📄 PDF" />
+            <Button onAction="#refreshTable" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;" text="🔄" />
+        </HBox>
     </HBox>
 
-    <TableView fx:id="reservationTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10;">
+    <TableView fx:id="reservationTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-overflow-x: hidden;">
         <columns>
-            <TableColumn fx:id="imgCol" prefWidth="80" text="Aperçu" />
-            <TableColumn fx:id="typeCol" prefWidth="100" text="Type" />
-            <TableColumn fx:id="nameCol" prefWidth="150" text="Ressource" />
-            <TableColumn fx:id="startCol" prefWidth="150" text="Date Début" />
-            <TableColumn fx:id="endCol" prefWidth="150" text="Date Fin" />
-            <TableColumn fx:id="qtyCol" prefWidth="60" text="Qté" />
-            <TableColumn fx:id="actionCol" prefWidth="120" text="Actions" />
+            <TableColumn fx:id="imgCol" prefWidth="80" resizable="false" text="Aperçu" />
+            <TableColumn fx:id="typeCol" prefWidth="110" text="Type" />
+            <TableColumn fx:id="nameCol" prefWidth="180" text="Ressource" />
+            <TableColumn fx:id="startCol" prefWidth="160" text="Date Début" />
+            <TableColumn fx:id="endCol" prefWidth="160" text="Date Fin" />
+            <TableColumn fx:id="qtyCol" prefWidth="70" text="Qté" />
+            <TableColumn fx:id="actionCol" prefWidth="140" resizable="false" text="Actions" />
         </columns>
         <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

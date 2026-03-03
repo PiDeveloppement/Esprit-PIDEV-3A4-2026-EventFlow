@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
-<VBox spacing="25" style="-fx-background-color: #f1f5f9;"
-      stylesheets="@style.css"
-      xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
+<VBox spacing="25" styleClass="main-container" stylesheets="@style.css"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pidev.controller.resource.EquipementController">
 
     <padding>
@@ -15,47 +13,49 @@
     </padding>
 
     <HBox alignment="CENTER_LEFT" spacing="20">
-        <VBox HBox.hgrow="ALWAYS" spacing="5">
-            <Label text="Gestion des Équipements" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
-            <Label text="Inventaire logistique : Suivi des stocks et état du matériel." style="-fx-text-fill: #64748b; -fx-font-size: 14;" />
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Gestion des Équipements" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            <Label text="Consultez et gérez l'inventaire de votre matériel" style="-fx-text-fill: #64748b;"/>
         </VBox>
-        <Button onAction="#ouvrirAjout" text="➕ Ajouter un Équipement"
-                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" />
-    </HBox>
 
-    <HBox spacing="20">
-        <HBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-            <VBox>
-                <Label text="TOTAL ARTICLES" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 12;"/>
-                <Label fx:id="totalArticlesLabel" text="0" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
-            </VBox>
-        </HBox>
-        <HBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-            <VBox>
-                <Label text="UNITÉS EN PANNE" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 12;"/>
-                <Label fx:id="aReparerLabel" text="0" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
-            </VBox>
+        <HBox spacing="15">
+            <HBox styleClass="stat-card-mini">
+                <VBox>
+                    <Label text="TOTAL" styleClass="stat-label-mini"/>
+                    <Label fx:id="totalArticlesLabel" text="124" styleClass="stat-value-mini"/>
+                </VBox>
+            </HBox>
+            <HBox styleClass="stat-card-mini" style="-fx-border-color: #fee2e2;">
+                <VBox>
+                    <Label text="EN PANNE" styleClass="stat-label-mini" style="-fx-text-fill: #ef4444;"/>
+                    <Label fx:id="aReparerLabel" text="12" styleClass="stat-value-mini" style="-fx-text-fill: #ef4444;"/>
+                </VBox>
+            </HBox>
         </HBox>
     </HBox>
 
-    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12;">
-        <Label text="Filtrer par :" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
-        <TextField fx:id="searchField" promptText="🔍 Rechercher par nom..."
-                   prefWidth="300" style="-fx-background-radius: 8; -fx-padding: 8;"/>
-        <Separator orientation="VERTICAL" prefHeight="30"/>
-        <ComboBox fx:id="categoryFilter" prefWidth="200" promptText="Toutes les catégories"
-                  style="-fx-background-radius: 8; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="toolbar">
+        <StackPane>
+            <TextField fx:id="searchField" promptText="Rechercher un équipement..." prefWidth="350" styleClass="search-field"/>
+        </StackPane>
+
+        <ComboBox fx:id="categoryFilter" prefWidth="200" promptText="Catégorie" styleClass="filter-combo"/>
+
+        <Region HBox.hgrow="ALWAYS" /> <Button onAction="#ouvrirAjout" text="Ajouter Équipement" styleClass="btn-primary">
+        <graphic>
+        </graphic>
+    </Button>
     </HBox>
 
-    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 10;" VBox.vgrow="ALWAYS">
-        <TableView fx:id="equipementTable" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+    <VBox styleClass="table-container" VBox.vgrow="ALWAYS">
+        <TableView fx:id="equipementTable" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="imageCol" text="Aperçu" prefWidth="100" minWidth="100" resizable="false" sortable="false" />
+                <TableColumn fx:id="imageCol" text="Aperçu" prefWidth="80" />
                 <TableColumn fx:id="nameCol" text="Désignation" prefWidth="250" />
-                <TableColumn fx:id="typeCol" text="Catégorie" prefWidth="180" />
+                <TableColumn fx:id="typeCol" text="Catégorie" prefWidth="150" />
                 <TableColumn fx:id="quantityCol" text="Stock" prefWidth="100" />
                 <TableColumn fx:id="statusCol" text="État" prefWidth="150" />
-                <TableColumn fx:id="actionCol" text="Actions" prefWidth="150" minWidth="150" resizable="false" sortable="false" />
+                <TableColumn fx:id="actionCol" text="Actions" prefWidth="150" />
             </columns>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

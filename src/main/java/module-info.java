@@ -7,7 +7,7 @@ module com.example.pidev {
     requires mysql.connector.j;
     requires jakarta.persistence;
     requires java.prefs;
-    requires javafx.web;
+    requires javafx.web; // On la garde ici
     requires java.desktop;
     requires java.net.http;
     requires kernel;
@@ -15,12 +15,14 @@ module com.example.pidev {
     requires itextpdf;
     requires java.mail;
     requires org.apache.pdfbox;
+    requires org.json;
+    requires vosk;
 
-    // --- AJOUTS POUR LA VOIX ET VOSK ---
-    requires org.json;    // Pour parser les résultats JSON de Vosk
-    requires vosk;        // Pour le moteur de reconnaissance vocale
+    // --- ACCÈS AUX RESSOURCES JS ---
+    // Cette ligne permet à la WebView de lire ton fichier apexcharts.min.js
+    opens com.example.pidev.js to javafx.web;
 
-    // Exportez tous les packages nécessaires
+    // --- EXPORTS ---
     exports com.example.pidev;
     exports com.example.pidev.model.event;
     exports com.example.pidev.model.resource;
@@ -34,12 +36,10 @@ module com.example.pidev {
     exports com.example.pidev.controller.role;
     exports com.example.pidev.controller.questionnaire;
     exports com.example.pidev.service.user;
-
-    // Ajout de l'export pour le service de ressource (Vosk)
     exports com.example.pidev.service.resource;
     exports com.example.pidev.controller.resource;
 
-    // Ouvrez tous les packages à javafx.fxml
+    // --- OPENS POUR FXML ---
     opens com.example.pidev to javafx.fxml;
     opens com.example.pidev.controller.dashboard to javafx.fxml;
     opens com.example.pidev.controller.event to javafx.fxml;
@@ -52,7 +52,6 @@ module com.example.pidev {
     opens com.example.pidev.controller.budget to javafx.fxml;
     opens com.example.pidev.controller.depense to javafx.fxml;
     opens com.example.pidev.service.user to javafx.fxml;
-
-    // Ouverture du service ressource pour permettre l'accès si nécessaire
     opens com.example.pidev.service.resource to javafx.fxml;
+
 }

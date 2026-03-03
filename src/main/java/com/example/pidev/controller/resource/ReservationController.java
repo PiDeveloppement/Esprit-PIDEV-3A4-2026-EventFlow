@@ -31,6 +31,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+
 public class ReservationController implements Initializable {
 
     @FXML private TextField searchField;
@@ -425,5 +429,14 @@ public class ReservationController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+    @FXML
+    private void goToStats() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/com/example/pidev/fxml/resource/reservation_stats.fxml"));
+            MainController.getInstance().setContent(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

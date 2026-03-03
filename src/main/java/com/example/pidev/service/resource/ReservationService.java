@@ -6,6 +6,8 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ReservationService {
     private Connection connection = DBConnection.getConnection();
@@ -102,5 +104,31 @@ public class ReservationService {
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getInt(1) : 0;
         } catch (SQLException e) { return 0; }
+    }
+    public Map<String, Integer> getStatsByType() {
+        Map<String, Integer> stats = new HashMap<>();
+        String query = "SELECT resource_type, COUNT(*) as count FROM reservation_resource GROUP BY resource_type";
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
+            while (rs.next()) {
+                stats.put(rs.getString("resource_type"), rs.getInt("count"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return stats;
+    }
+
+    public Map<String, Integer> getStatsTopResources() {
+        Map<String, Integer> stats = new HashMap<>();
+        // Cette requête récupère le nom des ressources les plus réservées
+        String query = "SELECT COALESCE(s.name, e.name) as name, COUNT(*) as count " +
+                "FROM reservation_resource r " +
+                "LEFT JOIN salle s ON r.salle_id = s.id " +
+                "LEFT JOIN equipement e ON r.equipement_id = e.id " +
+                "GROUP BY name ORDER BY count DESC LIMIT 5";
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
+            while (rs.next()) {
+                stats.put(rs.getString("name"), rs.getInt("count"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return stats;
     }
 }

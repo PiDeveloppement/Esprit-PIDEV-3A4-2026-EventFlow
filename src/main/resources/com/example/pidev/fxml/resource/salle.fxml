@@ -16,10 +16,7 @@
     </padding>
 
     <HBox spacing="20" alignment="CENTER_LEFT">
-        <VBox spacing="5">
-            <Label text="Gestion des Salles" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
-            <Label text="Consultez et gérez les ressources de l'établissement" style="-fx-text-fill: #64748b; -fx-font-size: 14;"/>
-        </VBox>
+
 
         <Region HBox.hgrow="ALWAYS"/>
 
