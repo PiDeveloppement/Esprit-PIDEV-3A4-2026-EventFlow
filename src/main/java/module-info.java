@@ -48,16 +48,18 @@ module com.example.pidev {
 
     // Sous-packages de modèles
     opens com.example.pidev.fxml.facial to javafx.fxml;
+    opens com.example.pidev.fxml.role to javafx.fxml;
     opens com.example.pidev.model.user to javafx.fxml;
     opens com.example.pidev.model.facial to javafx.fxml;
     opens com.example.pidev.model.event to javafx.fxml;
     opens com.example.pidev.model.sponsor to javafx.fxml;
     opens com.example.pidev.model.resource to javafx.base, javafx.fxml;
-
+    opens com.example.pidev.model.role to javafx.base, javafx.fxml;
     // --- Exportations ---
     exports com.example.pidev;
     exports com.example.pidev.controller.auth;
     exports com.example.pidev.controller.user;
+    exports com.example.pidev.controller.role;
     exports com.example.pidev.controller.facial;
     exports com.example.pidev.controller.resource;
     exports com.example.pidev.controller.sponsor;

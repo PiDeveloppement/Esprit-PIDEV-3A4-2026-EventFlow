@@ -25,14 +25,17 @@ import java.util.ResourceBundle;
 
 public class DepenseListController implements Initializable {
 
+    // Identifiants mis à jour pour correspondre au FXML moderne
     @FXML private Label totalDepensesLabel;
-    @FXML private Label countDepensesLabel;
-    @FXML private Label avgDepenseLabel;
-    @FXML private Label categoriesLabel;
-    @FXML private ComboBox<String> filtreCategorie;
-    @FXML private ComboBox<String> filtrePeriode;
-    @FXML private ComboBox<String> filtreEtatFinancier;
-    @FXML private Button addBtn;
+    @FXML private Label depensesCountLabel;
+    @FXML private Label monthDepensesLabel; // Nouveau Label dans le FXML
+    @FXML private Label topCategoryLabel;   // Remplace categoriesLabel
+
+    @FXML private TextField searchField;    // Ajouté pour la recherche
+    @FXML private ComboBox<String> categoryFilter; // Remplace filtreCategorie
+    @FXML private ComboBox<String> budgetFilter;   // Remplace filtrePeriode (S'aligne au FXML)
+    @FXML private Button addDepenseBtn;            // Match FXML
+
     @FXML private Label statusLabel;
     @FXML private TilePane cardsPane;
     @FXML private PieChart categoryPieChart;
@@ -48,20 +51,20 @@ public class DepenseListController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         filtered = new FilteredList<>(baseList, d -> true);
         filtered.addListener((ListChangeListener<Depense>) c -> renderCards());
 
-        if (filtreCategorie != null) filtreCategorie.valueProperty().addListener((obs, o, n) -> applyPredicate());
-        if (filtrePeriode != null) filtrePeriode.valueProperty().addListener((obs, o, n) -> applyPredicate());
-        if (filtreEtatFinancier != null) filtreEtatFinancier.valueProperty().addListener((obs, o, n) -> applyPredicate());
+        // Listeners mis à jour avec les nouveaux noms de ComboBox
+        if (categoryFilter != null) categoryFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
+        if (budgetFilter != null) budgetFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
+        if (searchField != null) searchField.textProperty().addListener((obs, o, n) -> applyPredicate());
 
-        if (addBtn != null) addBtn.setOnAction(e -> onAdd());
+        if (addDepenseBtn != null) addDepenseBtn.setOnAction(e -> onAdd());
 
         if (cardsPane != null) {
             cardsPane.setPadding(new Insets(8));
-            cardsPane.setHgap(14);
-            cardsPane.setVgap(14);
+            cardsPane.setHgap(15);
+            cardsPane.setVgap(15);
         }
 
         setupFilters();
@@ -70,28 +73,19 @@ public class DepenseListController implements Initializable {
     }
 
     private void setupFilters() {
-        if (filtrePeriode != null) {
-            filtrePeriode.getItems().setAll("Toutes", "Ce mois", "Ce trimestre", "Cette année");
-            filtrePeriode.setValue("Toutes");
+        if (budgetFilter != null) {
+            // Ici, on garde ta logique de période dans le combo budgetFilter du FXML
+            budgetFilter.getItems().setAll("Toutes", "Ce mois", "Ce trimestre", "Cette année");
+            budgetFilter.setValue("Toutes");
         }
 
-        if (filtreCategorie != null) {
-            filtreCategorie.getItems().clear();
-            filtreCategorie.getItems().add("Toutes");
+        if (categoryFilter != null) {
+            categoryFilter.getItems().clear();
+            categoryFilter.getItems().add("Toutes");
             try {
-                filtreCategorie.getItems().addAll(depenseService.getCategories());
+                categoryFilter.getItems().addAll(depenseService.getCategories());
             } catch (Exception ignored) {}
-            filtreCategorie.setValue("Toutes");
-        }
-
-        if (filtreEtatFinancier != null) {
-            filtreEtatFinancier.getItems().setAll(
-                    "Tous",
-                    "🟢 Faible",
-                    "🟡 Moyen",
-                    "🔴 Élevé"
-            );
-            filtreEtatFinancier.setValue("Tous");
+            categoryFilter.setValue("Toutes");
         }
     }
 
@@ -99,12 +93,12 @@ public class DepenseListController implements Initializable {
         try {
             baseList.setAll(depenseService.getAllDepenses());
             updateKpis();
-            initCategoryChart();
+            if (categoryPieChart != null) initCategoryChart();
 
-            if (statusLabel != null) statusLabel.setText("📊 " + baseList.size() + " dépense(s) • Mise à jour: Maintenant");
+            if (statusLabel != null) statusLabel.setText("📊 " + baseList.size() + " dépense(s) chargée(s)");
             renderCards();
         } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("❌ Erreur chargement dépenses: " + e.getMessage());
+            if (statusLabel != null) statusLabel.setText("❌ Erreur: " + e.getMessage());
         }
     }
 
@@ -117,18 +111,21 @@ public class DepenseListController implements Initializable {
         LocalDate to = now.atEndOfMonth();
         double monthTotal = depenseService.sumDepensesBetween(from, to);
 
-        int cats = 0;
-        try { cats = depenseService.getCategories().size(); } catch (Exception ignored) {}
-
-        if (countDepensesLabel != null) countDepensesLabel.setText(String.valueOf(count));
+        if (depensesCountLabel != null) depensesCountLabel.setText(String.valueOf(count));
         if (totalDepensesLabel != null) totalDepensesLabel.setText(String.format("%,.2f DT", total));
+        if (monthDepensesLabel != null) monthDepensesLabel.setText(String.format("%,.2f DT", monthTotal));
 
-        if (avgDepenseLabel != null) {
-            double avg = count == 0 ? 0 : total / count;
-            avgDepenseLabel.setText(String.format("%,.2f DT", avg));
+        // On peut afficher la catégorie la plus utilisée ici
+        if (topCategoryLabel != null) {
+            try {
+                Map<String, Double> stats = depenseService.getSumByCategory();
+                String top = stats.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse("—");
+                topCategoryLabel.setText(top);
+            } catch (Exception e) { topCategoryLabel.setText("—"); }
         }
-
-        if (categoriesLabel != null) categoriesLabel.setText(String.valueOf(cats));
     }
 
     private void initCategoryChart() {
@@ -141,28 +138,18 @@ public class DepenseListController implements Initializable {
                 }
             }
             categoryPieChart.setData(pieData);
-            categoryPieChart.setTitle("Répartition des dépenses par catégorie");
-            categoryPieChart.setLabelsVisible(true);
-            categoryPieChart.setLegendVisible(true);
+            categoryPieChart.setTitle("Répartition des dépenses");
         } catch (Exception e) {
-            showError("Chart", "Erreur chargement graphique : " + e.getMessage());
+            System.err.println("Erreur graphique: " + e.getMessage());
         }
-    }
-
-    private String getEtatFinancier(Depense d) {
-        if (d == null) return "Tous";
-        double a = d.getAmount();
-        if (a < 100) return "🟢 Faible";
-        if (a <= 1000) return "🟡 Moyen";
-        return "🔴 Élevé";
     }
 
     private void applyPredicate() {
         if (filtered == null) return;
 
-        String cat = (filtreCategorie == null || filtreCategorie.getValue() == null) ? "Toutes" : filtreCategorie.getValue();
-        String periode = (filtrePeriode == null || filtrePeriode.getValue() == null) ? "Toutes" : filtrePeriode.getValue();
-        String etat = (filtreEtatFinancier == null || filtreEtatFinancier.getValue() == null) ? "Tous" : filtreEtatFinancier.getValue();
+        String cat = (categoryFilter == null || categoryFilter.getValue() == null) ? "Toutes" : categoryFilter.getValue();
+        String periode = (budgetFilter == null || budgetFilter.getValue() == null) ? "Toutes" : budgetFilter.getValue();
+        String search = (searchField == null) ? "" : searchField.getText().toLowerCase().trim();
 
         LocalDate minDate = null;
         LocalDate maxDate = null;
@@ -177,24 +164,20 @@ public class DepenseListController implements Initializable {
             case "Ce trimestre" -> {
                 int qtr = (today.getMonthValue() - 1) / 3;
                 int startMonth = qtr * 3 + 1;
-                YearMonth start = YearMonth.of(today.getYear(), startMonth);
-                YearMonth end = YearMonth.of(today.getYear(), startMonth + 2);
-                minDate = start.atDay(1);
-                maxDate = end.atEndOfMonth();
+                minDate = LocalDate.of(today.getYear(), startMonth, 1);
+                maxDate = minDate.plusMonths(3).minusDays(1);
             }
             case "Cette année" -> {
                 minDate = LocalDate.of(today.getYear(), 1, 1);
                 maxDate = LocalDate.of(today.getYear(), 12, 31);
             }
-            default -> { /* Toutes */ }
         }
 
         LocalDate finalMin = minDate;
         LocalDate finalMax = maxDate;
 
         filtered.setPredicate(d -> {
-            boolean okCat = "Toutes".equalsIgnoreCase(cat)
-                    || (d.getCategory() != null && d.getCategory().equalsIgnoreCase(cat));
+            boolean okCat = "Toutes".equalsIgnoreCase(cat) || (d.getCategory() != null && d.getCategory().equalsIgnoreCase(cat));
 
             boolean okPeriode = true;
             if (finalMin != null && finalMax != null) {
@@ -202,12 +185,14 @@ public class DepenseListController implements Initializable {
                 else okPeriode = !d.getExpense_date().isBefore(finalMin) && !d.getExpense_date().isAfter(finalMax);
             }
 
-            boolean okEtat = "Tous".equalsIgnoreCase(etat) || getEtatFinancier(d).equals(etat);
+            boolean okSearch = search.isEmpty()
+                    || (d.getDescription() != null && d.getDescription().toLowerCase().contains(search))
+                    || (d.getCategory() != null && d.getCategory().toLowerCase().contains(search));
 
-            return okCat && okPeriode && okEtat;
+            return okCat && okPeriode && okSearch;
         });
 
-        if (statusLabel != null) statusLabel.setText("📊 " + filtered.size() + " dépense(s) filtrées • Mise à jour: Maintenant");
+        if (statusLabel != null) statusLabel.setText("📊 " + filtered.size() + " dépense(s) trouvée(s)");
         renderCards();
     }
 
@@ -220,106 +205,71 @@ public class DepenseListController implements Initializable {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(CARD_FXML));
                 Parent cardRoot = loader.load();
 
+                // FIX: Largeur adaptée pour tenir dans 1200px avec la sidebar
                 if (cardRoot instanceof Region r) {
-                    r.setPrefWidth(440);
-                    r.setMaxWidth(Double.MAX_VALUE);
+                    r.setPrefWidth(325);
+                    r.setMaxWidth(340);
                 }
 
                 DepenseCardController cell = loader.getController();
-                cell.setData(
-                        d,
-                        () -> openDetailsAsPage(d),
-                        () -> onEdit(d),
-                        () -> onDeleteNoIdText(d)
-                );
+                cell.setData(d, () -> openDetailsAsPage(d), () -> onEdit(d), () -> onDeleteNoIdText(d));
 
                 cardsPane.getChildren().add(cardRoot);
-
             } catch (Exception ex) {
-                showError("UI", "Erreur card dépense: " + ex.getMessage());
+                System.err.println("Erreur card: " + ex.getMessage());
             }
         }
     }
 
-    private void onAdd() {
-        openFormAsPage(null);
-    }
+    // --- Méthodes de navigation et actions (Inchangées) ---
 
-    private void onEdit(Depense existing) {
-        if (existing == null) return;
-        openFormAsPage(existing);
-    }
+    private void onAdd() { openFormAsPage(null); }
+
+    private void onEdit(Depense existing) { if (existing != null) openFormAsPage(existing); }
 
     private void onDeleteNoIdText(Depense d) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Suppression");
-        confirm.setHeaderText("Supprimer dépense");
-        confirm.setContentText("Voulez-vous supprimer cette dépense ?");
-
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous supprimer cette dépense ?", ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(btn -> {
-            if (btn == ButtonType.OK) {
+            if (btn == ButtonType.YES) {
                 try {
                     depenseService.deleteDepense(d.getId(), d.getBudget_id());
                     loadData();
-                    setupFilters();
-                } catch (Exception ex) {
-                    showError("Erreur suppression", ex.getMessage());
-                }
+                } catch (Exception ex) { showError("Erreur", ex.getMessage()); }
             }
         });
     }
 
     private void openFormAsPage(Depense existing) {
         try {
-            MainController.getInstance().loadIntoCenter(
-                    FORM_FXML,
-                    (DepenseFormController ctrl) -> {
-                        ctrl.setDepense(existing);
-
-                        ctrl.setOnFormDone(() -> {
-                            setupFilters();
-                            loadData();
-
-                            if (ctrl.isSaved() && ctrl.getDepense() != null) {
-                                openDetailsAsPage(ctrl.getDepense());
-                            } else {
-                                backToList();
-                            }
-                        });
-                    }
-            );
-        } catch (Exception e) {
-            showError("UI", "Impossible d'ouvrir le formulaire: " + e.getMessage());
-        }
+            MainController.getInstance().loadIntoCenter(FORM_FXML, (DepenseFormController ctrl) -> {
+                ctrl.setDepense(existing);
+                ctrl.setOnFormDone(() -> {
+                    loadData();
+                    if (ctrl.isSaved() && ctrl.getDepense() != null) openDetailsAsPage(ctrl.getDepense());
+                    else backToList();
+                });
+            });
+        } catch (Exception e) { showError("UI", e.getMessage()); }
     }
 
     private void openDetailsAsPage(Depense d) {
         try {
-            MainController.getInstance().loadIntoCenter(
-                    DETAILS_FXML,
-                    (DepenseDetailsController ctrl) -> {
-                        ctrl.setDepense(d);
-                        ctrl.setOnCloseAction(this::backToList);
-                    }
-            );
-        } catch (Exception e) {
-            showError("Détails", "Impossible d'ouvrir les détails: " + e.getMessage());
-        }
+            MainController.getInstance().loadIntoCenter(DETAILS_FXML, (DepenseDetailsController ctrl) -> {
+                ctrl.setDepense(d);
+                ctrl.setOnCloseAction(this::backToList);
+            });
+        } catch (Exception e) { showError("Détails", e.getMessage()); }
     }
 
     private void backToList() {
         try {
             MainController.getInstance().loadIntoCenter(LIST_FXML, (DepenseListController ctrl) -> {});
-        } catch (Exception e) {
-            setupFilters();
-            loadData();
-        }
+        } catch (Exception e) { loadData(); }
     }
 
     private void showError(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setTitle(title);
-        a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
     }

@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
 <VBox spacing="0" xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -9,102 +10,61 @@
       style="-fx-background-color: #f8fafc;"
       prefWidth="1200" prefHeight="800">
 
-    <!-- Bannière avec compteur (FIXE) -->
-    <HBox style="-fx-background-color: white; -fx-padding: 15 40; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
-          alignment="CENTER_RIGHT">
-        <Region HBox.hgrow="ALWAYS"/>
-        <VBox fx:id="totalParticipantsCard" alignment="CENTER" spacing="2"
-              style="-fx-padding: 10 25; -fx-background-color: #eff6ff; -fx-background-radius: 10;
-                     -fx-border-color: #bfdbfe; -fx-border-width: 1; -fx-border-radius: 10;">
-            <Label fx:id="totalParticipantsLabel" text="0"
-                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
-            <Label text="Total Participants" style="-fx-text-fill: #3b82f6; -fx-font-size: 11px;"/>
-        </VBox>
-    </HBox>
-
-    <!-- Barre de filtres (FIXE) -->
+    <!-- Barre de recherche et filtres (sans le KPI) -->
     <HBox style="-fx-background-color: #f1f5f9; -fx-padding: 15 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
-          spacing="15" alignment="CENTER_LEFT" prefHeight="70">
+          spacing="15" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="🔍 Rechercher un utilisateur..."
-                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15; -fx-pref-width: 300;
-                          -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 15; -fx-pref-width: 300;"/>
         <ComboBox fx:id="faculteFilterCombo" onAction="#filterByFaculte" promptText="📂 Faculté" prefWidth="160"
-                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+                  style="-fx-background-color: white; -fx-background-radius: 8;"/>
         <ComboBox fx:id="roleFilterCombo" onAction="#filterByRole" promptText="📊 Rôle" prefWidth="160"
-                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
-        <Region HBox.hgrow="ALWAYS"/>
+                  style="-fx-background-color: white; -fx-background-radius: 8;"/>
+        <Button text="🔄" onAction="#resetFilters" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8; -fx-cursor: hand;"/>
+
+        <!-- Label stats caché mais conservé pour les informations (optionnel) -->
+        <Label fx:id="statsLabel" text="0 utilisateurs"
+               style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-padding: 0 0 0 20;"/>
     </HBox>
 
-    <!-- SCROLLPANE GLOBAL - Tout le contenu peut défiler -->
-    <ScrollPane fitToWidth="true"
-                hbarPolicy="AS_NEEDED"
-                vbarPolicy="AS_NEEDED"
+    <ScrollPane fitToWidth="true" fitToHeight="true"
                 style="-fx-background-color: transparent; -fx-border-color: transparent;"
                 VBox.vgrow="ALWAYS">
-
-        <!-- Contenu principal qui défile -->
         <VBox spacing="20" style="-fx-padding: 20 30;">
 
-
-
-            <!-- Table avec hauteur fixe et SANS SCROLL INTERNE -->
             <TableView fx:id="userTable"
-                       VBox.vgrow="NEVER"
-                       prefHeight="300"
-                       style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                       style="-fx-background-color: white; -fx-border-radius: 12; -fx-font-size: 14px;">
                 <columns>
-                    <TableColumn fx:id="firstname_column" text="📝 Prénom" prefWidth="120"/>
-                    <TableColumn fx:id="lastname_column" text="📝 Nom" prefWidth="120"/>
-                    <TableColumn fx:id="email_column" text="📧 Email" prefWidth="200"/>
-                    <TableColumn fx:id="faculte_column" text="🏫 Faculté" prefWidth="150"/>
-                    <TableColumn fx:id="password_column" text="🔐 Mot de passe" prefWidth="120"/>
-                    <TableColumn fx:id="role_column" text="👤 Rôle" prefWidth="120"/>
-                    <TableColumn fx:id="actions_column" text="⚡ Actions" prefWidth="100"/>
+                    <TableColumn fx:id="firstname_column" text="Prénom" prefWidth="120" style="-fx-alignment: CENTER-LEFT;"/>
+                    <TableColumn fx:id="lastname_column" text="Nom" prefWidth="120" style="-fx-alignment: CENTER-LEFT;"/>
+                    <TableColumn fx:id="email_column" text="Email" prefWidth="200" style="-fx-alignment: CENTER-LEFT;"/>
+                    <TableColumn fx:id="faculte_column" text="Faculté" prefWidth="150" style="-fx-alignment: CENTER-LEFT;"/>
+                    <TableColumn fx:id="password_column" text="Mot de passe" prefWidth="120" style="-fx-alignment: CENTER-LEFT;"/>
+                    <TableColumn fx:id="role_column" text="Rôle" prefWidth="120" style="-fx-alignment: CENTER-LEFT;"/>
+                    <TableColumn fx:id="actions_column" text="Actions" prefWidth="120" style="-fx-alignment: CENTER;"/>
                 </columns>
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                </columnResizePolicy>
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
             </TableView>
 
-            <!-- Pagination -->
-            <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
-                <HBox spacing="8" alignment="CENTER">
-                    <Button fx:id="prevPageBtn" text="« Précédent"
-                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 16;
-                                   -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-radius: 8; -fx-cursor: hand;"/>
-                    <HBox spacing="4">
-                        <Button fx:id="page1Btn" text="1"
-                                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-min-width: 36;
-                                       -fx-min-height: 36; -fx-background-radius: 8; -fx-cursor: hand;"/>
-                        <Button fx:id="page2Btn" text="2"
-                                style="-fx-background-color: white; -fx-text-fill: #475569; -fx-min-width: 36;
-                                       -fx-min-height: 36; -fx-background-radius: 8; -fx-border-color: #e2e8f0;
-                                       -fx-border-width: 1; -fx-cursor: hand;"/>
-                        <Button fx:id="page3Btn" text="3"
-                                style="-fx-background-color: white; -fx-text-fill: #475569; -fx-min-width: 36;
-                                       -fx-min-height: 36; -fx-background-radius: 8; -fx-border-color: #e2e8f0;
-                                       -fx-border-width: 1; -fx-cursor: hand;"/>
-                        <Label text="..." style="-fx-text-fill: #94a3b8; -fx-padding: 0 4; -fx-font-size: 14px;"/>
-                        <Button fx:id="lastPageBtn" text="Dernière"
-                                style="-fx-background-color: white; -fx-text-fill: #475569; -fx-min-width: 60;
-                                       -fx-min-height: 36; -fx-background-radius: 8; -fx-border-color: #e2e8f0;
-                                       -fx-border-width: 1; -fx-cursor: hand;"/>
-                    </HBox>
-                    <Button fx:id="nextPageBtn" text="Suivant »"
-                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 16;
-                                   -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="prevPageBtn" text="«"
+                        style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                <HBox spacing="5">
+                    <Button fx:id="page1Btn" text="1"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    <Button fx:id="page2Btn" text="2"
+                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    <Button fx:id="page3Btn" text="3"
+                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    <Button fx:id="lastPageBtn" text="Dernière"
+                            style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
                 </HBox>
+                <Button fx:id="nextPageBtn" text="»"
+                        style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="paginationLabel" text="Page 1 sur 1"
-                       style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+                       style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
             </HBox>
 
-            <!-- Footer -->
-            <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
-                <Label text="© 2026 EventFlow - Gestion des utilisateurs"
-                       style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
-            </HBox>
-
-        </VBox> <!-- FIN du VBox contenu -->
-    </ScrollPane> <!-- FIN du ScrollPane -->
-</VBox> <!-- FIN du VBox principal -->
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -3,69 +3,217 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-<VBox spacing="10" style="-fx-background-color: #f5f5f5;"
-      xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.chat.ChatController"
-      prefWidth="550" prefHeight="600">
-    <padding>
-        <Insets bottom="15" left="15" right="15" top="15" />
-    </padding>
+<!-- STACKPANE PRINCIPAL qui permet de superposer le chat par-dessus le contenu -->
+<StackPane fx:id="mainStackPane"
+           xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.pidev.MainController"
+           prefHeight="900" prefWidth="1400"
+           stylesheets="/com/example/pidev/css/atlantafx-custom.css">
 
-    <!-- En-tête -->
-    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: linear-gradient(to right, #2196F3, #1565C0); -fx-background-radius: 10; -fx-padding: 10;">
-        <Label style="-fx-font-size: 28px;" text="🤖" />
-        <VBox spacing="2" HBox.hgrow="ALWAYS">
-            <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Assistant IA - EventFlow" />
-            <Label fx:id="statusIndicator" style="-fx-font-size: 11px; -fx-text-fill: #BBDEFB;" text="● Connecté • Posez vos questions" />
+    <!-- CONTENU PRINCIPAL (tout ce qui était déjà là) -->
+    <HBox fx:id="mainContentHBox" alignment="TOP_LEFT" StackPane.alignment="TOP_LEFT">
+        <!-- Sidebar gauche existante -->
+        <VBox prefWidth="220" spacing="0" styleClass="sidebar-container-topbar" VBox.vgrow="ALWAYS">
+            <!-- Votre sidebar existante -->
+            <VBox style="-fx-background-color: #0D47A1; -fx-padding: 25 15;" alignment="CENTER" spacing="8">
+                <!-- ... votre contenu sidebar ... -->
+            </VBox>
+            <!-- ... reste de votre sidebar ... -->
         </VBox>
-        <Button fx:id="clearButton" onAction="#handleClearChat" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20; -fx-text-fill: white; -fx-cursor: hand;" text="🗑️ Nouvelle conversation" />
-    </HBox>
 
-    <!-- Zone de chat -->
-    <ScrollPane fx:id="scrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
-                style="-fx-background: white; -fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 10;">
-        <VBox fx:id="chatBox" spacing="10" style="-fx-padding: 15;">
-            <!-- Les messages seront ajoutés dynamiquement -->
+        <!-- Contenu central -->
+        <VBox spacing="0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+            <!-- Top bar -->
+            <HBox style="-fx-background-color: #1565C0; -fx-padding: 8 20 8 20; -fx-spacing: 15;"
+                  alignment="CENTER_LEFT" prefHeight="60">
+                <TextField fx:id="globalSearchField" promptText="Recherche globale..."
+                           style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20;
+                                  -fx-padding: 8 15; -fx-pref-width: 300; -fx-text-fill: white;
+                                  -fx-border-color: transparent; -fx-border-radius: 20;
+                                  -fx-prompt-text-fill: rgba(255,255,255,0.5);"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Date et heure -->
+                <VBox alignment="CENTER_RIGHT" spacing="0">
+                    <Label fx:id="navDateLabel" text="Dimanche 15 février 2026"
+                           style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                    <Label fx:id="navTimeLabel" text="14:40:48"
+                           style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 11px;"/>
+                </VBox>
+
+                <!-- Menu profil -->
+                <MenuButton fx:id="profileMenu" style="-fx-background-color: rgba(255,255,255,0.2);">
+                    <!-- ... contenu du menu profil ... -->
+                </MenuButton>
+            </HBox>
+
+            <!-- Page header -->
+            <HBox style="-fx-background-color: white; -fx-padding: 15 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+                  alignment="CENTER_LEFT">
+                <VBox spacing="5">
+                    <Label fx:id="pageTitle" text="Tableau de bord"
+                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    <Label fx:id="pageSubtitle" text="Aperçu général de votre activité"
+                           style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox fx:id="kpiContainer" spacing="20" alignment="CENTER_RIGHT"
+                      visible="false" managed="false"/>
+            </HBox>
+
+            <!-- Contenu de la page -->
+            <VBox fx:id="pageContentContainer" VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #f8fafc; -fx-padding: 20;"/>
         </VBox>
-    </ScrollPane>
-
-    <!-- Zone de saisie -->
-    <HBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 10;">
-        <TextField fx:id="inputField" promptText="Posez votre question..." HBox.hgrow="ALWAYS"
-                   style="-fx-padding: 12; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #ccc;">
-            <font>
-                <Font size="14" />
-            </font>
-        </TextField>
-        <Button fx:id="sendButton" onAction="#handleSendMessage"
-                style="-fx-background-color: #2196F3; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;"
-                text="Envoyer" textFill="white">
-            <font>
-                <Font size="14" />
-            </font>
-        </Button>
     </HBox>
 
-    <!-- Suggestions rapides -->
-    <HBox spacing="8" alignment="CENTER" prefWidth="550">
-        <Button onAction="#handleSuggestion"
-                style="-fx-background-color: #e3f2fd; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #90caf9; -fx-border-radius: 20;"
-                text="📊 Statistiques"
-                userData="statistiques" />
-        <Button onAction="#handleSuggestion"
-                style="-fx-background-color: #e3f2fd; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #90caf9; -fx-border-radius: 20;"
-                text="👥 Liste admins"
-                userData="liste des admins" />
-        <Button onAction="#handleSuggestion"
-                style="-fx-background-color: #e3f2fd; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #90caf9; -fx-border-radius: 20;"
-                text="📅 Nouveaux ce mois"
-                userData="nouveaux utilisateurs ce mois" />
-        <Button onAction="#handleSuggestion"
-                style="-fx-background-color: #e3f2fd; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #90caf9; -fx-border-radius: 20;"
-                text="❓ Aide"
-                userData="aide" />
-    </HBox>
-</VBox>
+    <!-- PANNEAU LATÉRAL DU CHAT (MASQUÉ PAR DÉFAUT) -->
+    <VBox fx:id="chatSidebar"
+          visible="false" managed="false"
+          style="-fx-background-color: #f5f5f5;
+                 -fx-pref-width: 450;
+                 -fx-max-width: 450;
+                 -fx-min-width: 450;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, -5, 0);
+                 -fx-background-radius: 20 0 0 20;
+                 -fx-border-color: #e0e0e0;
+                 -fx-border-width: 0 0 0 1;"
+          StackPane.alignment="CENTER_RIGHT">
+
+        <!-- Espace pour l'animation -->
+        <padding>
+            <Insets bottom="15" left="15" right="15" top="15" />
+        </padding>
+
+        <!-- En-tête du chat -->
+        <HBox alignment="CENTER_LEFT" spacing="10"
+              style="-fx-background-color: linear-gradient(to right, #2196F3, #1565C0);
+                     -fx-background-radius: 10; -fx-padding: 15;">
+
+            <!-- Avatar robot -->
+            <StackPane>
+                <Circle radius="20" fill="white" opacity="0.2"/>
+                <Label style="-fx-font-size: 28px;" text="🤖" />
+            </StackPane>
+
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"
+                       text="Assistant IA - EventFlow" />
+                <Label fx:id="statusIndicator"
+                       style="-fx-font-size: 11px; -fx-text-fill: #BBDEFB;"
+                       text="● Connecté • Posez vos questions" />
+            </VBox>
+
+            <!-- Bouton fermer -->
+            <Button fx:id="closeChatButton"
+                    onAction="#toggleChatSidebar"
+                    style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20;
+                           -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 14px; -fx-font-weight: bold;"
+                    text="✕"
+                    prefWidth="30" prefHeight="30"/>
+        </HBox>
+
+        <!-- Zone de chat -->
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
+                    style="-fx-background: white; -fx-background-color: white;
+                           -fx-border-color: #ddd; -fx-border-radius: 10; -fx-background-radius: 10;">
+            <VBox fx:id="chatBox" spacing="10" style="-fx-padding: 15;">
+                <!-- Message de bienvenue -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Circle radius="15" fill="#2196F3"/>
+                    <VBox style="-fx-background-color: #e3f2fd; -fx-background-radius: 15;
+                                 -fx-padding: 12; -fx-max-width: 300;">
+                        <Label text="🎉 Bonjour ! Je suis votre assistant de gestion."
+                               wrapText="true" style="-fx-text-fill: #333; -fx-font-size: 13px;"/>
+                        <Label text="Posez-moi des questions sur les utilisateurs, événements, etc."
+                               wrapText="true" style="-fx-text-fill: #666; -fx-font-size: 12px;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Exemples de questions -->
+                <VBox spacing="8" style="-fx-padding: 10 0 0 25;">
+                    <Label text="💡 Exemples de questions :"
+                           style="-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 11px;"/>
+
+                    <Button onAction="#handleSuggestion"
+                            style="-fx-background-color: #e3f2fd; -fx-background-radius: 15;
+                                   -fx-padding: 8 12; -fx-font-size: 11px; -fx-cursor: hand;
+                                   -fx-alignment: CENTER-LEFT; -fx-max-width: 350; -fx-border-color: #90caf9;"
+                            text="📊 Combien d'utilisateurs sont inscrits ?"
+                            userData="statistiques" />
+
+                    <Button onAction="#handleSuggestion"
+                            style="-fx-background-color: #e3f2fd; -fx-background-radius: 15;
+                                   -fx-padding: 8 12; -fx-font-size: 11px; -fx-cursor: hand;
+                                   -fx-alignment: CENTER-LEFT; -fx-max-width: 350; -fx-border-color: #90caf9;"
+                            text="👥 Liste des administrateurs"
+                            userData="liste des admins" />
+
+                    <Button onAction="#handleSuggestion"
+                            style="-fx-background-color: #e3f2fd; -fx-background-radius: 15;
+                                   -fx-padding: 8 12; -fx-font-size: 11px; -fx-cursor: hand;
+                                   -fx-alignment: CENTER-LEFT; -fx-max-width: 350; -fx-border-color: #90caf9;"
+                            text="📅 Nouveaux utilisateurs ce mois"
+                            userData="nouveaux utilisateurs ce mois" />
+                </VBox>
+            </VBox>
+        </ScrollPane>
+
+        <!-- Zone de saisie -->
+        <HBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10;
+                                   -fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 10;">
+            <TextField fx:id="inputField" promptText="Posez votre question..." HBox.hgrow="ALWAYS"
+                       style="-fx-padding: 12; -fx-background-radius: 20; -fx-border-radius: 20;
+                              -fx-border-color: #ccc;">
+                <font>
+                    <Font size="14" />
+                </font>
+            </TextField>
+            <Button fx:id="sendButton" onAction="#handleSendMessage"
+                    style="-fx-background-color: #2196F3; -fx-background-radius: 20;
+                           -fx-padding: 10 20; -fx-cursor: hand;"
+                    text="Envoyer" textFill="white">
+                <font>
+                    <Font size="14" />
+                </font>
+            </Button>
+        </HBox>
+
+        <!-- Bouton nouvelle conversation -->
+        <HBox alignment="CENTER" spacing="8" prefWidth="450">
+            <Button fx:id="clearButton" onAction="#handleClearChat"
+                    style="-fx-background-color: #f44336; -fx-background-radius: 20;
+                           -fx-padding: 8 15; -fx-cursor: hand; -fx-text-fill: white;"
+                    text="🗑️ Nouvelle conversation" />
+        </HBox>
+    </VBox>
+
+    <!-- BOUTON FLOTTANT POUR OUVRIR LE CHAT (visible quand le chat est fermé) -->
+    <Button fx:id="chatFloatingButton"
+            onAction="#toggleChatSidebar"
+            style="-fx-background-color: linear-gradient(to bottom, #2196F3, #1565C0);
+                   -fx-background-radius: 30;
+                   -fx-min-width: 60; -fx-min-height: 60;
+                   -fx-max-width: 60; -fx-max-height: 60;
+                   -fx-cursor: hand;
+                   -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.6), 15, 0, 0, 5);
+                   -fx-translate-x: -20; -fx-translate-y: -20;"
+            StackPane.alignment="BOTTOM_RIGHT"
+            visible="true" managed="true">
+        <graphic>
+            <StackPane>
+                <Label text="🤖" style="-fx-font-size: 32px; -fx-text-fill: white;"/>
+                <Circle radius="8" fill="#4CAF50" stroke="white" strokeWidth="2"
+                        translateX="12" translateY="-12"/>
+            </StackPane>
+        </graphic>
+        <tooltip>
+            <Tooltip text="Ouvrir l'assistant IA" />
+        </tooltip>
+    </Button>
+</StackPane>

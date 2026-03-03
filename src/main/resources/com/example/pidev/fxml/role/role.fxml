@@ -1,128 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
 
 <VBox spacing="0" xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pidev.controller.role.RoleController"
-      VBox.vgrow="ALWAYS"
       style="-fx-background-color: #f8fafc;"
       prefWidth="1200" prefHeight="800">
-    <HBox style="-fx-background-color: white; -fx-padding: 15 40; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
-          alignment="CENTER_RIGHT" >
 
-    <Region HBox.hgrow="ALWAYS"/>
-
-            <VBox fx:id="totalRolesCard" alignment="CENTER" spacing="2"
-                  style="-fx-padding: 10 25; -fx-background-color: #f0fdf4; -fx-background-radius: 10;
-                     -fx-border-color: #bbf7d0; -fx-border-width: 1; -fx-border-radius: 10;">
-                <Label fx:id="totalRolesLabel" text="0"
-                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
-                <Label text="Total Rôles"
-                       style="-fx-text-fill: #22c55e; -fx-font-size: 11px;"/>
-            </VBox>
-    </HBox>
-    <!-- Barre d'actions -->
+    <!-- Barre de recherche et bouton d'ajout (sans le KPI) -->
     <HBox style="-fx-background-color: #f1f5f9; -fx-padding: 15 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
-          spacing="15" alignment="CENTER_LEFT" prefHeight="70">
-
-        <TextField fx:id="searchField"
-                   promptText="🔍 Rechercher un rôle..."
-                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15;
-                          -fx-pref-width: 300; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
-
+          spacing="15" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher un rôle..."
+                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 15; -fx-pref-width: 300;"/>
         <Region HBox.hgrow="ALWAYS"/>
-
-        <Button text="➕ Nouveau rôle"
-                onAction="#addRoleButtonOnAction"
-                style="-fx-background-color: linear-gradient(to right, #10b981, #059669);
-                       -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;
-                       -fx-background-radius: 8; -fx-padding: 10 22;
-                       -fx-cursor: hand;"/>
+        <Button text="➕ Nouveau rôle" onAction="#addRoleButtonOnAction"
+                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-background-radius: 8; -fx-padding: 10 22; -fx-cursor: hand;"/>
+        <!-- Label stats optionnel -->
+        <Label fx:id="statsLabel" text="0 rôles"
+               style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-padding: 0 0 0 20;"/>
     </HBox>
 
-    <!-- SCROLLPANE GLOBAL -->
-    <ScrollPane fitToWidth="true"
-                hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"
+    <ScrollPane fitToWidth="true" fitToHeight="true"
                 style="-fx-background-color: transparent; -fx-border-color: transparent;"
                 VBox.vgrow="ALWAYS">
-
         <VBox spacing="20" style="-fx-padding: 20 30;">
 
-
-
-            <!-- Table des rôles -->
-            <VBox spacing="15">
-                <StackPane VBox.vgrow="ALWAYS"
-                           style="-fx-background-color: white; -fx-background-radius: 12;
-                                  -fx-border-color: #e2e8f0; -fx-border-width: 1;
-                                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
-
-                    <TableView fx:id="roleTable"
-                               VBox.vgrow="NEVER"
-                               prefHeight="250"
-                               style="-fx-background-color: transparent; -fx-bar-policy: never;">
-                        <columns>
-                            <TableColumn fx:id="roleNameColumn" text="📝 Nom du Rôle" prefWidth="800"/>
-                            <TableColumn fx:id="actionsColumn" text="⚡ Actions" prefWidth="180"
-                                         style="-fx-alignment: CENTER;"/>
-                        </columns>
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                        </columnResizePolicy>
-                    </TableView>
-                </StackPane>
-
-                <!-- Pagination -->
-                <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
-                    <HBox spacing="8" alignment="CENTER">
-                        <Button fx:id="prevPageBtn" text="« Précédent"
-                                style="-fx-background-color: white; -fx-text-fill: #475569;
-                                       -fx-font-size: 13px; -fx-background-radius: 8;
-                                       -fx-padding: 8 16; -fx-border-color: #e2e8f0; -fx-border-width: 1;
-                                       -fx-cursor: hand;"/>
-
-                        <HBox spacing="4">
-                            <Button fx:id="page1Btn" text="1"
-                                    style="-fx-background-color: #2196F3; -fx-text-fill: white;
-                                           -fx-font-weight: bold; -fx-min-width: 36; -fx-min-height: 36;
-                                           -fx-background-radius: 8; -fx-cursor: hand;"/>
-                            <Button fx:id="page2Btn" text="2"
-                                    style="-fx-background-color: white; -fx-text-fill: #475569;
-                                           -fx-min-width: 36; -fx-min-height: 36; -fx-background-radius: 8;
-                                           -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-cursor: hand;"/>
-                            <Button fx:id="page3Btn" text="3"
-                                    style="-fx-background-color: white; -fx-text-fill: #475569;
-                                           -fx-min-width: 36; -fx-min-height: 36; -fx-background-radius: 8;
-                                           -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-cursor: hand;"/>
-                            <Label text="..." style="-fx-text-fill: #94a3b8; -fx-padding: 0 4;"/>
-                            <Button fx:id="lastPageBtn" text="Dernière"
-                                    style="-fx-background-color: white; -fx-text-fill: #475569;
-                                           -fx-min-width: 60; -fx-min-height: 36; -fx-background-radius: 8;
-                                           -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-cursor: hand;"/>
-                        </HBox>
-
-                        <Button fx:id="nextPageBtn" text="Suivant »"
-                                style="-fx-background-color: white; -fx-text-fill: #475569;
-                                       -fx-font-size: 13px; -fx-background-radius: 8;
-                                       -fx-padding: 8 16; -fx-border-color: #e2e8f0; -fx-border-width: 1;
-                                       -fx-cursor: hand;"/>
-                    </HBox>
-
-                    <Region HBox.hgrow="ALWAYS"/>
-
-                    <Label fx:id="paginationLabel" text="Page 1 sur 1"
-                           style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
-                </HBox>
+            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 5;">
+                <TableView fx:id="roleTable"
+                           style="-fx-background-color: transparent; -fx-font-size: 15px;">
+                    <columns>
+                        <TableColumn fx:id="roleNameColumn" text="📝 Nom du Rôle" prefWidth="600"
+                                     style="-fx-alignment: CENTER-LEFT; -fx-padding: 0 0 0 25;"/>
+                        <TableColumn fx:id="actionsColumn" text="⚡ Actions" prefWidth="150"
+                                     style="-fx-alignment: CENTER;"/>
+                    </columns>
+                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                </TableView>
             </VBox>
 
-
-
-            <!-- Footer -->
-            <HBox style="-fx-padding: 10 0 0 0;" alignment="CENTER">
-                <Label text="© 2026 EventFlow - Gestion des rôles"
-                       style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="prevPageBtn" text="«"
+                        style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                <HBox spacing="5">
+                    <Button fx:id="page1Btn" text="1"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    <Button fx:id="page2Btn" text="2"
+                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    <Button fx:id="page3Btn" text="3"
+                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    <Button fx:id="lastPageBtn" text="Dernière"
+                            style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                </HBox>
+                <Button fx:id="nextPageBtn" text="»"
+                        style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="paginationLabel" text="Page 1 sur 1"
+                       style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
             </HBox>
 
         </VBox>

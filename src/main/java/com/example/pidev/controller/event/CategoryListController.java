@@ -42,9 +42,7 @@ public class CategoryListController {
     @FXML private ComboBox<String> sortOrder;
 
     // ========== KPI ==========
-    @FXML private Label totalLabel;
-    @FXML private Label eventsLabel;
-    @FXML private Label resultLabel;
+
 
     // ========== NAVBAR ==========
     @FXML private Label dateLabel;
@@ -458,8 +456,7 @@ public class CategoryListController {
         if (allCategories == null) return;
         int total = allCategories.size();
         int events = allCategories.stream().mapToInt(EventCategory::getEventCount).sum();
-        totalLabel.setText(String.valueOf(total));
-        eventsLabel.setText(String.valueOf(events));
+
     }
 
     @FXML
@@ -538,7 +535,7 @@ public class CategoryListController {
 
         filteredCategories = filtered;
         currentPage = 1;
-        resultLabel.setText(filtered.size() + " résultat(s) trouvé(s)");
+
         setupPagination();
     }
 

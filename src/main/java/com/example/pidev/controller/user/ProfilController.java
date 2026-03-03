@@ -3,10 +3,12 @@ package com.example.pidev.controller.user;
 import com.example.pidev.MainController;
 import com.example.pidev.model.role.Role;
 import com.example.pidev.model.user.UserModel;
-import com.example.pidev.service.event.EventService;  // ← AJOUTER CET IMPORT
+import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.role.RoleService;
 import com.example.pidev.service.user.UserService;
 import com.example.pidev.utils.UserSession;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -46,13 +48,13 @@ public class ProfilController implements Initializable {
     @FXML private Text userInitialsText;
     @FXML private Button uploadImageButton;
 
-    // Sécurité
-    @FXML private TextField currentPasswordField;
-    @FXML private PasswordField newPasswordField;
-    @FXML private PasswordField confirmPasswordField;
+    // Sécurité - MODIFIÉ POUR UTILISER TextField
+    @FXML private TextField currentPasswordField;  // Changé de PasswordField à TextField
+    @FXML private TextField newPasswordField;      // Changé de PasswordField à TextField
+    @FXML private TextField confirmPasswordField;  // Changé de PasswordField à TextField
 
     // Statistiques
-    @FXML private Label eventCountLabel;  // ← Label pour le nombre d'événements
+    @FXML private Label eventCountLabel;
 
     @FXML private Label verificationStatusLabel;
     @FXML private Label lastLoginLabel;
@@ -62,8 +64,11 @@ public class ProfilController implements Initializable {
     private UserModel currentUser;
     private UserService userService;
     private RoleService roleService;
-    private EventService eventService;  // ← AJOUTER CETTE VARIABLE
+    private EventService eventService;
     private MainController mainController;
+
+    // États pour la validation du mot de passe
+    private boolean isCurrentPasswordValid = false;
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
@@ -75,7 +80,7 @@ public class ProfilController implements Initializable {
             System.out.println("✅ ProfilController initialisé");
             userService = new UserService();
             roleService = new RoleService();
-            eventService = new EventService();  // ← INITIALISER LE SERVICE
+            eventService = new EventService();
 
             // Récupérer l'utilisateur connecté depuis la session
             currentUser = UserSession.getInstance().getCurrentUser();
@@ -91,9 +96,12 @@ public class ProfilController implements Initializable {
                 loadFacultiesFromDatabase();
                 loadRolesFromDatabase();
                 loadProfileImage();
-                updateStatistics();      // ← MET À JOUR LES STATISTIQUES
+                updateStatistics();
                 setupBioCounter();
                 disableReadOnlyFields();
+
+                // Initialiser les champs de mot de passe
+                setupPasswordFields();
 
             } else {
                 System.err.println("❌ Aucun utilisateur connecté");
@@ -103,6 +111,83 @@ public class ProfilController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Erreur lors de l'initialisation: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Configure les champs de mot de passe avec la logique demandée
+     */
+    private void setupPasswordFields() {
+        // Vider les champs au démarrage
+        currentPasswordField.clear();
+        newPasswordField.clear();
+        confirmPasswordField.clear();
+
+        // Désactiver les champs du nouveau mot de passe au départ
+        newPasswordField.setDisable(true);
+        confirmPasswordField.setDisable(true);
+
+        // Style pour indiquer que les champs sont désactivés
+        newPasswordField.setStyle("-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
+        confirmPasswordField.setStyle("-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
+
+        // Ajouter un listener sur le champ du mot de passe actuel
+        currentPasswordField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                validateCurrentPassword(newValue);
+            }
+        });
+    }
+
+    /**
+     * Valide le mot de passe actuel
+     */
+    private void validateCurrentPassword(String enteredPassword) {
+        if (enteredPassword == null || enteredPassword.isEmpty()) {
+            // Champ vide - style normal
+            currentPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
+            newPasswordField.setDisable(true);
+            confirmPasswordField.setDisable(true);
+            isCurrentPasswordValid = false;
+            return;
+        }
+
+        String actualPassword = currentUser.getPassword();
+
+        if (enteredPassword.equals(actualPassword)) {
+            // Mot de passe correct
+            currentPasswordField.setStyle("-fx-background-color: #f0fdf4; -fx-border-color: #4caf50; -fx-border-width: 2; -fx-padding: 10 15; -fx-pref-height: 40;");
+
+            // Activer les champs pour le nouveau mot de passe
+            newPasswordField.setDisable(false);
+            confirmPasswordField.setDisable(false);
+
+            // Restaurer le style normal pour les nouveaux champs
+            newPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
+            confirmPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
+
+            isCurrentPasswordValid = true;
+
+            // Ajouter un tooltip de succès
+            Tooltip tooltip = new Tooltip("✓ Mot de passe correct");
+            Tooltip.install(currentPasswordField, tooltip);
+
+        } else {
+            // Mot de passe incorrect
+            currentPasswordField.setStyle("-fx-background-color: #fff5f5; -fx-border-color: #f44336; -fx-border-width: 2; -fx-padding: 10 15; -fx-pref-height: 40;");
+
+            // Désactiver les champs pour le nouveau mot de passe
+            newPasswordField.setDisable(true);
+            confirmPasswordField.setDisable(true);
+            newPasswordField.clear();
+            confirmPasswordField.clear();
+
+            isCurrentPasswordValid = false;
+
+            // Ajouter un tooltip d'erreur
+            Tooltip tooltip = new Tooltip("✗ Mot de passe incorrect");
+            Tooltip.install(currentPasswordField, tooltip);
         }
     }
 
@@ -131,15 +216,9 @@ public class ProfilController implements Initializable {
      */
     private int countUserEvents() {
         try {
-            // Utiliser la méthode countEvents() qui compte tous les événements
             int totalEvents = eventService.countEvents();
             System.out.println("📊 Nombre total d'événements: " + totalEvents);
             return totalEvents;
-
-            // Si vous voulez compter uniquement les événements créés par l'utilisateur connecté,
-            // vous devrez ajouter une méthode spécifique dans EventService, comme:
-            // return eventService.countEventsByUser(currentUser.getId_User());
-
         } catch (Exception e) {
             System.err.println("❌ Erreur lors du comptage des événements: " + e.getMessage());
             e.printStackTrace();
@@ -147,7 +226,7 @@ public class ProfilController implements Initializable {
         }
     }
 
-    // === LE RESTE DE VOTRE CODE RESTE IDENTIQUE ===
+    // === LE RESTE DE VOTRE CODE (méthodes existantes) ===
 
     /**
      * Charge les facultés depuis la table user_model
@@ -246,13 +325,12 @@ public class ProfilController implements Initializable {
                 bioCharCountLabel.setText((currentUser.getBio() != null ? currentUser.getBio().length() : 0) + "/500");
             }
 
-            if (currentPasswordField != null && currentUser.getPassword() != null) {
-                currentPasswordField.setText(currentUser.getPassword());
-            }
-
             if (userRoleDisplayLabel != null && currentUser.getRole() != null) {
                 userRoleDisplayLabel.setText(currentUser.getRole().getRoleName());
             }
+
+            // NE PAS charger le mot de passe dans les champs
+            // Les champs de mot de passe restent vides
         }
     }
 
@@ -409,17 +487,31 @@ public class ProfilController implements Initializable {
         if (currentUser.getFaculte() != null) {
             facultyComboBox.setValue(currentUser.getFaculte());
         }
+
+        // Réinitialiser les champs de mot de passe
+        currentPasswordField.clear();
+        newPasswordField.clear();
+        confirmPasswordField.clear();
+        newPasswordField.setDisable(true);
+        confirmPasswordField.setDisable(true);
+        currentPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
+
         showAlert("Annulé", "Modifications annulées");
     }
 
     @FXML
     private void changePassword() {
-        String current = currentPasswordField.getText();
+        // Vérifier que le mot de passe actuel est valide
+        if (!isCurrentPasswordValid) {
+            showAlert("Erreur", "Mot de passe actuel incorrect");
+            return;
+        }
+
         String newPass = newPasswordField.getText();
         String confirm = confirmPasswordField.getText();
 
-        if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()) {
-            showAlert("Champs requis", "Tous les champs sont obligatoires");
+        if (newPass.isEmpty() || confirm.isEmpty()) {
+            showAlert("Champs requis", "Veuillez remplir tous les champs");
             return;
         }
 
@@ -433,18 +525,20 @@ public class ProfilController implements Initializable {
             return;
         }
 
-        if (!current.equals(currentUser.getPassword())) {
-            showAlert("Erreur", "Mot de passe actuel incorrect");
-            return;
-        }
-
         try {
             currentUser.setPassword(newPass);
             if (userService.updateUser(currentUser)) {
                 showSuccessAlert("Succès", "Mot de passe changé avec succès");
+
+                // Réinitialiser les champs
+                currentPasswordField.setText(newPass); // Mettre à jour avec le nouveau mot de passe
                 newPasswordField.clear();
                 confirmPasswordField.clear();
-                currentPasswordField.setText(newPass);
+                newPasswordField.setDisable(true);
+                confirmPasswordField.setDisable(true);
+
+                // Réinitialiser l'état
+                isCurrentPasswordValid = false;
             }
         } catch (Exception e) {
             showAlert("Erreur", "Erreur lors du changement: " + e.getMessage());
