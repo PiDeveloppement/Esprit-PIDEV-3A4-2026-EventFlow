@@ -10,11 +10,19 @@
 
     <HBox spacing="15" alignment="CENTER_LEFT">
         <StackPane style="-fx-background-color: #3b82f6; -fx-background-radius: 10; -fx-padding: 10;">
-            <Text text="📦" style="-fx-fill: white; -fx-font-size: 20;" />
+            <Text text="🛠️" style="-fx-fill: white; -fx-font-size: 20;" />
         </StackPane>
-        <VBox spacing="2">
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
             <Label fx:id="titleLabel" text="Ajouter un Équipement" styleClass="form-title" />
             <Label text="Mise à jour de l'inventaire en temps réel" styleClass="form-subtitle" />
+        </VBox>
+
+        <VBox alignment="CENTER_RIGHT" spacing="5">
+            <Button fx:id="voiceBtn" onAction="#toggleVoiceControl" prefHeight="45" prefWidth="45"
+                    style="-fx-background-color: #ef4444; -fx-background-radius: 50; -fx-cursor: hand;" text="🎙️" textFill="WHITE">
+                <tooltip><Tooltip text="Activer la commande vocale" /></tooltip>
+            </Button>
+            <Label fx:id="voiceStatusLabel" text="Micro Off" style="-fx-font-size: 10; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
         </VBox>
     </HBox>
 
@@ -51,7 +59,7 @@
             <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-border-style: dashed;">
                 <VBox spacing="10" HBox.hgrow="ALWAYS">
                     <Text text="Format supporté : PNG, JPG" style="-fx-fill: #94a3b8; -fx-font-size: 11;" />
-                    <Button onAction="#choisirImage" text="Sélectionner un fichier" styleClass="btn-secondary" />
+                    <Button onAction="#choisirImage" text="🖼️ Sélectionner un fichier" styleClass="btn-secondary" />
                 </VBox>
                 <StackPane prefHeight="80" prefWidth="80" styleClass="image-preview-wrapper">
                     <ImageView fx:id="previewImage" fitHeight="70" fitWidth="70" preserveRatio="true" />
@@ -61,7 +69,7 @@
     </GridPane>
 
     <HBox spacing="15" alignment="CENTER_RIGHT">
-        <Button onAction="#annuler" text="Annuler" styleClass="btn-cancel" />
-        <Button fx:id="btnValider" onAction="#enregistrer" text="Confirmer l'enregistrement" styleClass="btn-save" />
+        <Button onAction="#annuler" text="✖ Annuler" styleClass="btn-cancel" />
+        <Button fx:id="btnValider" onAction="#enregistrer" text="💾 Confirmer l'enregistrement" styleClass="btn-save" />
     </HBox>
 </VBox>

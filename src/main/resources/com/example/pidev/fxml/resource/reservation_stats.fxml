@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="15.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.StatsController">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Button onAction="#goBack" text="← Retour" style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Label text="Statistiques Natives" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <PieChart fx:id="pieChart" VBox.vgrow="ALWAYS" title="Répartition des Réservations" />
+</VBox>

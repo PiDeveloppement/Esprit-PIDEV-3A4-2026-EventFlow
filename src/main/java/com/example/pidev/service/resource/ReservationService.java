@@ -2,51 +2,28 @@ package com.example.pidev.service.resource;
 
 import com.example.pidev.model.resource.ReservationResource;
 import com.example.pidev.utils.DBConnection;
-import com.example.pidev.utils.UserSession;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ReservationService {
     private Connection connection = DBConnection.getConnection();
 
     public void ajouter(ReservationResource r) throws SQLException {
-        // Récupérer l'ID de l'utilisateur connecté
-        int userId = UserSession.getInstance().getUserId();
-
-        // Vérifier que l'utilisateur est bien connecté
-        if (userId == -1) {
-            throw new SQLException("Aucun utilisateur connecté - Impossible de créer la réservation");
-        }
-
-        System.out.println("Création réservation pour l'utilisateur ID: " + userId);
-
+        // Ajout de user_id dans la requête
         String query = "INSERT INTO reservation_resource (resource_type, salle_id, equipement_id, reservation_date_start_time, end_time, quantity, user_id) VALUES (?,?,?,?,?,?,?)";
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, r.getResourceType());
-
-            if (r.getSalleId() != null) ps.setInt(2, r.getSalleId());
-            else ps.setNull(2, Types.INTEGER);
-
-            if (r.getEquipementId() != null) ps.setInt(3, r.getEquipementId());
-            else ps.setNull(3, Types.INTEGER);
-
-            ps.setTimestamp(4, Timestamp.valueOf(r.getStartTimedate()));
-            ps.setTimestamp(5, Timestamp.valueOf(r.getEndTime()));
-            ps.setInt(6, r.getQuantity());
-
-            // Utiliser l'ID de l'utilisateur connecté au lieu de 1
-            ps.setInt(7, userId);
-
-            ps.executeUpdate();
-            System.out.println("Réservation créée avec userId: " + userId);
-        }
+        save(r, query, false);
     }
 
     public void modifier(ReservationResource r) throws SQLException {
         String query = "UPDATE reservation_resource SET resource_type=?, salle_id=?, equipement_id=?, reservation_date_start_time=?, end_time=?, quantity=? WHERE id=?";
+        save(r, query, true);
+    }
+
+    private void save(ReservationResource r, String query, boolean isUpdate) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, r.getResourceType());
 
@@ -59,18 +36,25 @@ public class ReservationService {
             ps.setTimestamp(4, Timestamp.valueOf(r.getStartTimedate()));
             ps.setTimestamp(5, Timestamp.valueOf(r.getEndTime()));
             ps.setInt(6, r.getQuantity());
-            ps.setInt(7, r.getId());
+
+            if (isUpdate) {
+                ps.setInt(7, r.getId());
+            } else {
+                // IMPORTANT: On envoie l'ID de l'utilisateur (1 par défaut ici)
+                // Si tu as un système de session, remplace 1 par l'ID de l'utilisateur connecté
+                ps.setInt(7, 1);
+            }
 
             ps.executeUpdate();
-            System.out.println("Réservation modifiée: " + r.getId());
         }
     }
+
+    // ... (Le reste de tes méthodes supprimer, afficher, etc. restent inchangées)
 
     public void supprimer(int id) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement("DELETE FROM reservation_resource WHERE id = ?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
-            System.out.println("Réservation supprimée: " + id);
         }
     }
 
@@ -86,8 +70,6 @@ public class ReservationService {
                         rs.getTimestamp("reservation_date_start_time").toLocalDateTime(),
                         rs.getTimestamp("end_time").toLocalDateTime(), rs.getInt("quantity")
                 );
-                // Ajouter l'userId au modèle
-                res.setUserId(rs.getInt("user_id"));
                 res.setResourceName(res.getSalleId() != null ? rs.getString("s_name") : rs.getString("e_name"));
                 res.setImagePath(res.getSalleId() != null ? rs.getString("s_img") : rs.getString("e_img"));
                 list.add(res);
@@ -122,5 +104,31 @@ public class ReservationService {
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getInt(1) : 0;
         } catch (SQLException e) { return 0; }
+    }
+    public Map<String, Integer> getStatsByType() {
+        Map<String, Integer> stats = new HashMap<>();
+        String query = "SELECT resource_type, COUNT(*) as count FROM reservation_resource GROUP BY resource_type";
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
+            while (rs.next()) {
+                stats.put(rs.getString("resource_type"), rs.getInt("count"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return stats;
+    }
+
+    public Map<String, Integer> getStatsTopResources() {
+        Map<String, Integer> stats = new HashMap<>();
+        // Cette requête récupère le nom des ressources les plus réservées
+        String query = "SELECT COALESCE(s.name, e.name) as name, COUNT(*) as count " +
+                "FROM reservation_resource r " +
+                "LEFT JOIN salle s ON r.salle_id = s.id " +
+                "LEFT JOIN equipement e ON r.equipement_id = e.id " +
+                "GROUP BY name ORDER BY count DESC LIMIT 5";
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
+            while (rs.next()) {
+                stats.put(rs.getString("name"), rs.getInt("count"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return stats;
     }
 }

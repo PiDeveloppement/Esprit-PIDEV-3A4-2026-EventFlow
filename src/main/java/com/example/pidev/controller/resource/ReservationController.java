@@ -31,6 +31,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+
 public class ReservationController implements Initializable {
 
     @FXML private TextField searchField;
@@ -56,6 +60,17 @@ public class ReservationController implements Initializable {
         currentUserId = session.getUserId();
         userRole = session.getRole();
 
+        if (sortCombo != null) {
+            sortCombo.setItems(FXCollections.observableArrayList("Plus récent", "Plus ancien"));
+            sortCombo.setOnAction(e -> {
+                String selection = sortCombo.getValue();
+                if ("Plus récent".equals(selection)) {
+                    trierParDate(false); // DESC
+                } else if ("Plus ancien".equals(selection)) {
+                    trierParDate(true);  // ASC
+                }
+            });
+        }
         // Afficher les informations utilisateur
         if (session.isLoggedIn()) {
             if (welcomeLabel != null) {
@@ -220,6 +235,26 @@ public class ReservationController implements Initializable {
             filterCombo.setOnAction(e -> applyFilter());
         }
     }
+    private void trierParDate(boolean ascendant) {
+        if (masterData == null || masterData.isEmpty()) return;
+
+        if (ascendant) {
+            // Tri ASC : a compareTo b
+            masterData.sort((a, b) -> {
+                if (a.getStartTimedate() == null || b.getStartTimedate() == null) return 0;
+                return a.getStartTimedate().compareTo(b.getStartTimedate());
+            });
+        } else {
+            // Tri DESC : b compareTo a
+            masterData.sort((a, b) -> {
+                if (a.getStartTimedate() == null || b.getStartTimedate() == null) return 0;
+                return b.getStartTimedate().compareTo(a.getStartTimedate());
+            });
+        }
+
+        // Optionnel : rafraîchir visuellement le tableau
+        reservationTable.refresh();
+    }
 
     private void applyFilter() {
         if (filterCombo == null) return;
@@ -242,6 +277,7 @@ public class ReservationController implements Initializable {
         goToForm(null);
     }
 
+    @FXML
     private void goToForm(ReservationResource res) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/resource/reservation_form.fxml"));
@@ -393,5 +429,14 @@ public class ReservationController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+    @FXML
+    private void goToStats() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/com/example/pidev/fxml/resource/reservation_stats.fxml"));
+            MainController.getInstance().setContent(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

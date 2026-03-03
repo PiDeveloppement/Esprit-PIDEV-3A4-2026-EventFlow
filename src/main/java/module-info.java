@@ -6,7 +6,7 @@ module com.example.pidev {
     requires mysql.connector.j;
     requires jakarta.persistence;
     requires java.prefs;
-    requires javafx.web;
+    requires javafx.web; // On la garde ici
     requires java.desktop;
     requires java.net.http;
     requires java.mail;
@@ -17,6 +17,7 @@ module com.example.pidev {
 
     requires itextpdf;
     requires org.apache.pdfbox;
+
     requires io;
     requires layout;
     requires kernel;
@@ -25,6 +26,33 @@ module com.example.pidev {
     requires org.bytedeco.javacpp;
 
     // --- Ouvertures pour JavaFX (FXMLLoader) ---
+
+    requires org.json;
+    requires vosk;
+
+    // --- ACCÈS AUX RESSOURCES JS ---
+    // Cette ligne permet à la WebView de lire ton fichier apexcharts.min.js
+    opens com.example.pidev.js to javafx.web;
+
+    // --- EXPORTS ---
+    exports com.example.pidev;
+    exports com.example.pidev.model.event;
+    exports com.example.pidev.model.resource;
+    exports com.example.pidev.model.user;
+    exports com.example.pidev.model.role;
+    exports com.example.pidev.model.sponsor;
+    exports com.example.pidev.controller.event;
+    exports com.example.pidev.controller.sponsor;
+    exports com.example.pidev.controller.auth;
+    exports com.example.pidev.controller.user;
+    exports com.example.pidev.controller.role;
+    exports com.example.pidev.controller.questionnaire;
+    exports com.example.pidev.service.user;
+    exports com.example.pidev.service.resource;
+    exports com.example.pidev.controller.resource;
+
+    // --- OPENS POUR FXML ---
+
     opens com.example.pidev to javafx.fxml;
 
     // Sous-packages de contrôleurs (ceux-ci contiennent des fichiers)
@@ -43,6 +71,7 @@ module com.example.pidev {
 
     // Sous-packages de services
     opens com.example.pidev.service.user to javafx.fxml;
+
     opens com.example.pidev.service.facial to javafx.fxml;
     opens com.example.pidev.service.chat to javafx.fxml;
 
@@ -56,18 +85,10 @@ module com.example.pidev {
     opens com.example.pidev.model.resource to javafx.base, javafx.fxml;
     opens com.example.pidev.model.role to javafx.base, javafx.fxml;
     // --- Exportations ---
-    exports com.example.pidev;
-    exports com.example.pidev.controller.auth;
-    exports com.example.pidev.controller.user;
-    exports com.example.pidev.controller.role;
-    exports com.example.pidev.controller.facial;
-    exports com.example.pidev.controller.resource;
-    exports com.example.pidev.controller.sponsor;
-    exports com.example.pidev.controller.event;
-    exports com.example.pidev.controller.questionnaire;
-    exports com.example.pidev.service.user;
-    exports com.example.pidev.service.facial;
-    exports com.example.pidev.service.resource;
-    exports com.example.pidev.model.user;
+
     exports com.example.pidev.model.facial;
+
+    opens com.example.pidev.service.resource to javafx.fxml;
+
+
 }
