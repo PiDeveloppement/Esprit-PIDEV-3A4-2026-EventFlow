@@ -2,7 +2,6 @@ package com.example.pidev.controller.budget;
 
 import com.example.pidev.model.budget.Budget;
 import com.example.pidev.service.budget.BudgetService;
-import com.example.pidev.service.translation.TranslationService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -64,24 +63,5 @@ public class BudgetCardController {
         if (detailsBtn != null) detailsBtn.setOnAction(e -> { if (onDetails != null) onDetails.run(); });
         if (editBtn != null) editBtn.setOnAction(e -> { if (onEdit != null) onEdit.run(); });
         if (deleteBtn != null) deleteBtn.setOnAction(e -> { if (onDelete != null) onDelete.run(); });
-
-        translateUI();
-    }
-
-    private void translateUI() {
-        if (TranslationService.getCurrentLang().equals("fr")) return;
-        if (eventLabelPrefix != null) eventLabelPrefix.setText(TranslationService.translate("Événement:"));
-        if (detailsBtn != null) detailsBtn.setText(TranslationService.translate("Détails"));
-        if (editBtn != null) editBtn.setText(TranslationService.translate("Modifier"));
-        if (deleteBtn != null) deleteBtn.setText(TranslationService.translate("Supprimer"));
-        // Les labels fixes comme "Budget", "OK", "Déficit" pourraient aussi être traduits, mais ils sont dans le code.
-        // On peut traduire "OK" et "Déficit" si on veut :
-        if (statusLabel != null) {
-            if (statusLabel.getText().equals("OK")) {
-                statusLabel.setText(TranslationService.translate("OK"));
-            } else if (statusLabel.getText().equals("Déficit")) {
-                statusLabel.setText(TranslationService.translate("Déficit"));
-            }
-        }
     }
 }

@@ -1,9 +1,13 @@
 package com.example.pidev.controller.depense;
 
 import com.example.pidev.model.depense.Depense;
+import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.service.budget.BudgetService;
 import com.example.pidev.service.depense.DepenseService;
 import com.example.pidev.service.currency.CurrencyService;
+import com.example.pidev.service.event.EventCategoryService;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -11,13 +15,14 @@ import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class DepenseFormController {
 
     @FXML private Label titleLabel;
     @FXML private ComboBox<String> budgetComboBox;
     @FXML private TextField descField;
-    @FXML private TextField categoryField;
+    @FXML private ComboBox<String> categoryComboBox; // nouveau
     @FXML private TextField amountField;
     @FXML private DatePicker datePicker;
     @FXML private Label errorLabel;
@@ -29,6 +34,7 @@ public class DepenseFormController {
 
     private final BudgetService budgetService = new BudgetService();
     private final DepenseService depenseService = new DepenseService();
+    private final EventCategoryService categoryService = new EventCategoryService();
 
     private Runnable onFormDone;
 
@@ -64,6 +70,34 @@ public class DepenseFormController {
             }
         }
 
+        // Charger les catégories depuis event_category
+        if (categoryComboBox != null) {
+            try {
+                List<EventCategory> categories = categoryService.getAllCategories();
+                ObservableList<String> categoryNames = FXCollections.observableArrayList();
+                for (EventCategory cat : categories) {
+                    categoryNames.add(cat.getName() + " - " + (cat.getDescription() != null ? cat.getDescription() : ""));
+                }
+                categoryComboBox.setItems(categoryNames);
+                categoryComboBox.setPromptText("Choisissez une catégorie");
+
+                // Personnalisation de l'affichage pour montrer nom + description
+                categoryComboBox.setCellFactory(lv -> new ListCell<String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty || item == null) {
+                            setText(null);
+                        } else {
+                            setText(item);
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                if (errorLabel != null) errorLabel.setText("⚠️ Erreur chargement catégories");
+            }
+        }
+
         // Initialisation de la devise avec une large sélection
         if (currencyComboBox != null) {
             currencyComboBox.getItems().addAll(
@@ -90,15 +124,6 @@ public class DepenseFormController {
             });
         }
 
-        if (categoryField != null) {
-            categoryField.textProperty().addListener((obs, old, n) -> {
-                if (n == null) return;
-                String filtered = n.replaceAll("\\d", "");
-                if (filtered.length() > 100) filtered = filtered.substring(0, 100);
-                if (!filtered.equals(n)) categoryField.setText(filtered);
-            });
-        }
-
         if (amountField != null) {
             amountField.textProperty().addListener((obs, old, n) -> {
                 if (n == null || n.isEmpty()) return;
@@ -119,7 +144,6 @@ public class DepenseFormController {
         try {
             double amount = Double.parseDouble(amountText);
             if (currency == null || currency.equals("TND")) {
-                // Afficher le montant en TND sans conversion
                 convertedAmountLabel.setText(String.format("= %,.2f TND", amount));
             } else {
                 double converted = CurrencyService.convert(amount, currency, "TND");
@@ -141,7 +165,7 @@ public class DepenseFormController {
             if (titleLabel != null) titleLabel.setText("➕ Nouvelle Dépense");
             if (budgetComboBox != null) budgetComboBox.setValue(null);
             if (descField != null) descField.clear();
-            if (categoryField != null) categoryField.clear();
+            if (categoryComboBox != null) categoryComboBox.setValue(null);
             if (amountField != null) amountField.clear();
             if (datePicker != null) datePicker.setValue(LocalDate.now());
             if (currencyComboBox != null) currencyComboBox.setValue("TND");
@@ -156,7 +180,21 @@ public class DepenseFormController {
             budgetComboBox.setValue(budgetName);
         }
         if (descField != null) descField.setText(existing.getDescription());
-        if (categoryField != null) categoryField.setText(existing.getCategory());
+        if (categoryComboBox != null) {
+            // On cherche la catégorie correspondante dans la liste
+            String category = existing.getCategory();
+            if (category != null) {
+                categoryComboBox.setValue(category + " - ..."); // À améliorer : il faudrait récupérer la description
+                // En pratique, on pourrait stocker l'ID de catégorie, mais ici on utilise juste le nom
+                // On va parcourir les items pour trouver celui qui commence par le nom
+                for (String item : categoryComboBox.getItems()) {
+                    if (item.startsWith(category + " - ")) {
+                        categoryComboBox.setValue(item);
+                        break;
+                    }
+                }
+            }
+        }
         if (amountField != null) amountField.setText(String.valueOf(existing.getAmount()));
         if (datePicker != null) datePicker.setValue(existing.getExpense_date());
         if (currencyComboBox != null) currencyComboBox.setValue("TND");
@@ -183,9 +221,11 @@ public class DepenseFormController {
         if (desc.isEmpty()) { showError("Description obligatoire"); return; }
         if (desc.length() > 255) { showError("Description trop longue (max 255)"); return; }
 
-        String cat = categoryField.getText() == null ? "" : categoryField.getText().trim();
-        if (cat.isEmpty()) { showError("Catégorie obligatoire"); return; }
-        if (cat.length() > 100) { showError("Catégorie trop longue (max 100)"); return; }
+        String catSelection = (categoryComboBox == null) ? null : categoryComboBox.getValue();
+        if (catSelection == null || catSelection.trim().isEmpty()) { showError("Catégorie obligatoire"); return; }
+        // Extraire le nom de la catégorie (avant le " - ")
+        String catName = catSelection.split(" - ")[0].trim();
+        if (catName.isEmpty()) { showError("Catégorie invalide"); return; }
 
         String currency = (currencyComboBox == null) ? "TND" : currencyComboBox.getValue();
         double amount;
@@ -221,7 +261,7 @@ public class DepenseFormController {
 
         depense.setBudget_id(budgetId);
         depense.setDescription(desc);
-        depense.setCategory(cat);
+        depense.setCategory(catName); // On enregistre seulement le nom, pas la description
         depense.setAmount(amountInTND);
         depense.setExpense_date(dt);
 

@@ -68,16 +68,20 @@ public class DepenseService {
         }
     }
 
+    /**
+     * Retourne la liste des noms de catégories depuis la table event_category.
+     */
     public ObservableList<String> getCategories() {
         ObservableList<String> list = FXCollections.observableArrayList();
-        String sql = "SELECT DISTINCT category FROM depense " +
-                "WHERE category IS NOT NULL AND category <> '' ORDER BY category";
+        String sql = "SELECT name FROM event_category ORDER BY name";
         try (PreparedStatement ps = cnx().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(rs.getString(1));
+            while (rs.next()) {
+                list.add(rs.getString("name"));
+            }
             return list;
         } catch (SQLException e) {
-            throw new RuntimeException("getCategories failed", e);
+            throw new RuntimeException("getCategories from event_category failed", e);
         }
     }
 

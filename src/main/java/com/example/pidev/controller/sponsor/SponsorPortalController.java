@@ -7,8 +7,10 @@ import com.example.pidev.service.sponsor.SponsorService;
 import com.example.pidev.service.sponsor.SponsorMatchingService;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.pdf.LocalSponsorPdfService;
-import com.example.pidev.service.translation.TranslationService;
+import com.example.pidev.service.excel.ExcelExportService;
+import com.example.pidev.service.chart.QuickChartService;
 import com.example.pidev.utils.UserSession;
+import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -24,12 +26,14 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -45,6 +49,7 @@ public class SponsorPortalController implements Initializable {
     @FXML private ComboBox<String> companyFilter;
     @FXML private ComboBox<String> eventFilter;
     @FXML private Button addSponsorBtn;
+    @FXML private Button exportExcelBtn;
     @FXML private Label statusLabel;
     @FXML private TilePane cardsPane;
     @FXML private BarChart<String, Number> myContributionsChart;
@@ -70,7 +75,6 @@ public class SponsorPortalController implements Initializable {
 
     public void setInitialEmail(String email) {
         if (email == null || email.isBlank()) return;
-        System.out.println("setInitialEmail: " + email);
         currentEmail = email;
         if (emailAccount != null) emailAccount.setValue(email);
         setPortalEnabled(true);
@@ -79,8 +83,6 @@ public class SponsorPortalController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("SponsorPortalController.initialize()");
-
         if (todayLabel != null) {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy");
             todayLabel.setText(LocalDate.now().format(fmt));
@@ -89,18 +91,11 @@ public class SponsorPortalController implements Initializable {
         filtered = new FilteredList<>(baseList, s -> true);
         filtered.addListener((ListChangeListener<Sponsor>) c -> renderCards());
 
-        if (searchField != null) {
-            searchField.textProperty().addListener((obs, o, n) -> applyPredicate());
-        }
-        if (companyFilter != null) {
-            companyFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
-        }
-        if (eventFilter != null) {
-            eventFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
-        }
-        if (addSponsorBtn != null) {
-            addSponsorBtn.setOnAction(e -> onAdd());
-        }
+        if (searchField != null)   searchField.textProperty().addListener((obs, o, n) -> applyPredicate());
+        if (companyFilter != null) companyFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
+        if (eventFilter != null)   eventFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
+        if (addSponsorBtn != null) addSponsorBtn.setOnAction(e -> onAdd());
+        if (exportExcelBtn != null) exportExcelBtn.setOnAction(e -> handleExportExcel());
 
         if (cardsPane != null) {
             cardsPane.setPadding(new Insets(8));
@@ -110,7 +105,6 @@ public class SponsorPortalController implements Initializable {
             cardsPane.setTileAlignment(Pos.TOP_LEFT);
         }
 
-        // Configuration de la ListView avec cellules personnalisées
         if (suggestedEventsListView != null) {
             suggestedEventsListView.setPlaceholder(new Label("Aucun événement recommandé pour le moment."));
             suggestedEventsListView.setCellFactory(lv -> new ListCell<Event>() {
@@ -122,22 +116,21 @@ public class SponsorPortalController implements Initializable {
                 private final Region spacer = new Region();
 
                 {
-                    // Style du conteneur principal
                     container.setPadding(new Insets(10, 15, 10, 15));
                     container.setAlignment(Pos.CENTER_LEFT);
-                    container.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);");
-
-                    // Titre de l'événement
-                    titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
-
-                    // Détails (lieu, date)
-                    detailsLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
-
-                    // Bouton Sponsoriser
-                    sponsorBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 6 15; -fx-cursor: hand;");
-                    sponsorBtn.setOnMouseEntered(e -> sponsorBtn.setStyle("-fx-background-color: #059669; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 6 15; -fx-cursor: hand;"));
-                    sponsorBtn.setOnMouseExited(e -> sponsorBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 6 15; -fx-cursor: hand;"));
-
+                    container.setStyle("-fx-background-color: white; -fx-background-radius: 8; " +
+                            "-fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1; " +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);");
+                    titleLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+                    detailsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+                    sponsorBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; " +
+                            "-fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 7 16; -fx-cursor: hand;");
+                    sponsorBtn.setOnMouseEntered(e -> sponsorBtn.setStyle(
+                            "-fx-background-color: #059669; -fx-text-fill: white; " +
+                                    "-fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 7 16; -fx-cursor: hand;"));
+                    sponsorBtn.setOnMouseExited(e -> sponsorBtn.setStyle(
+                            "-fx-background-color: #10b981; -fx-text-fill: white; " +
+                                    "-fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 7 16; -fx-cursor: hand;"));
                     HBox.setHgrow(spacer, Priority.ALWAYS);
                     textContainer.getChildren().addAll(titleLabel, detailsLabel);
                     container.getChildren().addAll(textContainer, spacer, sponsorBtn);
@@ -150,20 +143,16 @@ public class SponsorPortalController implements Initializable {
                         setGraphic(null);
                     } else {
                         titleLabel.setText(event.getTitle());
-                        String dateStr = "";
-                        if (event.getStartDate() != null) {
-                            dateStr = event.getStartDate().toLocalDate().toString();
-                        }
+                        String dateStr = (event.getStartDate() != null)
+                                ? event.getStartDate().toLocalDate().toString() : "";
                         detailsLabel.setText(event.getLocation() + " • " + dateStr);
                         sponsorBtn.setOnAction(e -> handleSponsorEvent(event));
                         setGraphic(container);
                     }
                 }
             });
-            System.out.println("✅ ListView configurée avec cellules personnalisées.");
         }
 
-        // Gestion du sélecteur d'email
         if (emailAccount != null) {
             try {
                 ObservableList<String> emails = sponsorService.getDemoEmailsFromSponsor();
@@ -179,7 +168,7 @@ public class SponsorPortalController implements Initializable {
                     emailAccount.setValue(first);
                     onAccountSelected(first);
                 } else {
-                    showError("Aucun email", "Aucun sponsor trouvé en base. Veuillez en créer un.");
+                    showError("Aucun email", "Aucun sponsor trouvé en base.");
                 }
             } catch (Exception e) {
                 showError("DB", "Impossible de charger les emails : " + e.getMessage());
@@ -188,38 +177,15 @@ public class SponsorPortalController implements Initializable {
             String sessionEmail = UserSession.getInstance().getEmail();
             if (sessionEmail != null && !sessionEmail.isBlank()) {
                 setInitialEmail(sessionEmail);
-            } else {
-                showError("Session", "Aucun utilisateur connecté et aucun sélecteur d'email.");
             }
         }
 
         setPortalEnabled(false);
         clearPortal();
         renderCards();
-
-        Platform.runLater(this::translateUI);
-    }
-
-    private void translateUI() {
-        if (TranslationService.getCurrentLang().equals("fr")) return;
-        String[] texts = {
-                "Mes Sponsors",
-                "Ma Contribution",
-                "Mes Événements",
-                "Mes contributions par sponsor"
-        };
-        String[] translated = new String[texts.length];
-        for (int i = 0; i < texts.length; i++) {
-            translated[i] = TranslationService.translate(texts[i]);
-        }
-        if (mySponsorsSectionLabel != null) mySponsorsSectionLabel.setText(translated[0]);
-        if (myContributionSectionLabel != null) myContributionSectionLabel.setText(translated[1]);
-        if (myEventsSectionLabel != null) myEventsSectionLabel.setText(translated[2]);
-        if (myContributionsChart != null) myContributionsChart.setTitle(translated[3]);
     }
 
     private void onAccountSelected(String email) {
-        System.out.println("onAccountSelected: " + email);
         currentEmail = email;
         MainController.getInstance().setLastSponsorPortalEmail(currentEmail);
         if (currentEmail == null || currentEmail.isBlank()) {
@@ -232,31 +198,30 @@ public class SponsorPortalController implements Initializable {
     }
 
     private void setPortalEnabled(boolean enabled) {
-        if (addSponsorBtn != null) addSponsorBtn.setDisable(!enabled);
-        if (searchField != null)   searchField.setDisable(!enabled);
-        if (companyFilter != null) companyFilter.setDisable(!enabled);
-        if (eventFilter != null)   eventFilter.setDisable(!enabled);
-        if (cardsPane != null)     cardsPane.setDisable(!enabled);
+        if (addSponsorBtn != null)  addSponsorBtn.setDisable(!enabled);
+        if (exportExcelBtn != null) exportExcelBtn.setDisable(!enabled);
+        if (searchField != null)    searchField.setDisable(!enabled);
+        if (companyFilter != null)  companyFilter.setDisable(!enabled);
+        if (eventFilter != null)    eventFilter.setDisable(!enabled);
+        if (cardsPane != null)      cardsPane.setDisable(!enabled);
     }
 
     private void clearPortal() {
         baseList.clear();
-        if (mySponsorsLabel != null) mySponsorsLabel.setText("0");
+        if (mySponsorsLabel != null)     mySponsorsLabel.setText("0");
         if (myContributionLabel != null) myContributionLabel.setText("0,00 DT");
-        if (myEventsLabel != null) myEventsLabel.setText("0");
-        if (statusLabel != null) statusLabel.setText("Sélectionnez un compte pour afficher vos sponsors.");
-        if (searchField != null) searchField.clear();
-        if (companyFilter != null) companyFilter.getItems().clear();
-        if (eventFilter != null) eventFilter.getItems().clear();
-        myContributionsChart.setData(FXCollections.observableArrayList());
+        if (myEventsLabel != null)       myEventsLabel.setText("0");
+        if (statusLabel != null)         statusLabel.setText("Sélectionnez un compte pour afficher vos sponsors.");
+        if (searchField != null)         searchField.clear();
+        if (companyFilter != null)       companyFilter.getItems().clear();
+        if (eventFilter != null)         eventFilter.getItems().clear();
+        if (myContributionsChart != null) myContributionsChart.setData(FXCollections.observableArrayList());
         if (suggestedEventsListView != null) suggestedEventsListView.getItems().clear();
     }
 
     private void reloadMine() {
-        System.out.println("reloadMine() avec email: " + currentEmail);
         try {
             baseList.setAll(sponsorService.getSponsorsByContactEmail(currentEmail));
-            System.out.println("Nombre de sponsors trouvés: " + baseList.size());
             updateMyKpis();
             refreshFilterCombos();
             applyPredicate();
@@ -265,55 +230,41 @@ public class SponsorPortalController implements Initializable {
             loadSuggestedEvents();
         } catch (Exception e) {
             showError("DB", e.getMessage());
-            e.printStackTrace();
         }
     }
 
     private void loadSuggestedEvents() {
-        System.out.println("loadSuggestedEvents()");
         if (currentEmail == null || currentEmail.isBlank()) return;
-
-        List<Sponsor> sponsors = null;
+        List<Sponsor> sponsors;
         try {
             sponsors = sponsorService.getSponsorsByContactEmail(currentEmail);
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la récupération des sponsors: " + e.getMessage());
-            return;
-        }
+        } catch (Exception e) { return; }
 
-        if (sponsors == null || sponsors.isEmpty()) {
-            System.out.println("Aucun sponsor trouvé pour cet email.");
-            return;
-        }
+        if (sponsors == null || sponsors.isEmpty()) return;
 
-        Sponsor sponsor = sponsors.get(0);
-        String industry = sponsor.getIndustry();
-        System.out.println("Secteur du sponsor: " + industry);
-
+        String industry = sponsors.get(0).getIndustry();
         if (industry == null || industry.isBlank()) {
-            System.out.println("Secteur vide, pas de recommandations.");
-            suggestedEventsListView.getItems().clear();
+            if (suggestedEventsListView != null) suggestedEventsListView.getItems().clear();
             return;
         }
 
         List<Event> events = matchingService.findRelevantEvents(industry);
-        System.out.println("Événements recommandés trouvés: " + events.size());
-
         Platform.runLater(() -> {
-            suggestedEventsListView.getItems().setAll(events);
-            suggestedEventsListView.refresh();
+            if (suggestedEventsListView != null) {
+                suggestedEventsListView.getItems().setAll(events);
+                suggestedEventsListView.refresh();
+            }
         });
     }
 
     private void updateMyKpis() {
         try {
-            int count = sponsorService.getMySponsorsCountDemo(currentEmail);
-            double sum = sponsorService.getMyTotalContributionDemo(currentEmail);
-            int evCount = sponsorService.getMySponsoredEventsCountDemo(currentEmail);
-
-            if (mySponsorsLabel != null) mySponsorsLabel.setText(String.valueOf(count));
-            if (myContributionLabel != null) myContributionLabel.setText(String.format("%,.2f DT", sum));
-            if (myEventsLabel != null) myEventsLabel.setText(String.valueOf(evCount));
+            if (mySponsorsLabel != null)
+                mySponsorsLabel.setText(String.valueOf(sponsorService.getMySponsorsCountDemo(currentEmail)));
+            if (myContributionLabel != null)
+                myContributionLabel.setText(String.format("%,.2f DT", sponsorService.getMyTotalContributionDemo(currentEmail)));
+            if (myEventsLabel != null)
+                myEventsLabel.setText(String.valueOf(sponsorService.getMySponsoredEventsCountDemo(currentEmail)));
         } catch (Exception e) {
             showError("KPI", e.getMessage());
         }
@@ -344,16 +295,13 @@ public class SponsorPortalController implements Initializable {
 
     private void applyPredicate() {
         if (filtered == null) return;
-
         String q = (searchField == null || searchField.getText() == null) ? "" : searchField.getText().trim().toLowerCase();
         String comp = (companyFilter == null) ? null : companyFilter.getValue();
         String eventTitle = (eventFilter == null) ? null : eventFilter.getValue();
 
         Integer eventId = null;
         if (eventTitle != null && !eventTitle.isBlank()) {
-            try {
-                eventId = sponsorService.getEventIdByTitle(eventTitle);
-            } catch (Exception ignored) {}
+            try { eventId = sponsorService.getEventIdByTitle(eventTitle); } catch (Exception ignored) {}
         }
         Integer finalEventId = eventId;
 
@@ -362,10 +310,8 @@ public class SponsorPortalController implements Initializable {
                     || String.valueOf(s.getId()).contains(q)
                     || (s.getCompany_name() != null && s.getCompany_name().toLowerCase().contains(q))
                     || (s.getContact_email() != null && s.getContact_email().toLowerCase().contains(q));
-
             boolean okComp = (comp == null) || (s.getCompany_name() != null && s.getCompany_name().equalsIgnoreCase(comp));
             boolean okEv = (finalEventId == null) || s.getEvent_id() == finalEventId;
-
             return okQ && okComp && okEv;
         });
 
@@ -376,7 +322,6 @@ public class SponsorPortalController implements Initializable {
     private void renderCards() {
         if (cardsPane == null || filtered == null) return;
         cardsPane.getChildren().clear();
-
         for (Sponsor s : filtered) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(CARD_FXML));
@@ -385,16 +330,12 @@ public class SponsorPortalController implements Initializable {
                     r.setPrefWidth(440);
                     r.setMaxWidth(Double.MAX_VALUE);
                 }
-
                 SponsorCardController card = loader.getController();
-                card.setData(
-                        s,
+                card.setData(s,
                         () -> openDetailsAsPage(s),
                         () -> onGeneratePdfFromDetails(s),
                         () -> onEdit(s),
-                        () -> onDelete(s)
-                );
-
+                        () -> onDelete(s));
                 cardsPane.getChildren().add(root);
             } catch (Exception ignored) {}
         }
@@ -408,26 +349,52 @@ public class SponsorPortalController implements Initializable {
             for (Map.Entry<String, Double> entry : data.entrySet()) {
                 series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
             }
-            myContributionsChart.setData(FXCollections.observableArrayList(series));
-            myContributionsChart.setTitle("Mes contributions par sponsor");
+            if (myContributionsChart != null) {
+                myContributionsChart.setData(FXCollections.observableArrayList(series));
+                myContributionsChart.setTitle("Mes contributions par sponsor");
+            }
         } catch (Exception e) {
-            showError("Chart", "Erreur chargement graphique : " + e.getMessage());
+            showError("Chart", e.getMessage());
+        }
+    }
+
+    private void handleExportExcel() {
+        try {
+            List<Sponsor> sponsorsToExport = new ArrayList<>(filtered);
+            if (sponsorsToExport.isEmpty()) {
+                showError("Export", "Aucun sponsor à exporter.");
+                return;
+            }
+            Map<String, Double> contributions = sponsorService.getMyContributionsByCompany(currentEmail);
+            JsonObject chartConfig = QuickChartService.createPieChart(
+                    "Mes contributions",
+                    contributions.keySet().toArray(new String[0]),
+                    contributions.values().stream().mapToDouble(Double::doubleValue).toArray()
+            );
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le fichier Excel");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+            fileChooser.setInitialFileName("mes_sponsors_export.xlsx");
+            File file = fileChooser.showSaveDialog(
+                    exportExcelBtn != null ? exportExcelBtn.getScene().getWindow() : null);
+            if (file != null) {
+                ExcelExportService.exportSponsors(sponsorsToExport, chartConfig, file.getAbsolutePath());
+                showInfo("Export réussi", "Le fichier Excel a été généré avec succès !");
+            }
+        } catch (Exception e) {
+            showError("Export", "Erreur : " + e.getMessage());
         }
     }
 
     private void onAdd() {
         if (currentEmail == null || currentEmail.isBlank()) {
-            showError("Accès", "Choisissez un email (mode DEMO).");
+            showError("Accès", "Choisissez un email.");
             return;
         }
         openFormAsPage(null, currentEmail);
     }
 
     private void onEdit(Sponsor existing) {
-        if (currentEmail == null || currentEmail.isBlank()) {
-            showError("Accès", "Choisissez un email (mode DEMO).");
-            return;
-        }
         openFormAsPage(existing, currentEmail);
     }
 
@@ -435,8 +402,7 @@ public class SponsorPortalController implements Initializable {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Suppression");
         confirm.setHeaderText("Supprimer sponsor");
-        confirm.setContentText("Supprimer: " + s.getCompany_name() + " ?");
-
+        confirm.setContentText("Supprimer : " + s.getCompany_name() + " ?");
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 try {
@@ -454,10 +420,7 @@ public class SponsorPortalController implements Initializable {
             if (s == null) return;
             String eventTitle = sponsorService.getEventTitleById(s.getEvent_id());
             File pdf = pdfService.generateSponsorContractPdf(s, eventTitle);
-            if (!Desktop.isDesktopSupported()) {
-                showError("PDF", "Desktop non supporté sur cette machine.");
-                return;
-            }
+            if (!Desktop.isDesktopSupported()) { showError("PDF", "Desktop non supporté."); return; }
             Desktop.getDesktop().open(pdf);
         } catch (Exception ex) {
             showError("PDF", ex.getMessage());
@@ -475,9 +438,7 @@ public class SponsorPortalController implements Initializable {
                     ctrl.setFixedEmail(fixedEmail);
                     if (existing == null) ctrl.setModeAdd();
                     else ctrl.setModeEdit(existing);
-                    if (eventToSelect != null) {
-                        ctrl.preSelectEvent(eventToSelect);
-                    }
+                    if (eventToSelect != null) ctrl.preSelectEvent(eventToSelect);
                     ctrl.setOnSaved(saved -> {
                         reloadMine();
                         openDetailsAsPage(saved);
@@ -508,15 +469,19 @@ public class SponsorPortalController implements Initializable {
                     }
             );
         } catch (Exception e) {
-            showError("UI", "Impossible d'ouvrir détails: " + e.getMessage());
+            showError("UI", "Impossible d'ouvrir détails : " + e.getMessage());
         }
     }
 
     private void showError(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(msg);
+        a.setTitle(title); a.setHeaderText(null); a.setContentText(msg);
+        a.showAndWait();
+    }
+
+    private void showInfo(String title, String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(title); a.setHeaderText(null); a.setContentText(msg);
         a.showAndWait();
     }
 }

@@ -8,107 +8,118 @@
 
     <center>
         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-border-color: transparent;" vbarPolicy="AS_NEEDED">
-            <VBox spacing="0">
 
-                <!-- KPI (5 cartes) -->
-                <HBox spacing="10" style="-fx-padding: 24 35; -fx-background-color: #f1f5f9;                              -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+            <VBox fillWidth="true" spacing="0">
 
-                    <VBox maxWidth="300" styleClass="stat-card stat-card-rose" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label style="-fx-font-size: 32px;" text="💸" />
-                            <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                <Label styleClass="label-section" text="Total Dépenses" />
-                                <Label fx:id="totalDepensesLabel" style="-fx-text-fill: #be123c;" styleClass="label-value" text="0 DT" />
+                <!-- KPI -->
+                <HBox spacing="16" style="-fx-padding: 24 35; -fx-background-color: #f1f5f9;">
+
+                    <VBox spacing="12" styleClass="dashboard-stat-card" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="14">
+                            <StackPane styleClass="dashboard-icon-box icon-rose">
+                                <Label styleClass="dashboard-icon-label" text="💸" />
+                            </StackPane>
+                            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                <Label styleClass="dashboard-stat-title" text="Total Dépenses" />
+                                <Label fx:id="totalDepensesLabel" styleClass="dashboard-stat-value value-rose" text="0 DT" />
                             </VBox>
                         </HBox>
-                        <Label style="-fx-text-fill: #e11d48; -fx-font-size: 12px; -fx-font-weight: bold;" text="Engagées" />
+                        <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-rose" />
+                        <Label styleClass="dashboard-stat-footer footer-rose" text="Engagées" />
                     </VBox>
 
-                    <VBox maxWidth="300" styleClass="stat-card stat-card-blue" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label style="-fx-font-size: 32px;" text="📋" />
-                            <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                <Label styleClass="label-section" text="Nombre total" />
-                                <Label fx:id="countDepensesLabel" style="-fx-text-fill: #1e40af;" styleClass="label-value" text="0" />
+                    <VBox spacing="12" styleClass="dashboard-stat-card" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="14">
+                            <StackPane styleClass="dashboard-icon-box icon-blue">
+                                <Label styleClass="dashboard-icon-label" text="📋" />
+                            </StackPane>
+                            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                <Label styleClass="dashboard-stat-title" text="Nombre total" />
+                                <Label fx:id="countDepensesLabel" styleClass="dashboard-stat-value dashboard-stat-value-small value-blue" text="0" />
                             </VBox>
                         </HBox>
-                        <Label style="-fx-text-fill: #2563eb; -fx-font-size: 12px; -fx-font-weight: bold;" text="Enregistrées" />
+                        <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-blue" />
+                        <Label styleClass="dashboard-stat-footer footer-blue" text="Enregistrées" />
                     </VBox>
 
-                    <VBox maxWidth="300" styleClass="stat-card stat-card-emerald" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label style="-fx-font-size: 32px;" text="📊" />
-                            <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                <Label styleClass="label-section" text="Ligne moyenne" />
-                                <Label fx:id="avgDepenseLabel" style="-fx-text-fill: #15803d;" styleClass="label-value" text="0 DT" />
+                    <VBox spacing="12" styleClass="dashboard-stat-card" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="14">
+                            <StackPane styleClass="dashboard-icon-box icon-emerald">
+                                <Label styleClass="dashboard-icon-label" text="📊" />
+                            </StackPane>
+                            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                <Label styleClass="dashboard-stat-title" text="Ligne moyenne" />
+                                <Label fx:id="avgDepenseLabel" styleClass="dashboard-stat-value value-emerald" text="0 DT" />
                             </VBox>
                         </HBox>
-                        <Label style="-fx-text-fill: #059669; -fx-font-size: 12px; -fx-font-weight: bold;" text="Par dépense" />
+                        <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-emerald" />
+                        <Label styleClass="dashboard-stat-footer footer-emerald" text="Par dépense" />
                     </VBox>
 
-                    <VBox maxWidth="300" styleClass="stat-card stat-card-purple" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label style="-fx-font-size: 32px;" text="🏷" />
-                            <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                <Label styleClass="label-section" text="Catégories" />
-                                <Label fx:id="categoriesLabel" style="-fx-text-fill: #7c3aed;" styleClass="label-value" text="0" />
+                    <VBox spacing="12" styleClass="dashboard-stat-card" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="14">
+                            <StackPane styleClass="dashboard-icon-box icon-purple">
+                                <Label styleClass="dashboard-icon-label" text="🏷" />
+                            </StackPane>
+                            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                <Label styleClass="dashboard-stat-title" text="Catégories" />
+                                <Label fx:id="categoriesLabel" styleClass="dashboard-stat-value dashboard-stat-value-small value-purple" text="0" />
                             </VBox>
                         </HBox>
-                        <Label style="-fx-text-fill: #a855f7; -fx-font-size: 12px; -fx-font-weight: bold;" text="Utilisées" />
-                    </VBox>
-
-                    <VBox maxWidth="300" styleClass="stat-card stat-card-amber" HBox.hgrow="ALWAYS">
-                        <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label style="-fx-font-size: 32px;" text="⚠" />
-                            <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                <Label styleClass="label-section" text="Anomalies" />
-                                <Label fx:id="anomaliesLabel" style="-fx-text-fill: #d97706;" styleClass="label-value" text="0" />
-                            </VBox>
-                        </HBox>
-                        <Label style="-fx-text-fill: #f59e0b; -fx-font-size: 12px; -fx-font-weight: bold;" text="Détectées" />
+                        <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-purple" />
+                        <Label styleClass="dashboard-stat-footer footer-purple" text="Utilisées" />
                     </VBox>
                 </HBox>
 
-                <!-- FILTRES & ACTIONS -->
-                <HBox alignment="CENTER_LEFT" spacing="14" style="-fx-padding: 20 35; -fx-background-color: white;                              -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+                <!-- FILTRES -->
+                <HBox alignment="CENTER_LEFT" spacing="14" style="-fx-padding: 20 35; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
 
                     <VBox spacing="6">
-                        <Label style="-fx-text-fill:#64748b; -fx-font-size:12px; -fx-font-weight:700;" text="Catégorie" />
+                        <Label styleClass="filter-label-modern" text="Catégorie" />
                         <ComboBox fx:id="filtreCategorie" prefWidth="220" styleClass="text-field" />
                     </VBox>
 
                     <VBox spacing="6">
-                        <Label style="-fx-text-fill:#64748b; -fx-font-size:12px; -fx-font-weight:700;" text="Période" />
+                        <Label styleClass="filter-label-modern" text="Période" />
                         <ComboBox fx:id="filtrePeriode" prefWidth="220" styleClass="text-field" />
                     </VBox>
 
                     <VBox spacing="6">
-                        <Label style="-fx-text-fill:#64748b; -fx-font-size:12px; -fx-font-weight:700;" text="État financier" />
+                        <Label styleClass="filter-label-modern" text="État financier" />
                         <ComboBox fx:id="filtreEtatFinancier" prefWidth="240" styleClass="text-field" />
                     </VBox>
 
                     <Region HBox.hgrow="ALWAYS" />
 
-                    <!-- AJOUT : bouton Exporter Excel -->
-                    <Button fx:id="exportExcelBtn" minHeight="40" minWidth="170" styleClass="btn-primary" text="📥 Exporter Excel" />
+                    <Button fx:id="exportExcelBtn" minHeight="42" minWidth="170" styleClass="btn-primary" text="📥 Exporter Excel" />
 
-                    <Button fx:id="addBtn" minHeight="40" minWidth="170" styleClass="btn-success" text="➕ Nouvelle Dépense" />
+                    <Button fx:id="addBtn" minHeight="42" minWidth="180" styleClass="btn-success" text="➕ Nouvelle Dépense" />
                 </HBox>
 
-                <!-- Graphique circulaire -->
-                <HBox alignment="CENTER" style="-fx-padding: 20 35;">
-                    <PieChart fx:id="categoryPieChart" labelsVisible="true" legendVisible="true" prefHeight="400" prefWidth="700" title="Répartition des dépenses par catégorie" />
-                </HBox>
+                <!-- GRAPHE -->
+                <VBox style="-fx-padding: 24 35 20 35;">
+                    <VBox spacing="12" styleClass="chart-card-modern">
+                        <Label styleClass="chart-card-title" text="Répartition des dépenses par catégorie" />
+                        <Label styleClass="chart-card-subtitle" text="Visualisation claire des catégories les plus utilisées" />
+
+                        <StackPane maxWidth="1.7976931348623157E308" prefHeight="470" styleClass="chart-image-holder">
+                            <PieChart fx:id="categoryPieChart" clockwise="true" labelsVisible="true" legendSide="RIGHT" legendVisible="true" minHeight="430" minWidth="900" prefHeight="430" prefWidth="1000" startAngle="90" styleClass="modern-pie-chart" />
+                        </StackPane>
+                    </VBox>
+                </VBox>
 
                 <!-- LISTE -->
-                <VBox spacing="16" style="-fx-padding: 28 35;" VBox.vgrow="ALWAYS">
-                    <Label styleClass="label-subtitle" text="📋 Liste des Dépenses" />
+                <VBox spacing="16" styleClass="list-block-modern" VBox.vgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label style="-fx-font-size: 18px;" text="📋" />
+                        <Label styleClass="section-title-modern" text="Liste des Dépenses" />
+                        <Label fx:id="statusLabel" styleClass="section-desc-modern" text="..." />
+                    </HBox>
+
                     <TilePane fx:id="cardsPane" hgap="16" prefColumns="3" style="-fx-padding: 10;" vgap="16" />
-                    <Label fx:id="statusLabel" styleClass="label-description" text="..." />
                 </VBox>
 
             </VBox>
         </ScrollPane>
     </center>
-
 </BorderPane>

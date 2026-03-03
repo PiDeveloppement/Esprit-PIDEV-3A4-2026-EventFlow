@@ -32,9 +32,9 @@
             <Label text="📝 Description" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <TextField fx:id="descField" promptText="Ex: Achat de matériel" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <!-- Catégorie -->
+            <!-- Catégorie (remplacée par ComboBox) -->
             <Label text="🏷️ Catégorie" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <TextField fx:id="categoryField" promptText="Ex: Fournitures" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <ComboBox fx:id="categoryComboBox" promptText="Choisissez une catégorie" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
             <!-- Montant et Devise -->
             <Label text="💵 Montant" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
