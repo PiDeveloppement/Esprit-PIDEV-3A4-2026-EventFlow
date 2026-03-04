@@ -182,6 +182,4 @@ public class HelloApplication extends Application {
             System.err.println("❌ Erreur lors du chargement de la page d'inscription");
             e.printStackTrace();
         }
-
-
     }}

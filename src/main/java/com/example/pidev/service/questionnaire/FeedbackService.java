@@ -172,4 +172,29 @@ public class FeedbackService {
         }
         stats.put("repartition", repartition);
         return stats;
-    }}
+    }
+    public String getNomUserComplet(int idUser) {
+        String nomComplet = "";
+        // Note : On utilise 'user_model' et les colonnes 'First_Name'/'Last_Name'
+        // comme vu dans tes autres méthodes
+        String sql = "SELECT First_Name, Last_Name FROM user_model WHERE Id_User = ?";
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, idUser);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    String prenom = rs.getString("First_Name");
+                    String nom = rs.getString("Last_Name");
+
+                    nomComplet = (prenom != null ? prenom : "") + " " + (nom != null ? nom : "");
+                    nomComplet = nomComplet.trim();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération du nom utilisateur : " + e.getMessage());
+        }
+
+        // Si on ne trouve rien en BDD, on retourne une valeur par défaut pour ne pas avoir un PDF vide
+        return nomComplet.isEmpty() ? "Participant #" + idUser : nomComplet;
+    }
+}

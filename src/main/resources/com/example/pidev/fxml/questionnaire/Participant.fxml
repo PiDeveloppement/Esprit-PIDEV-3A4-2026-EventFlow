@@ -31,28 +31,40 @@
     </VBox>
 
     <VBox fx:id="vboxEvaluation" spacing="15" alignment="CENTER" style="-fx-padding: 20 0;">
-        <Label text="Notez globalement l'événement :" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+        <Label text="Notez globalement l'événement :" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;"/>
 
         <HBox fx:id="starContainer" spacing="10" alignment="CENTER">
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 30; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
+            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
         </HBox>
 
-        <TextArea fx:id="txtCommentaire"
-                  promptText="Un commentaire additionnel (facultatif)..."
-                  prefHeight="100"
-                  wrapText="true"
-                  style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
+        <VBox spacing="8" maxWidth="500">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Votre avis :" style="-fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                <Button text="😊" onAction="#toggleEmojiPicker"
+                        style="-fx-background-color: transparent; -fx-font-size: 20; -fx-cursor: hand; -fx-padding: 0;"/>
+            </HBox>
+
+            <FlowPane fx:id="emojiPicker" visible="false" managed="false" hgap="10" vgap="10"
+                      style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+            </FlowPane>
+
+            <TextArea fx:id="txtCommentaire"
+                      promptText="Un commentaire additionnel (facultatif)..."
+                      prefHeight="120"
+                      wrapText="true"
+                      style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-font-family: 'Segoe UI Emoji'; -fx-font-size: 14px;" />
+        </VBox>
     </VBox>
 
     <HBox alignment="CENTER_RIGHT">
         <Button fx:id="btnSuivant"
                 onAction="#handleSuivant"
                 text="SUIVANT →"
-                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 8; -fx-cursor: hand;" />
+                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 35; -fx-background-radius: 8; -fx-cursor: hand;" />
     </HBox>
 
 </VBox>

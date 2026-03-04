@@ -1,27 +1,151 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.pidev.controller.questionnaire.FeedbackViewController"
-            style="-fx-background-color: #f8fafc;">
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.questionnaire.FeedbackViewController"
+      style="-fx-background-color: #f1f5f9;"
+      spacing="0">
 
-    <VBox spacing="30" style="-fx-padding: 40; -fx-background-color: #f8fafc;">
+    <!-- HEADER BLANC -->
+    <VBox style="-fx-background-color: white;
+                 -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;
+                 -fx-padding: 16 40 16 40;">
 
-        <HBox spacing="50" alignment="CENTER_LEFT"
-              style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 5);">
-            <VBox alignment="CENTER" spacing="5">
-                <Label fx:id="lblMoyenne" text="0.0" style="-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
-                <Label fx:id="lblTotalRatings" text="0 Ratings" style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label text="Customer Reviews"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="See what customers are saying about your work"
+                       style="-fx-font-size: 12px; -fx-text-fill: #9ca3af;"/>
             </VBox>
+            <Button fx:id="btnExport" text="⬆  Export" onAction="#handleExport"
+                    style="-fx-background-color: white; -fx-text-fill: #374151;
+                           -fx-font-size: 12px; -fx-font-weight: 600;
+                           -fx-background-radius: 8; -fx-border-color: #d1d5db;
+                           -fx-border-width: 1.5; -fx-border-radius: 8;
+                           -fx-padding: 7 15; -fx-cursor: hand;"/>
+            <Button fx:id="btnFilter" text="≡  Filter" onAction="#handleFilter"
+                    style="-fx-background-color: white; -fx-text-fill: #374151;
+                           -fx-font-size: 12px; -fx-font-weight: 600;
+                           -fx-background-radius: 8; -fx-border-color: #d1d5db;
+                           -fx-border-width: 1.5; -fx-border-radius: 8;
+                           -fx-padding: 7 15; -fx-cursor: hand;"/>
         </HBox>
 
-        <Label text="Recent Feedbacks" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+        <!-- KPI CARDS -->
+        <HBox spacing="14" style="-fx-padding: 14 0 0 0;">
 
-        <VBox fx:id="feedbackListContainer" spacing="20"/>
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
+                  spacing="6">
+                <Label fx:id="lblMoyenne" text="0.0"
+                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <HBox fx:id="starsKpi1" spacing="2"/>
+                <Separator/>
+                <Label fx:id="lblBasedOn" text="Based on 0 reviews"
+                       style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
+            </VBox>
 
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
+                  spacing="6">
+                <Label fx:id="lblTotalReviews" text="0"
+                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="Total Reviews"
+                       style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                <Separator/>
+                <Label fx:id="lblTrend" text="+17% from last month"
+                       style="-fx-font-size: 11px; -fx-text-fill: #16a34a; -fx-font-weight: 600;"/>
+            </VBox>
+
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
+                  spacing="6">
+                <Label fx:id="lblFiveStarPct" text="0%"
+                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="5-Star reviews"
+                       style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                <Separator/>
+                <Label fx:id="lblQuality" text="Excellent ratings"
+                       style="-fx-font-size: 11px; -fx-text-fill: #16a34a; -fx-font-weight: 600;"/>
+            </VBox>
+
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
+                  spacing="6">
+                <Label fx:id="lblThisMonth" text="0.0"
+                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="This Month"
+                       style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                <Separator/>
+                <Label fx:id="lblMonthTrend" text="+0.1 from last month"
+                       style="-fx-font-size: 11px; -fx-text-fill: #2563eb; -fx-font-weight: 600;"/>
+            </VBox>
+
+        </HBox>
     </VBox>
-</ScrollPane>
+
+    <!-- CORPS -->
+    <HBox spacing="0" VBox.vgrow="ALWAYS">
+
+        <!-- PANNEAU GAUCHE — 320px -->
+        <VBox style="-fx-background-color: #f1f5f9; -fx-padding: 16 14;"
+              prefWidth="360" minWidth="360" spacing="12">
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;
+                         -fx-padding: 14 10;" spacing="10">
+                <Label text="Ratings Breakdown"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <VBox fx:id="ratingsBreakdownBox" spacing="10"/>
+            </VBox>
+
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;
+                         -fx-padding: 14 14;" spacing="8">
+                <Label text="Category Ratings"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <VBox fx:id="categoryRatingsBox" spacing="8"/>
+            </VBox>
+
+        </VBox>
+
+        <!-- PANNEAU DROIT -->
+        <VBox VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: #f1f5f9;" spacing="0">
+
+            <HBox style="-fx-background-color: white; -fx-padding: 0 20;
+                         -fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0;" spacing="0">
+                <Button fx:id="btnTabRecent" text="Recent Reviews" onAction="#showRecentTab"
+                        style="-fx-background-color: transparent; -fx-text-fill: #1d4ed8;
+                               -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;
+                               -fx-padding: 13 16; -fx-border-color: #1d4ed8;
+                               -fx-border-width: 0 0 2.5 0;"/>
+                <Button fx:id="btnTabHighest" text="Highest Rated" onAction="#showHighestTab"
+                        style="-fx-background-color: transparent; -fx-text-fill: #6b7280;
+                               -fx-font-size: 13px; -fx-cursor: hand;
+                               -fx-padding: 13 16; -fx-border-color: transparent;
+                               -fx-border-width: 0 0 2.5 0;"/>
+                <Button fx:id="btnTabPhotos" text="With Photos" onAction="#showPhotosTab"
+                        style="-fx-background-color: transparent; -fx-text-fill: #6b7280;
+                               -fx-font-size: 13px; -fx-cursor: hand;
+                               -fx-padding: 13 16; -fx-border-color: transparent;
+                               -fx-border-width: 0 0 2.5 0;"/>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+                <VBox fx:id="feedbackListContainer" spacing="12"
+                      style="-fx-padding: 16 20;"/>
+            </ScrollPane>
+
+        </VBox>
+    </HBox>
+
+</VBox>

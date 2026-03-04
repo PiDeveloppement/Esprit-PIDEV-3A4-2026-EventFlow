@@ -36,16 +36,23 @@ public class LandingPageController {
     @FXML
     private void handleFeedback() {
         try {
-            currentScene = homeSection.getScene(); // ← utiliser homeSection au lieu de mainScrollPane
+            currentScene = homeSection.getScene();
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pidev/fxml/questionnaire/FeedbackView.fxml")
+            );
+            Parent feedbackRoot = loader.load();
+
             VBox root = (VBox) currentScene.getRoot();
-            VBox feedbackContenu = construireFeedbackContenu();
             if (root.getChildren().size() > 1) {
-                root.getChildren().set(1, feedbackContenu);
+                root.getChildren().set(1, feedbackRoot);
             } else {
-                root.getChildren().add(feedbackContenu);
+                root.getChildren().add(feedbackRoot);
             }
+            VBox.setVgrow(feedbackRoot, Priority.ALWAYS);
+
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la page feedbacks : " + e.getMessage());
         }
     }
 
