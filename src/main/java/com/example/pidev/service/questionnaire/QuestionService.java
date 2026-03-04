@@ -77,18 +77,21 @@ public class QuestionService {
      * Ajoute une nouvelle question.
      */
     public void ajouter(Question q) throws SQLException {
-        // On ajoute id_user dans la requête
-        String req = "INSERT INTO questions (id_event, texte_question, bonne_reponse, points, id_user) VALUES (?, ?, ?, ?, ?)";
+        // Vérifiez que option1, option2, option3 sont bien dans la liste des colonnes
+        String req = "INSERT INTO questions (id_event, texte_question, bonne_reponse, points, option1, option2, option3, id_user) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pst = conn.prepareStatement(req)) {
-            pst.setInt(1, q.getIdEvent());
-            pst.setString(2, q.getTexte());
-            pst.setString(3, q.getReponse());
-            pst.setInt(4, q.getPoints());
-            pst.setInt(5, 1); // <--- Ici, on envoie l'ID de l'utilisateur (ex: 1)
+        PreparedStatement ps = conn.prepareStatement(req);
+        ps.setInt(1, q.getIdEvent());
+        ps.setString(2, q.getTexte());
+        ps.setString(3, q.getReponse());
+        ps.setInt(4, q.getPoints());
+        ps.setString(5, q.getOption1()); // Assurez-vous que ce n'est pas null
+        ps.setString(6, q.getOption2());
+        ps.setString(7, q.getOption3());
+        ps.setInt(8, q.getIdUser());
 
-            pst.executeUpdate();
-        }
+        ps.executeUpdate();
     }
 
     /**
@@ -158,12 +161,17 @@ public class QuestionService {
      * Méthode utilitaire pour éviter la répétition du mapping ResultSet -> Objet Question.
      */
     private Question mapResultSetToQuestion(ResultSet rs) throws SQLException {
-        return new Question(
+        Question q = new Question(
                 rs.getInt("id_question"),
                 rs.getInt("id_event"),
                 rs.getString("texte_question"),
                 rs.getString("bonne_reponse"),
-                rs.getInt("points")
+                rs.getInt("points"),
+                rs.getString("option1"),
+                rs.getString("option2"),
+                rs.getString("option3")
         );
+        q.setIdUser(rs.getInt("id_user"));
+        return q;
     }
 }

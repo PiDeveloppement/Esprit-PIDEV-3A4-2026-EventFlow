@@ -5,92 +5,88 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.questionnaire.QuestionController">
-    <content>
-        <VBox spacing="30.0" style="-fx-padding: 40;">
+<VBox spacing="20.0" style="-fx-background-color: #f8fafc; -fx-padding: 30;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.questionnaire.QuestionController">
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="15.0">
             <children>
-                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                    <children>
-                        <Label text="✨ Éditeur de Questions" textFill="#1e293b">
-                            <font><Font name="System Bold" size="28.0" /></font>
-                        </Label>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#switchToList" prefHeight="40.0" style="-fx-background-color: white; -fx-text-fill: #4f46e5; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-cursor: hand;" text="Voir la liste des questions ➡" />
-                    </children>
-                </HBox>
+                <Button onAction="#switchToList" style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;" text="← Retour" />
+                <Label text="Gestionnaire de QCM" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#genererQuestionParIA" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="✨ Générer par IA" />
+            </children>
+        </HBox>
 
-                <VBox spacing="15.0" style="-fx-background-color: #eff6ff; -fx-background-radius: 20; -fx-padding: 25; -fx-border-color: #bfdbfe; -fx-border-radius: 20; -fx-border-width: 1;">
-                    <children>
-                        <Label text="Génération Intelligente par Événement" textFill="#1e40af">
-                            <font><Font name="System Bold" size="14.0" /></font>
-                        </Label>
-                        <HBox spacing="15.0" alignment="CENTER_LEFT">
-                            <children>
-                                <Label text="L'IA utilisera le thème de l'événement sélectionné ci-dessous pour créer une question unique." textFill="#1e40af" wrapText="true" HBox.hgrow="ALWAYS" />
-                                <Button onAction="#genererQuestionParIA" prefHeight="45.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="✨ GÉNÉRER VIA IA" />
-                            </children>
-                        </HBox>
-                        <Label fx:id="lblSuggestionIA" text="Sélectionnez un événement puis cliquez sur Générer." textFill="#1e40af" style="-fx-font-style: italic;" />
-                    </children>
-                </VBox>
+        <Separator />
 
-                <VBox spacing="25.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5); -fx-padding: 35;">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f8fafc;">
+            <content>
+                <VBox spacing="20.0" style="-fx-padding: 10;">
                     <children>
-                        <Label text="Informations de la Question" textFill="#64748b">
-                            <font><Font name="System Bold" size="14.0" /></font>
-                        </Label>
+                        <VBox spacing="8.0">
+                            <Label text="Événement associé" style="-fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                            <ComboBox fx:id="comboEvent" maxWidth="Infinity" prefHeight="45.0" promptText="Choisir un événement..." style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0;" />
+                        </VBox>
 
-                        <GridPane hgap="25.0" vgap="20.0">
+                        <VBox spacing="8.0">
+                            <Label text="Énoncé de la question" style="-fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                            <TextArea fx:id="txtTexte" prefHeight="100.0" promptText="Saisissez la question ou laissez l'IA générer..." wrapText="true" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-font-size: 14;" />
+                            <Label fx:id="lblSuggestionIA" style="-fx-font-style: italic;" text="" />
+                        </VBox>
+
+                        <GridPane hgap="20.0" vgap="20.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                             </columnConstraints>
                             <rowConstraints>
-                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
-                                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                     <children>
-                                        <Label style="-fx-font-weight: bold;" text="Événement associé (Thème)" textFill="#475569" />
-                                        <ComboBox fx:id="comboEvent" maxWidth="Infinity" prefHeight="45.0" promptText="Choisir l'événement" style="-fx-background-radius: 10; -fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" />
+                                        <Label text="✅ Bonne Réponse" style="-fx-font-weight: bold; -fx-text-fill: #059669;" />
+                                        <TextField fx:id="txtReponse" prefHeight="45.0" promptText="La réponse correcte" style="-fx-background-radius: 8; -fx-border-color: #059669; -fx-border-radius: 8; -fx-border-width: 2;" />
                                     </children>
                                 </VBox>
 
-                                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                     <children>
-                                        <Label style="-fx-font-weight: bold;" text="Nombre de points" textFill="#475569" />
-                                        <TextField fx:id="txtPoints" prefHeight="45.0" promptText="Ex: 10" style="-fx-background-radius: 10; -fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" />
+                                        <Label text="❌ Option fausse 1" style="-fx-font-weight: bold; -fx-text-fill: #ef4444;" />
+                                        <TextField fx:id="txtOption1" prefHeight="45.0" promptText="Erreur possible 1" style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
                                     </children>
                                 </VBox>
 
-                                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                                <VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                     <children>
-                                        <Label style="-fx-font-weight: bold;" text="Énoncé de la Question" textFill="#475569" />
-                                        <TextArea fx:id="txtTexte" prefHeight="100.0" promptText="L'IA remplira ce champ..." style="-fx-background-radius: 10; -fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" wrapText="true" />
+                                        <Label text="❌ Option fausse 2" style="-fx-font-weight: bold; -fx-text-fill: #ef4444;" />
+                                        <TextField fx:id="txtOption2" prefHeight="45.0" promptText="Erreur possible 2" style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label text="❌ Option fausse 3" style="-fx-font-weight: bold; -fx-text-fill: #ef4444;" />
+                                        <TextField fx:id="txtOption3" prefHeight="45.0" promptText="Erreur possible 3" style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
                                     </children>
                                 </VBox>
                             </children>
                         </GridPane>
 
                         <VBox spacing="8.0">
-                            <children>
-                                <Label style="-fx-font-weight: bold;" text="Réponse attendue" textFill="#475569" />
-                                <TextField fx:id="txtReponse" prefHeight="45.0" promptText="L'IA remplira ce champ..." style="-fx-background-radius: 10; -fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" />
-                            </children>
+                            <Label text="Points pour cette question" style="-fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                            <TextField fx:id="txtPoints" maxWidth="150.0" prefHeight="40.0" promptText="ex: 10" style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
                         </VBox>
-
-                        <Separator style="-fx-padding: 10 0;" />
-
-                        <HBox alignment="CENTER_RIGHT" spacing="15.0">
-                            <children>
-                                <Button onAction="#viderChampsSaufCombo" prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: white; -fx-text-fill: #64748b; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-cursor: hand;" text="Réinitialiser" />
-                                <Button onAction="#handleSave" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="ENREGISTRER" />
-                            </children>
-                        </HBox>
                     </children>
                 </VBox>
+            </content>
+        </ScrollPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 20 0 0 0;">
+            <children>
+                <Button onAction="#viderChampsSaufCombo" prefHeight="45.0" prefWidth="120.0" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;" text="Réinitialiser" />
+                <Button onAction="#handleSave" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;" text="ENREGISTRER LE QCM" />
             </children>
-        </VBox>
-    </content>
-</ScrollPane>
+        </HBox>
+    </children>
+</VBox>

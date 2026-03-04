@@ -16,15 +16,22 @@ public class FeedbackService {
 
     public List<Question> chargerQuestionsAleatoires(int idEvent) throws SQLException {
         List<Question> questions = new ArrayList<>();
-        String req = "SELECT id_question, id_event, texte_question, bonne_reponse, points FROM questions WHERE id_event = ? ORDER BY RAND() LIMIT 10";
+        // On ajoute option1, option2, option3 à la requête
+        String req = "SELECT id_question, id_event, texte_question, bonne_reponse, points, option1, option2, option3 FROM questions WHERE id_event = ? ORDER BY RAND() LIMIT 10";
+
         try (PreparedStatement pst = conn.prepareStatement(req)) {
             pst.setInt(1, idEvent);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     questions.add(new Question(
-                            rs.getInt("id_question"), rs.getInt("id_event"),
-                            rs.getString("texte_question"), rs.getString("bonne_reponse"),
-                            rs.getInt("points")
+                            rs.getInt("id_question"),
+                            rs.getInt("id_event"),
+                            rs.getString("texte_question"),
+                            rs.getString("bonne_reponse"),
+                            rs.getInt("points"),
+                            rs.getString("option1"),
+                            rs.getString("option2"),
+                            rs.getString("option3")
                     ));
                 }
             }

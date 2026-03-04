@@ -4,67 +4,217 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="20"
-      style="-fx-background-color: #f8fafc; -fx-padding: 40;"
-      VBox.vgrow="ALWAYS"
-      xmlns="http://javafx.com/javafx/17"
+<HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.questionnaire.ParticipantController">
+      fx:controller="com.example.pidev.controller.questionnaire.ParticipantController"
+      style="-fx-background-color: #f0f4f8;"
+      prefWidth="1100" prefHeight="720">
 
-    <HBox alignment="CENTER_LEFT">
-        <Label fx:id="lblProgression"
-               text="Question 1 / 5"
-               style="-fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-font-size: 16px;" />
-    </HBox>
+    <VBox HBox.hgrow="ALWAYS" spacing="0" style="-fx-background-color: #f0f4f8;">
 
-    <VBox spacing="15"
-          style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <VBox style="-fx-background-color: white; -fx-padding: 28 40 20 40;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 3);">
 
-        <Label fx:id="lblQuestion"
-               text="Chargement de la question..."
-               wrapText="true"
-               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <Label text="EventFlow Quiz"
+                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
 
-        <TextField fx:id="txtReponseParticipant"
-                   promptText="Tapez votre réponse ici..."
-                   style="-fx-pref-height: 50; -fx-font-size: 16px; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" />
-    </VBox>
-
-    <VBox fx:id="vboxEvaluation" spacing="15" alignment="CENTER" style="-fx-padding: 20 0;">
-        <Label text="Notez globalement l'événement :" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;"/>
-
-        <HBox fx:id="starContainer" spacing="10" alignment="CENTER">
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-            <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 35; -fx-text-fill: #bdc3c7; -fx-cursor: hand;" />
-        </HBox>
-
-        <VBox spacing="8" maxWidth="500">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Votre avis :" style="-fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                <Button text="😊" onAction="#toggleEmojiPicker"
-                        style="-fx-background-color: transparent; -fx-font-size: 20; -fx-cursor: hand; -fx-padding: 0;"/>
+            <HBox alignment="CENTER_LEFT" spacing="12" VBox.vgrow="NEVER" style="-fx-padding: 12 0 0 0;">
+                <ProgressBar fx:id="pgBar" prefWidth="600" prefHeight="10"
+                             style="-fx-accent: #2563eb; -fx-background-color: #e2e8f0; -fx-background-radius: 10; -fx-pref-height: 10;"
+                             progress="0.47" />
+                <Label fx:id="lblProgression"
+                       text="47%"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748b;" />
             </HBox>
-
-            <FlowPane fx:id="emojiPicker" visible="false" managed="false" hgap="10" vgap="10"
-                      style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
-            </FlowPane>
-
-            <TextArea fx:id="txtCommentaire"
-                      promptText="Un commentaire additionnel (facultatif)..."
-                      prefHeight="120"
-                      wrapText="true"
-                      style="-fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-font-family: 'Segoe UI Emoji'; -fx-font-size: 14px;" />
         </VBox>
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <VBox spacing="24" style="-fx-padding: 36 40 20 40; -fx-background-color: #f0f4f8;">
+
+                <VBox spacing="16"
+                      style="-fx-background-color: white; -fx-padding: 30;
+                             -fx-background-radius: 14;
+                             -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.07), 12, 0, 0, 4);">
+
+                    <Label fx:id="lblQuestion"
+                           text="Chargement de la question..."
+                           wrapText="true"
+                           style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-line-spacing: 3;" />
+
+                    <Separator style="-fx-opacity: 0.4;" />
+
+                    <VBox fx:id="vboxOptions" spacing="12" style="-fx-padding: 6 0 0 0;" />
+                </VBox>
+
+                <VBox fx:id="vboxEvaluation" spacing="18" visible="false" managed="false"
+                      style="-fx-background-color: white; -fx-padding: 28;
+                             -fx-background-radius: 14;
+                             -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.07), 12, 0, 0, 4);">
+
+                    <Label text="Notez globalement l'événement :"
+                           style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #1e293b;" />
+
+                    <HBox fx:id="starContainer" spacing="8" alignment="CENTER_LEFT">
+                        <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
+                        <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
+                        <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
+                        <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
+                        <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
+                    </HBox>
+
+                    <VBox spacing="8">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Votre avis :"
+                                   style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #64748b;" />
+                            <Button text="😊" onAction="#toggleEmojiPicker"
+                                    style="-fx-background-color: #f1f5f9; -fx-font-size: 16; -fx-cursor: hand;
+                                           -fx-background-radius: 8; -fx-padding: 4 10;" />
+                        </HBox>
+
+                        <FlowPane fx:id="emojiPicker" visible="false" managed="false" hgap="8" vgap="8"
+                                  style="-fx-background-color: #f8fafc; -fx-padding: 10;
+                                         -fx-background-radius: 10; -fx-border-color: #e2e8f0;
+                                         -fx-border-radius: 10;" />
+
+                        <TextArea fx:id="txtCommentaire"
+                                  promptText="Un commentaire additionnel (facultatif)..."
+                                  prefHeight="100" wrapText="true"
+                                  style="-fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                                         -fx-border-radius: 8; -fx-font-size: 14px;" />
+                    </VBox>
+                </VBox>
+
+                <TextField fx:id="txtReponseParticipant" visible="false" managed="false" />
+
+            </VBox>
+        </ScrollPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="16"
+              style="-fx-background-color: white; -fx-padding: 18 40;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, -3, 0);">
+
+            <Button text="← Précédent"
+                    style="-fx-background-color: white; -fx-text-fill: #2563eb;
+                           -fx-font-weight: bold; -fx-font-size: 14px;
+                           -fx-padding: 12 30; -fx-background-radius: 8;
+                           -fx-border-color: #2563eb; -fx-border-radius: 8;
+                           -fx-cursor: hand;" />
+
+            <Button fx:id="btnSuivant" onAction="#handleSuivant"
+                    text="Suivant →"
+                    style="-fx-background-color: #2563eb; -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-font-size: 14px;
+                           -fx-padding: 12 36; -fx-background-radius: 8;
+                           -fx-cursor: hand;
+                           -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.35), 10, 0, 0, 4);" />
+        </HBox>
     </VBox>
 
-    <HBox alignment="CENTER_RIGHT">
-        <Button fx:id="btnSuivant"
-                onAction="#handleSuivant"
-                text="SUIVANT →"
-                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 35; -fx-background-radius: 8; -fx-cursor: hand;" />
-    </HBox>
+    <VBox prefWidth="240" spacing="16"
+          style="-fx-background-color: white; -fx-padding: 28 20;
+                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, -3, 0, 0);">
 
-</VBox>
+        <VBox alignment="CENTER" spacing="4"
+              style="-fx-background-color: #f8fafc; -fx-padding: 20;
+                     -fx-background-radius: 12; -fx-border-color: #e2e8f0;
+                     -fx-border-radius: 12; -fx-border-width: 1.5;">
+            <Label fx:id="lblScoreSide" text="83.3%"
+                   style="-fx-font-size: 34px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <Label fx:id="lblScoreDetail" text="You got 5 answers correct"
+                   style="-fx-font-size: 12px; -fx-text-fill: #64748b;" wrapText="true" />
+        </VBox>
+
+        <Separator />
+
+        <Label text="Questions" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #94a3b8;" />
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <VBox fx:id="sidebarQuestionsVBox" spacing="8" style="-fx-padding: 2;">
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f0fdf4; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #bbf7d0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="✅" style="-fx-font-size: 14;" />
+                    <Label text="Question 1" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #166534;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #fff1f2; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #fecdd3;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="❌" style="-fx-font-size: 14;" />
+                    <Label text="Question 2" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #9f1239;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f0fdf4; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #bbf7d0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="✅" style="-fx-font-size: 14;" />
+                    <Label text="Question 3" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #166534;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f0fdf4; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #bbf7d0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="✅" style="-fx-font-size: 14;" />
+                    <Label text="Question 4" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #166534;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f0fdf4; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #bbf7d0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="✅" style="-fx-font-size: 14;" />
+                    <Label text="Question 5" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #166534;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f0fdf4; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #bbf7d0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="✅" style="-fx-font-size: 14;" />
+                    <Label text="Question 6" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #166534;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: white; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #2563eb;
+                             -fx-border-radius: 8; -fx-border-width: 2; -fx-cursor: hand;">
+                    <Label text="⬜" style="-fx-font-size: 14;" />
+                    <Label text="Question 7" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2563eb;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f8fafc; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="⬜" style="-fx-font-size: 14; -fx-opacity: 0.4;" />
+                    <Label text="Question 8" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f8fafc; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="⬜" style="-fx-font-size: 14; -fx-opacity: 0.4;" />
+                    <Label text="Question 9" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10"
+                      style="-fx-background-color: #f8fafc; -fx-padding: 10 14;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                             -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Label text="⬜" style="-fx-font-size: 14; -fx-opacity: 0.4;" />
+                    <Label text="Question 10" style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;" />
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </VBox>
+
+</HBox>

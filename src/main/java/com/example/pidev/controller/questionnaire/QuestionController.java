@@ -38,6 +38,7 @@ public class QuestionController {
     @FXML private ComboBox<Event> comboEvent, comboEventList;
     @FXML private ComboBox<String> comboSort;
     @FXML private TextField txtReponse, txtPoints, txtSearch;
+    @FXML private TextField txtOption1, txtOption2, txtOption3; // NOUVEAU
     @FXML private TextArea txtTexte;
     @FXML private FlowPane cardsContainer;
     @FXML private Label lblPagination, lblSuggestionIA;
@@ -163,50 +164,45 @@ public class QuestionController {
         try {
             Event ev = comboEvent.getValue();
 
-            if (ev == null || txtTexte.getText().trim().isEmpty() || txtReponse.getText().trim().isEmpty()) {
-                afficherAlerte("Champs manquants", "Veuillez sélectionner un événement et remplir l'énoncé et la réponse.");
+            // Validation : On vérifie que les options ne sont pas vides
+            if (ev == null || txtTexte.getText().trim().isEmpty() ||
+                    txtReponse.getText().trim().isEmpty() ||
+                    txtOption1.getText().trim().isEmpty() ||
+                    txtOption2.getText().trim().isEmpty() ||
+                    txtOption3.getText().trim().isEmpty()) {
+
+                afficherAlerte("Champs manquants", "Veuillez remplir l'énoncé, la bonne réponse ET les 3 options fausses.");
                 return;
             }
 
-            int points;
-            try {
-                points = Integer.parseInt(txtPoints.getText().trim());
-            } catch (NumberFormatException e) {
-                afficherAlerte("Format invalide", "Le champ 'Points' doit être un nombre entier.");
-                return;
-            }
-
-            // FIX : ID de l'utilisateur Sellami Arij (ID 1 selon votre base de données)
+            int points = Integer.parseInt(txtPoints.getText().trim());
             int idUtilisateurConnecte = 1;
 
             if (questionEnCours == null) {
-                Question nouvelleQ = new Question();
-                nouvelleQ.setIdEvent(ev.getId());
-                nouvelleQ.setTexte(txtTexte.getText());
-                nouvelleQ.setReponse(txtReponse.getText());
-                nouvelleQ.setPoints(points);
+                // AJOUT : On passe les options au constructeur ou via setters
+                Question nouvelleQ = new Question(
+                        0, ev.getId(), txtTexte.getText(), txtReponse.getText(), points,
+                        txtOption1.getText(), txtOption2.getText(), txtOption3.getText()
+                );
                 nouvelleQ.setIdUser(idUtilisateurConnecte);
-
                 qs.ajouter(nouvelleQ);
             } else {
+                // MODIFICATION
                 questionEnCours.setIdEvent(ev.getId());
                 questionEnCours.setTexte(txtTexte.getText());
                 questionEnCours.setReponse(txtReponse.getText());
                 questionEnCours.setPoints(points);
-                questionEnCours.setIdUser(idUtilisateurConnecte);
+                questionEnCours.setOption1(txtOption1.getText());
+                questionEnCours.setOption2(txtOption2.getText());
+                questionEnCours.setOption3(txtOption3.getText());
 
                 qs.modifier(questionEnCours);
-                questionEnCours = null; // Reset après modification
+                questionEnCours = null;
             }
 
             switchToList();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            afficherAlerte("Erreur SQL", "Impossible d'enregistrer : " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
-            afficherAlerte("Erreur", "Une erreur inattendue est survenue.");
+            afficherAlerte("Erreur", "Vérifiez vos champs : " + e.getMessage());
         }
     }
 
@@ -418,9 +414,12 @@ public class QuestionController {
     }
 
     @FXML
-    private void viderChampsSaufCombo() {
+    private void viderChampsSaufCombo() { // Le nom doit être identique au FXML
         if(txtTexte != null) txtTexte.clear();
         if(txtReponse != null) txtReponse.clear();
+        if(txtOption1 != null) txtOption1.clear();
+        if(txtOption2 != null) txtOption2.clear();
+        if(txtOption3 != null) txtOption3.clear();
         if(txtPoints != null) txtPoints.clear();
         if(lblSuggestionIA != null) lblSuggestionIA.setText("");
         questionEnCours = null;
@@ -442,6 +441,12 @@ public class QuestionController {
         txtTexte.setText(q.getTexte());
         txtReponse.setText(q.getReponse());
         txtPoints.setText(String.valueOf(q.getPoints()));
+
+        // NOUVEAU : Remplir les options
+        if(txtOption1 != null) txtOption1.setText(q.getOption1());
+        if(txtOption2 != null) txtOption2.setText(q.getOption2());
+        if(txtOption3 != null) txtOption3.setText(q.getOption3());
+
         if (comboEvent != null) {
             comboEvent.getItems().stream()
                     .filter(e -> e.getId() == q.getIdEvent())
@@ -459,44 +464,52 @@ public class QuestionController {
     }
     @FXML
     private void genererQuestionParIA() {
-        // 1. Vérification si on est sur le formulaire
         if (txtTexte == null || comboEvent == null) {
-            afficherAlerte("Action requise", "Veuillez d'abord ouvrir l'éditeur pour générer une question.");
+            afficherAlerte("Action requise", "Veuillez d'abord ouvrir l'éditeur.");
             return;
         }
 
-        // 2. Récupération de l'événement sélectionné
         Event selectedEvent = comboEvent.getValue();
-
         if (selectedEvent == null) {
-            afficherAlerte("Sélection requise", "Veuillez choisir un événement dans la liste pour définir le thème (ex: Java, Sport...).");
+            afficherAlerte("Sélection requise", "Veuillez choisir un événement.");
             return;
         }
 
-        // On utilise le titre de l'événement comme thème
         String theme = selectedEvent.getTitle();
 
         new Thread(() -> {
             try {
                 Platform.runLater(() -> {
-                    lblSuggestionIA.setText("⌛ L'IA génère une question sur l'événement : " + theme + "...");
+                    lblSuggestionIA.setText("⌛ Génération complète du QCM...");
                     lblSuggestionIA.setStyle("-fx-text-fill: #4f46e5;");
                 });
 
                 AIService ai = new AIService();
-                String jsonBrut = ai.appelerIA(theme);
+                String reponseBruteIA = ai.appelerIA(theme);
+                String jsonNettoye = extraireLeJsonUniquement(reponseBruteIA);
 
-                // Extraction du JSON retourné par l'IA
-                org.json.JSONObject json = new org.json.JSONObject(jsonBrut);
-                String question = json.getString("question");
-                String reponse = json.getString("reponse");
-                int points = json.optInt("points", 10);
+                org.json.JSONObject json = new org.json.JSONObject(jsonNettoye);
+
+                // Extraction de TOUTES les données du JSON
+                String question = json.optString("question", "");
+                String bonneReponse = json.optString("reponse", "");
+                String fausse1 = json.optString("option1", "");
+                String fausse2 = json.optString("option2", "");
+                String fausse3 = json.optString("option3", "");
 
                 Platform.runLater(() -> {
+                    // Remplissage de l'énoncé
                     txtTexte.setText(question);
-                    txtReponse.setText(reponse);
-                    txtPoints.setText(String.valueOf(points));
-                    lblSuggestionIA.setText("✨ Question générée pour l'événement '" + theme + "' !");
+
+                    // Remplissage de la bonne réponse
+                    txtReponse.setText(bonneReponse);
+
+                    // Remplissage des OPTIONS FAUSSES (Vérifie bien tes fx:id dans le contrôleur)
+                    txtOption1.setText(fausse1);
+                    txtOption2.setText(fausse2);
+                    txtOption3.setText(fausse3);
+
+                    lblSuggestionIA.setText("✨ QCM et options générés avec succès !");
                     lblSuggestionIA.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
                 });
 
@@ -504,9 +517,25 @@ public class QuestionController {
                 e.printStackTrace();
                 Platform.runLater(() -> {
                     lblSuggestionIA.setText("❌ Erreur de génération.");
-                    afficherAlerte("Erreur IA", "Détail : " + e.getMessage());
+                    afficherAlerte("Erreur IA", "L'IA n'a pas pu générer les options fausses.");
                 });
             }
         }).start();
     }
+    /**
+     * Méthode utilitaire à ajouter dans ta classe pour isoler le JSON
+     */
+    private String extraireLeJsonUniquement(String texte) {
+        try {
+            int debut = texte.indexOf("{");
+            int fin = texte.lastIndexOf("}");
+            if (debut != -1 && fin != -1) {
+                return texte.substring(debut, fin + 1);
+            }
+        } catch (Exception e) {
+            System.err.println("Impossible d'extraire le JSON");
+        }
+        return texte;
+    }
 }
+
