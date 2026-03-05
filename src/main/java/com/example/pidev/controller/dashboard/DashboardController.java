@@ -4,6 +4,8 @@ import com.example.pidev.MainController;
 import com.example.pidev.model.event.Event;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.user.UserService;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,17 +17,38 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
+// Remplacer les imports génériques par des imports spécifiques
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.awt.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -615,7 +638,7 @@ public class DashboardController implements Initializable {
             buttonBox.setStyle("-fx-padding: 20 30 30 30; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;");
 
             Button exportPdfBtn = createActionButton("📥 Exporter PDF", "#3b82f6");
-            exportPdfBtn.setOnAction(e -> exportReportToPDF(allEvents));
+            exportPdfBtn.setOnAction(e -> exportToPDF(allEvents));
 
             Button printBtn = createActionButton("🖨️ Imprimer", "#10b981");
             printBtn.setOnAction(e -> printReport(mainScrollPane));
@@ -991,13 +1014,223 @@ public class DashboardController implements Initializable {
         return row;
     }
 
-    private void exportReportToPDF(List<Event> events) {
+    // ================= MÉTHODE D'EXPORT PDF UNIQUE =================
+    private void exportToPDF(List<Event> events) {
         try {
-            showAlert("Export PDF",
-                    "Le rapport a été exporté avec succès!\nChemin: C:\\Rapports\\rapport_evenements_" +
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf");
+            System.out.println("📄 Début de l'export PDF...");
+
+            // Créer le dossier Rapports s'il n'existe pas
+            String userHome = System.getProperty("user.home");
+            String reportsDir = userHome + File.separator + "EventFlow_Rapports";
+            File directory = new File(reportsDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            // Générer le nom du fichier avec timestamp
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String fileName = reportsDir + File.separator + "rapport_evenements_" + timestamp + ".pdf";
+
+            // Créer le document PDF
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(fileName));
+            document.open();
+
+            // Police pour supporter l'UTF-8
+            BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
+            Font titleFont = new Font(baseFont, 24, Font.BOLD, BaseColor.BLACK);
+            Font subtitleFont = new Font(baseFont, 16, Font.BOLD, BaseColor.DARK_GRAY);
+            Font normalFont = new Font(baseFont, 12, Font.NORMAL, BaseColor.BLACK);
+            Font boldFont = new Font(baseFont, 12, Font.BOLD, BaseColor.BLACK);
+            Font smallFont = new Font(baseFont, 10, Font.NORMAL, BaseColor.GRAY);
+
+            // ========== EN-TÊTE ==========
+            Paragraph title = new Paragraph("EventFlow - Rapport des événements", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            Paragraph datePara = new Paragraph("Généré le " +
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), smallFont);
+            datePara.setAlignment(Element.ALIGN_RIGHT);
+            datePara.setSpacingAfter(30);
+            document.add(datePara);
+
+            // ========== STATISTIQUES GLOBALES ==========
+            Paragraph statsTitle = new Paragraph("📊 Statistiques globales", subtitleFont);
+            statsTitle.setSpacingAfter(15);
+            document.add(statsTitle);
+
+            // Calculer les stats
+            int totalEvents = events.size();
+            int totalParticipants = 0;
+            try {
+                totalParticipants = userService.getTotalParticipantsCount();
+            } catch (Exception e) {
+                totalParticipants = 0;
+            }
+
+            int draftCount = 0, publishedCount = 0, ongoingCount = 0, completedCount = 0;
+            LocalDateTime now = LocalDateTime.now();
+
+            for (Event event : events) {
+                String status = event.getStatus() != null ? event.getStatus().name() : "DRAFT";
+                if ("DRAFT".equals(status)) {
+                    draftCount++;
+                } else if ("PUBLISHED".equals(status)) {
+                    if (event.getStartDate() != null && event.getEndDate() != null) {
+                        if (now.isAfter(event.getEndDate())) {
+                            completedCount++;
+                        } else if (now.isAfter(event.getStartDate()) && now.isBefore(event.getEndDate())) {
+                            ongoingCount++;
+                        } else {
+                            publishedCount++;
+                        }
+                    } else {
+                        publishedCount++;
+                    }
+                }
+            }
+
+            // Créer un tableau pour les stats
+            PdfPTable statsTable = new PdfPTable(2);
+            statsTable.setWidthPercentage(80);
+            statsTable.setHorizontalAlignment(Element.ALIGN_CENTER);
+            statsTable.setSpacingAfter(20);
+
+            addStatCell(statsTable, "Total événements", String.valueOf(totalEvents), boldFont, normalFont);
+            addStatCell(statsTable, "Total participants", String.valueOf(totalParticipants), boldFont, normalFont);
+            addStatCell(statsTable, "Brouillons", String.valueOf(draftCount), boldFont, normalFont);
+            addStatCell(statsTable, "À venir", String.valueOf(publishedCount), boldFont, normalFont);
+            addStatCell(statsTable, "En cours", String.valueOf(ongoingCount), boldFont, normalFont);
+            addStatCell(statsTable, "Terminés", String.valueOf(completedCount), boldFont, normalFont);
+
+            document.add(statsTable);
+
+            // ========== DÉTAIL DES ÉVÉNEMENTS ==========
+            Paragraph eventsTitle = new Paragraph("📋 Détail des événements", subtitleFont);
+            eventsTitle.setSpacingBefore(20);
+            eventsTitle.setSpacingAfter(15);
+            document.add(eventsTitle);
+
+            for (Event event : events) {
+                // Titre de l'événement
+                Paragraph eventName = new Paragraph(event.getTitle(), boldFont);
+                eventName.setSpacingBefore(10);
+                eventName.setSpacingAfter(5);
+                document.add(eventName);
+
+                // Informations de l'événement
+                PdfPTable eventTable = new PdfPTable(2);
+                eventTable.setWidthPercentage(90);
+                eventTable.setSpacingAfter(10);
+
+                addInfoRow(eventTable, "Statut:", getEventStatus(event), normalFont);
+                addInfoRow(eventTable, "Dates:", formatEventDates(event), normalFont);
+                addInfoRow(eventTable, "Lieu:", event.getLocation() != null ? event.getLocation() : "Non défini", normalFont);
+                addInfoRow(eventTable, "Capacité:", String.valueOf(event.getCapacity()) + " places", normalFont);
+                addInfoRow(eventTable, "Prix:", event.isFree() ? "Gratuit" : event.getTicketPrice() + " DT", normalFont);
+
+                document.add(eventTable);
+
+                // Description si présente
+                if (event.getDescription() != null && !event.getDescription().isEmpty()) {
+                    Paragraph desc = new Paragraph("Description: " + event.getDescription(), smallFont);
+                    desc.setIndentationLeft(20);
+                    desc.setSpacingAfter(5);
+                    document.add(desc);
+                }
+
+                // Séparateur entre événements
+                document.add(new Paragraph(" "));
+            }
+
+            // ========== PIED DE PAGE ==========
+            Paragraph footer = new Paragraph("EventFlow - Système de gestion événementielle\n" +
+                    "© 2024 Tous droits réservés", smallFont);
+            footer.setAlignment(Element.ALIGN_CENTER);
+            footer.setSpacingBefore(30);
+            document.add(footer);
+
+            // Fermer le document
+            document.close();
+
+            System.out.println("✅ PDF généré avec succès: " + fileName);
+
+            // Afficher une boîte de dialogue de succès avec option d'ouverture
+            showPDFSuccessDialog(fileName);
+
         } catch (Exception e) {
-            showAlert("Erreur", "Impossible d'exporter le rapport: " + e.getMessage());
+            System.err.println("❌ Erreur lors de l'export PDF: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'exporter le rapport PDF: " + e.getMessage());
+        }
+    }
+
+    // Méthodes helper pour le PDF
+    private void addStatCell(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, labelFont));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setPadding(5);
+        table.addCell(labelCell);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, valueFont));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setPadding(5);
+        table.addCell(valueCell);
+    }
+
+    private void addInfoRow(PdfPTable table, String label, String value, Font font) {
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, font));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setPadding(5);
+        table.addCell(labelCell);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, font));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setPadding(5);
+        table.addCell(valueCell);
+    }
+
+    private String getEventStatus(Event event) {
+        if (event.getStatus() == null) return "Non défini";
+
+        LocalDateTime now = LocalDateTime.now();
+        String status = event.getStatus().name();
+
+        if ("DRAFT".equals(status)) {
+            return "Brouillon";
+        } else if ("PUBLISHED".equals(status)) {
+            if (event.getStartDate() != null && event.getEndDate() != null) {
+                if (now.isAfter(event.getEndDate())) {
+                    return "Terminé";
+                } else if (now.isAfter(event.getStartDate()) && now.isBefore(event.getEndDate())) {
+                    return "En cours";
+                }
+            }
+            return "Publié à venir";
+        }
+        return status;
+    }
+
+    private void showPDFSuccessDialog(String filePath) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Export PDF réussi");
+        alert.setHeaderText("Le rapport a été généré avec succès !");
+        alert.setContentText("Fichier: " + filePath);
+
+        ButtonType openButton = new ButtonType("Ouvrir le dossier", ButtonBar.ButtonData.OK_DONE);
+        ButtonType closeButton = new ButtonType("Fermer", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(openButton, closeButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == openButton) {
+            try {
+                Desktop.getDesktop().open(new File(filePath).getParentFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

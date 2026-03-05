@@ -59,7 +59,7 @@ public class FeedbackService {
     public List<FeedbackStats> recupererHistorique() throws SQLException {
         List<FeedbackStats> historique = new ArrayList<>();
         String req = "SELECT f.id_feedback, f.comments, f.etoiles, u.username " +
-                "FROM feedbacks f JOIN users u ON f.id_user = u.id_user";
+                "FROM feedbacks f JOIN user_model u ON f.id_user = u.id_user";
         try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(req)) {
             while (rs.next()) {
                 historique.add(new FeedbackStats(

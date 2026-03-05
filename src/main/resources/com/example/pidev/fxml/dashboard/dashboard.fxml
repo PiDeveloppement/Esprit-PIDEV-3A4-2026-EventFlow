@@ -171,7 +171,7 @@
 
                         <Button fx:id="reportBtn" text="📊 Générer rapport"
                                 style="-fx-background-color: white; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 14px;
-               -fx-background-radius: 8; -fx-padding: 12 25; -fx-border-color: #e2e8f0; -fx-border-width: 1;"
+                                       -fx-background-radius: 8; -fx-padding: 12 25; -fx-border-color: #e2e8f0; -fx-border-width: 1;"
                                 onAction="#generateReport"/>
                         <Region HBox.hgrow="ALWAYS"/>
 

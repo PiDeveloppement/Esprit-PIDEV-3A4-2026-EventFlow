@@ -144,8 +144,7 @@ public class MainController {
     @FXML private VBox questionnairesSubmenu;
     @FXML private Text questionnairesArrow;
     @FXML private Button questionsBtn;
-    @FXML private Button reponsesBtn;
-    @FXML private Button participantQuizBtn;  // Ajouté depuis event
+    // Ajouté depuis event
 
     @FXML private Button settingsBtn;
     @FXML private Button logoutBtn;
@@ -217,12 +216,7 @@ public class MainController {
             loadDashboardView();
         }
 
-        // Initialiser le bouton participant quiz
-        if (participantQuizBtn != null) {
-            participantQuizBtn.setOnAction(event -> {
-                loadParticipantQuizView();
-            });
-        }
+
 
         // Animer le bouton flottant au démarrage
         animateFloatingButton();
@@ -378,7 +372,7 @@ public class MainController {
                 usersToggleBtn, rolesBtn, inscriptionsBtn,
                 sponsorsBtn, sponsorsListBtn, sponsorPortalBtn, budgetBtn, contratsBtn,
                 resourcesToggleBtn, sallesBtn, equipementsBtn, reservationsBtn,
-                questionnairesToggleBtn, questionsBtn, reponsesBtn, settingsBtn
+                questionnairesToggleBtn, questionsBtn, settingsBtn
         };
         for (Button btn : allButtons) {
             if (btn != null) {
@@ -386,8 +380,7 @@ public class MainController {
                 boolean isSub = btn == eventsListBtn || btn == categoriesBtn || btn == ticketsBtn ||
                         btn == rolesBtn || btn == inscriptionsBtn ||
                         btn == sponsorsListBtn || btn == sponsorPortalBtn || btn == budgetBtn || btn == contratsBtn ||
-                        btn == sallesBtn || btn == equipementsBtn || btn == reservationsBtn ||
-                        btn == questionsBtn || btn == reponsesBtn;
+                        btn == sallesBtn || btn == equipementsBtn || btn == reservationsBtn ;
                 btn.getStyleClass().add(isSub ? "submenu-button" : "main-menu-button");
             }
         }
@@ -418,7 +411,6 @@ public class MainController {
         if (equipementsBtn != null) equipementsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(equipementsBtn); loadEquipementsView(); });
         if (reservationsBtn != null) reservationsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reservationsBtn); loadReservationsView(); });
         if (questionsBtn != null) questionsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(questionsBtn); showQuestionEditor(); });
-        if (reponsesBtn != null) reponsesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reponsesBtn); showResultats(); });
         if (settingsBtn != null) settingsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(settingsBtn); loadSettingsView(); });
         if (logoutBtn != null) logoutBtn.setOnAction(e -> logout());
     }
@@ -541,7 +533,6 @@ public class MainController {
         else if (selected.contains("Réservations")) reservationsBtn.fire();
         else if (selected.contains("Questionnaires") && !selected.contains("  ")) questionnairesToggleBtn.fire();
         else if (selected.contains("Questions")) questionsBtn.fire();
-        else if (selected.contains("Résultats")) reponsesBtn.fire();
         else if (selected.contains("Historique")) showHistorique();
         else if (selected.contains("Passer le Quiz")) loadParticipantQuizView();  // Modifié pour utiliser la nouvelle méthode
         else if (selected.contains("Paramètres")) settingsBtn.fire();
@@ -974,7 +965,7 @@ public class MainController {
     }
 
     @FXML public void showQuestionEditor() { collapseAllSubmenus(); setActiveButton(questionsBtn); loadQuestionEditor(); }
-    @FXML public void showResultats() { collapseAllSubmenus(); setActiveButton(reponsesBtn); loadResultatsView(); }
+
     @FXML public void showParticipantQuiz() { collapseAllSubmenus(); loadParticipantQuizView(); }
     @FXML public void showHistorique() { collapseAllSubmenus(); loadHistoriqueView(); }
 
@@ -1448,6 +1439,7 @@ public class MainController {
             statusIndicator.setText("● Connecté");
         }
     }
+
 
 
 }

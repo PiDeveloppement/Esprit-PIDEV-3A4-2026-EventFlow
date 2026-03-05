@@ -271,16 +271,38 @@ public class LandingPageController implements Initializable {
     @FXML
     private void handleFeedback() {
         try {
-            currentScene = homeSection.getScene();
-            VBox root = (VBox) currentScene.getRoot();
-            VBox feedbackContenu = construireFeedbackContenu();
+            System.out.println("📂 Chargement du NOUVEAU FeedbackView.fxml");
+
+            // Charger le nouveau FXML depuis le dossier questionnaire
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pidev/fxml/questionnaire/FeedbackView.fxml")
+            );
+
+            VBox feedbackContenu = loader.load(); // C'est déjà un VBox
+
+            // Récupérer la scène actuelle
+            Scene scene = homeSection.getScene();
+            if (scene == null) {
+                System.err.println("❌ Scène non disponible");
+                showAlert("Erreur", "Impossible d'afficher les feedbacks");
+                return;
+            }
+
+            VBox root = (VBox) scene.getRoot();
+
+            // Remplacer le contenu (généralement l'index 1 est le contenu principal)
             if (root.getChildren().size() > 1) {
                 root.getChildren().set(1, feedbackContenu);
             } else {
                 root.getChildren().add(feedbackContenu);
             }
+
+            System.out.println("✅ Nouveau FeedbackView chargé avec succès");
+
         } catch (Exception e) {
+            System.err.println("❌ Erreur lors du chargement du FeedbackView:");
             e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la page des feedbacks: " + e.getMessage());
         }
     }
 

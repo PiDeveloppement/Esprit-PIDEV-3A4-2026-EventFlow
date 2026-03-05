@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.Locale;
 import javafx.stage.FileChooser;
 import java.io.File;
+
 public class FeedbackViewController {
 
     @FXML private HBox   starsKpi1;
@@ -64,6 +65,7 @@ public class FeedbackViewController {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger les feedbacks: " + e.getMessage());
         }
     }
 
@@ -171,7 +173,6 @@ public class FeedbackViewController {
             score.setMinWidth(30);
             score.setStyle("-fx-font-weight: bold; -fx-text-fill: #111827; -fx-font-size: 12px;");
 
-            // 5 étoiles séparées avec largeur fixe
             HBox starsBox = new HBox(2);
             starsBox.setAlignment(Pos.CENTER_LEFT);
             starsBox.setMinWidth(90);
@@ -188,7 +189,6 @@ public class FeedbackViewController {
             categoryRatingsBox.getChildren().add(row);
         }
     }
-
 
     private void displayFeedbacks(List<Map<String, Object>> feedbacks) {
         feedbackListContainer.getChildren().clear();
@@ -330,13 +330,11 @@ public class FeedbackViewController {
         Region sp2 = new Region();
         HBox.setHgrow(sp2, Priority.ALWAYS);
 
-        // MODIFICATION ICI : Remplacement du bouton Response par le bouton Supprimer
         Button btnDelete = new Button("🗑  Supprimer");
         btnDelete.setStyle(
                 "-fx-background-color: transparent; -fx-text-fill: #ef4444; " +
                         "-fx-font-size: 12px; -fx-cursor: hand; -fx-padding: 0;");
 
-        // Appel à la méthode de suppression (assure-toi d'avoir implémenté supprimerFeedback dans la classe)
         btnDelete.setOnAction(e -> supprimerFeedback((int)fb.get("idFeedback"), card));
 
         HBox bottomRow = new HBox(10);
@@ -372,8 +370,6 @@ public class FeedbackViewController {
     private void handleExport() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers CSV", "*.csv"));
-
-        // Ouvre une fenêtre pour choisir le dossier et le nom
         java.io.File file = fileChooser.showSaveDialog(null);
 
         if (file != null) {
@@ -382,16 +378,17 @@ public class FeedbackViewController {
                 for (Map<String, Object> fb : allFeedbacks) {
                     writer.println(fb.get("firstName") + "," + fb.get("etoiles") + ",\"" + fb.get("comments") + "\"");
                 }
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Exporté avec succès ici : " + file.getAbsolutePath());
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Exporté avec succès: " + file.getAbsolutePath());
                 alert.show();
             } catch (Exception e) {
                 e.printStackTrace();
+                showAlert("Erreur", "Erreur lors de l'export: " + e.getMessage());
             }
         }
     }
+
     @FXML
     private void handleFilter() {
-        // Ici, nous créons une boîte de dialogue pour choisir le filtre
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(3, Arrays.asList(1, 2, 3, 4, 5));
         dialog.setTitle("Filtre des avis");
         dialog.setHeaderText("Afficher les avis avec au moins :");
@@ -399,18 +396,14 @@ public class FeedbackViewController {
         Optional<Integer> result = dialog.showAndWait();
         if (result.isPresent()) {
             int noteMin = result.get();
-
-            // On filtre la liste existante allFeedbacks
             List<Map<String, Object>> filtered = allFeedbacks.stream()
                     .filter(f -> (int) f.get("etoiles") >= noteMin)
                     .collect(Collectors.toList());
-
-            // On rafraîchit l'affichage avec la liste filtrée
             displayFeedbacks(filtered);
         }
-    }    // 1. Ajoute cette méthode dans FeedbackViewController.java
+    }
+
     private void supprimerFeedback(int idFeedback, VBox card) {
-        // Demande de confirmation
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Supprimer l'avis");
         alert.setHeaderText("Voulez-vous vraiment supprimer cet avis ?");
@@ -418,14 +411,22 @@ public class FeedbackViewController {
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    // Appelle ton service pour supprimer en base
                     feedbackService.supprimerFeedback(idFeedback);
-                    // Retire la carte de l'interface visuellement sans recharger tout
                     feedbackListContainer.getChildren().remove(card);
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    showAlert("Erreur", "Impossible de supprimer: " + e.getMessage());
                 }
             }
         });
+    }
+
+    // Méthode utilitaire pour les alertes
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

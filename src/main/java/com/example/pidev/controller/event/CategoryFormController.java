@@ -504,5 +504,3 @@ public class CategoryFormController {
         alert.showAndWait();
     }
 }
-
-

@@ -147,12 +147,7 @@
                             <Button fx:id="questionsBtn" text="    Questions" maxWidth="180" prefHeight="35" styleClass="submenu-button">
                                 <graphic><Text text="❓" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
                             </Button>
-                            <Button fx:id="reponsesBtn" text="    Réponses" maxWidth="180" prefHeight="35" styleClass="submenu-button">
-                                <graphic><Text text="📊" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
-                            </Button>
-                            <Button fx:id="participantQuizBtn" text="    Passer Quiz" maxWidth="180" prefHeight="35" styleClass="submenu-button">
-                                <graphic><Text text="📝" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
-                            </Button>
+
                         </VBox>
                     </VBox>
 
