@@ -40,6 +40,7 @@ public class ParticipantController {
 
     private final FeedbackService fs = new FeedbackService();
     private final CertificateService certificateService = new CertificateService();
+    private final com.example.pidev.service.questionnaire.BadWordService badWordService = new com.example.pidev.service.questionnaire.BadWordService();
     @FXML
     public void initialize() {
         try {
@@ -180,7 +181,12 @@ public class ParticipantController {
             int dernierIdFeedback = 0;
             int nombreBonnesReponses = 0;
 
-            // 1. Sauvegarde en base de données et calcul du score
+            // --- 1. FILTRAGE DES BAD WORDS (Appel API PurgoMalum) ---
+            // On récupère le texte, on le filtre, et on utilise cette version partout
+            String commentaireBrut = txtCommentaire.getText();
+            String commentaireFiltre = badWordService.filtrerTexte(commentaireBrut);
+
+            // --- 2. SAUVEGARDE EN BASE DE DONNÉES ET CALCUL DU SCORE ---
             for (int i = 0; i < listeQuestions.size(); i++) {
                 Question q = listeQuestions.get(i);
                 String repDonnee = reponsesUtilisateur.get(i);
@@ -189,76 +195,73 @@ public class ParticipantController {
                     nombreBonnesReponses++;
                 }
 
+                // Utilisation du commentaireFiltre pour la base de données
                 dernierIdFeedback = fs.enregistrerFeedbackComplet(
                         idParticipantConnecte,
                         idEventActuel,
                         q.getIdQuestion(),
                         repDonnee,
-                        txtCommentaire.getText(),
+                        commentaireFiltre,
                         etoilesSelectionnees
                 );
             }
 
-            // ================= AJOUT : GÉNÉRATION DU CERTIFICAT SI ADMIS =================
-            // Seuil de réussite : au moins la moitié des réponses justes
-            if (nombreBonnesReponses >= (listeQuestions.size() / 2)) {
+            // --- 3. GÉNÉRATION DU CERTIFICAT SI ADMIS ---
+            if (nombreBonnesReponses >= (listeQuestions.size() / 2.0)) {
                 com.example.pidev.service.questionnaire.CertificateService certService = new com.example.pidev.service.questionnaire.CertificateService();
-
-                // RÉCUPÉRATION DU VRAI NOM DEPUIS LA BASE DE DONNÉES
                 String nomGagnant = fs.getNomUserComplet(idParticipantConnecte);
-
                 String scoreFinal = nombreBonnesReponses + " / " + listeQuestions.size();
                 String cheminLogo = "C:\\Users\\USER\\Desktop\\pigestion\\src\\main\\java\\com\\example\\pidev\\images\\logo.png";
-                // On génère avec le nom récupéré (ex: "Ghofrane Jridi")
+
                 certService.genererCertificat(nomGagnant, scoreFinal, cheminLogo);
             }
-            // =============================================================================
 
-            // ================= AJOUT : ENVOI DE L'EMAIL AUTOMATIQUE =================
+            // --- 4. ENVOI DE L'EMAIL AUTOMATIQUE (Version Filtrée) ---
             String emailDestinataire = "jridighofrane48@gmail.com";
             String sujet = "Merci pour votre avis ! - EventFlow";
             String contenu = "Bonjour,\n\n" +
                     "Nous avons bien reçu votre avis concernant l'événement.\n" +
                     "Note : " + etoilesSelectionnees + " / 5\n" +
-                    "Commentaire : " + (txtCommentaire.getText().isEmpty() ? "Aucun" : txtCommentaire.getText()) + "\n\n" +
+                    "Commentaire : " + (commentaireFiltre.isEmpty() ? "Aucun" : commentaireFiltre) + "\n\n" +
                     "Merci de votre participation !";
 
             new Thread(() -> {
                 com.example.pidev.utils.MailUtils.envoyerMailConfirmation(emailDestinataire, sujet, contenu);
             }).start();
-            // ========================================================================
 
-            // 2. Charger le FXML Résultat
+            // --- 5. CHARGEMENT DE LA PAGE RÉSULTAT ---
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/questionnaire/Resultat.fxml"));
             Parent root = loader.load();
 
-            // 3. Injection des données dans le contrôleur de résultat
+            // Injection des données filtrées dans le contrôleur de résultat
             ResultatController resCtrl = loader.getController();
             resCtrl.initData(
                     dernierIdFeedback,
                     listeQuestions,
                     reponsesUtilisateur,
-                    txtCommentaire.getText(),
+                    commentaireFiltre, // On affiche la version censurée
                     etoilesSelectionnees
             );
 
-            // 4. Navigation via la scène courante
+            // --- 6. NAVIGATION ---
             javafx.scene.Scene scene = btnSuivant.getScene();
             if (com.example.pidev.MainController.getInstance() != null) {
                 com.example.pidev.MainController.getInstance().getPageContentContainer().getChildren().clear();
                 com.example.pidev.MainController.getInstance().getPageContentContainer().getChildren().add(root);
             } else {
-                VBox rootVBox = (VBox) scene.getRoot();
-                if (rootVBox.getChildren().size() > 1) {
-                    rootVBox.getChildren().set(1, root);
-                } else {
-                    rootVBox.getChildren().add(root);
+                // Fallback si le MainController n'est pas dispo
+                if (scene.getRoot() instanceof VBox rootVBox) {
+                    if (rootVBox.getChildren().size() > 1) {
+                        rootVBox.getChildren().set(1, root);
+                    } else {
+                        rootVBox.getChildren().add(root);
+                    }
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            afficherAlerte("Erreur", "Problème lors du chargement des résultats : " + e.getMessage());
+            afficherAlerte("Erreur", "Problème lors du traitement : " + e.getMessage());
         }
     }
 
