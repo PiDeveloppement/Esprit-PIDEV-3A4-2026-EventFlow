@@ -3,26 +3,31 @@ module com.example.pidev {
     requires javafx.fxml;
     requires javafx.web;
     requires atlantafx.base;
+
     requires java.sql;
-    requires mysql.connector.j;
-    requires jakarta.persistence;
     requires java.prefs;
     requires java.desktop;
     requires java.net.http;
+    requires java.mail;
+
+    requires mysql.connector.j;
+    requires jakarta.persistence;
     requires com.google.gson;
     requires okhttp3;
+
     requires org.apache.pdfbox;
     requires org.apache.poi.ooxml;
     requires org.apache.lucene.core;
     requires org.apache.lucene.queryparser;
     requires org.apache.lucene.analysis.common;
-    requires commons.math3;                 // module automatique
+    requires commons.math3;
+
     requires org.slf4j;
-    requires kernel;                        // iText kernel (automatique)
-    requires layout;                        // iText layout (automatique)
-    requires io;                            // iText io (automatique)
-    requires itextpdf;                       // iText 5 (automatique)
-    requires java.mail;
+    requires kernel;
+    requires layout;
+    requires io;
+    requires itextpdf;
+
     requires org.bouncycastle.provider;
     requires org.bouncycastle.pkix;
     requires org.bouncycastle.mail;
@@ -30,7 +35,6 @@ module com.example.pidev {
     requires org.apache.httpcomponents.httpmime;
     requires google.cloud.vision;
 
-    // Exports
     exports com.example.pidev;
     exports com.example.pidev.model.event;
     exports com.example.pidev.model.resource;
@@ -39,6 +43,7 @@ module com.example.pidev {
     exports com.example.pidev.model.sponsor;
     exports com.example.pidev.model.budget;
     exports com.example.pidev.model.depense;
+
     exports com.example.pidev.controller.event;
     exports com.example.pidev.controller.sponsor;
     exports com.example.pidev.controller.auth;
@@ -50,6 +55,7 @@ module com.example.pidev {
     exports com.example.pidev.controller.resource;
     exports com.example.pidev.controller.budget;
     exports com.example.pidev.controller.depense;
+
     exports com.example.pidev.service.user;
     exports com.example.pidev.service.event;
     exports com.example.pidev.service.role;
@@ -64,11 +70,9 @@ module com.example.pidev {
     exports com.example.pidev.service.search;
     exports com.example.pidev.service.pdf;
     exports com.example.pidev.service.chart;
-    exports com.example.pidev.service.imagga;
     exports com.example.pidev.service.vision;
     exports com.example.pidev.utils;
 
-    // Opens pour FXML
     opens com.example.pidev to javafx.fxml;
     opens com.example.pidev.controller.dashboard to javafx.fxml;
     opens com.example.pidev.controller.event to javafx.fxml;

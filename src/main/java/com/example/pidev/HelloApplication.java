@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -36,13 +38,13 @@ public class HelloApplication extends Application {
                     getClass().getResource("/com/example/pidev/fxml/auth/landingPage.fxml")
             );
             if (loader.getLocation() == null) {
-                throw new IllegalArgumentException("landingPage.fxml non trouvé");
+                throw new IllegalArgumentException("landingPage.fxml non trouvÃ©");
             }
 
             Parent root = loader.load();
             stage.initStyle(StageStyle.DECORATED);
 
-            // Taille initiale adaptée à l'écran
+            // Taille initiale adaptÃ©e Ã  l'Ã©cran
             Rectangle2D screen = Screen.getPrimary().getVisualBounds();
             double w = Math.min(1400, screen.getWidth()  * 0.92);
             double h = Math.min(900,  screen.getHeight() * 0.92);
@@ -50,7 +52,7 @@ public class HelloApplication extends Application {
             Scene scene = new Scene(root, w, h);
             applyCSS(scene);
 
-            stage.setTitle("EventFlow - Plateforme de gestion d'événements");
+            stage.setTitle("EventFlow - Plateforme de gestion d evenements");
             stage.setScene(scene);
             stage.setMinWidth(960);
             stage.setMinHeight(680);
@@ -58,7 +60,7 @@ public class HelloApplication extends Application {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur démarrage : " + e.getMessage());
+            System.err.println("âŒ Erreur dÃ©marrage : " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -68,11 +70,11 @@ public class HelloApplication extends Application {
         return primaryStage;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  HELPERS INTERNES
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    /** Applique le CSS sur une scène */
+    /** Applique le CSS sur une scÃ¨ne */
     private static void applyCSS(Scene scene) {
         var cssUrl = HelloApplication.class
                 .getResource("/com/example/pidev/css/atlantafx-custom.css");
@@ -82,9 +84,9 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Réutilise la scène existante en changeant juste la racine (root).
-     * → Les dimensions de la fenêtre ne changent JAMAIS.
-     * → Pas de scintillement, pas de redimensionnement.
+     * RÃ©utilise la scÃ¨ne existante en changeant juste la racine (root).
+     * â†’ Les dimensions de la fenÃªtre ne changent JAMAIS.
+     * â†’ Pas de scintillement, pas de redimensionnement.
      */
     private static void navigateTo(String fxmlPath, String title) {
         try {
@@ -94,16 +96,16 @@ public class HelloApplication extends Application {
             Parent root = loader.load();
             postConfigureView(root, fxmlPath);
 
-            // ✅ ON RÉUTILISE LA SCÈNE EXISTANTE — pas de new Scene()
+            // âœ… ON RÃ‰UTILISE LA SCÃˆNE EXISTANTE â€” pas de new Scene()
             Scene currentScene = primaryStage.getScene();
             if (currentScene != null) {
-                // S'assurer que le CSS est bien appliqué
+                // S'assurer que le CSS est bien appliquÃ©
                 if (!currentScene.getStylesheets().stream().anyMatch(s -> s.contains("atlantafx-custom"))) {
                     applyCSS(currentScene);
                 }
                 currentScene.setRoot(root);
             } else {
-                // Cas rare : pas de scène existante
+                // Cas rare : pas de scÃ¨ne existante
                 Rectangle2D screen = Screen.getPrimary().getVisualBounds();
                 double w = Math.min(1400, screen.getWidth()  * 0.92);
                 double h = Math.min(900,  screen.getHeight() * 0.92);
@@ -116,14 +118,14 @@ public class HelloApplication extends Application {
             primaryStage.show();
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur navigation vers " + fxmlPath + " : " + e.getMessage());
+            System.err.println("âŒ Erreur navigation vers " + fxmlPath + " : " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * Comme navigateTo() mais avec un contrôleur à initialiser après chargement.
-     * Utilisé pour loadEventDetailsPage() qui doit injecter un objet dans le contrôleur.
+     * Comme navigateTo() mais avec un contrÃ´leur Ã  initialiser aprÃ¨s chargement.
+     * UtilisÃ© pour loadEventDetailsPage() qui doit injecter un objet dans le contrÃ´leur.
      */
     private static <T> T navigateToWithController(String fxmlPath, String title) {
         try {
@@ -154,25 +156,29 @@ public class HelloApplication extends Application {
             return controller;
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur navigation avec contrôleur : " + e.getMessage());
+            System.err.println("âŒ Erreur navigation avec contrÃ´leur : " + e.getMessage());
             e.printStackTrace();
             return null;
         }
     }
 
-    /** Centre la fenêtre à l'écran selon w/h donnés */
+    /** Centre la fenÃªtre Ã  l'Ã©cran selon w/h donnÃ©s */
     private static void centerStage(double w, double h) {
         Rectangle2D screen = Screen.getPrimary().getVisualBounds();
         primaryStage.setX(screen.getMinX() + (screen.getWidth()  - w) / 2);
         primaryStage.setY(screen.getMinY() + (screen.getHeight() - h) / 2);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  NAVIGATION PUBLIQUE — appelée depuis les contrôleurs
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  NAVIGATION PUBLIQUE â€” appelÃ©e depuis les contrÃ´leurs
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    /** Dashboard principal (après login) */
+    /** Dashboard principal (aprÃ¨s login) */
     public static void loadMainLayout() {
+        if (!canAccessDashboard()) {
+            loadLandingPage();
+            return;
+        }
         navigateTo(
                 "/com/example/pidev/fxml/MainLayout.fxml",
                 "EventFlow - Dashboard"
@@ -181,7 +187,7 @@ public class HelloApplication extends Application {
         primaryStage.setMinHeight(680);
     }
 
-    /** Alias pour compatibilité */
+    /** Alias pour compatibilitÃ© */
     public static void loadDashboard() {
         loadMainLayout();
     }
@@ -190,7 +196,7 @@ public class HelloApplication extends Application {
     public static void loadLandingPage() {
         navigateTo(
                 "/com/example/pidev/fxml/auth/landingPage.fxml",
-                "EventFlow - Plateforme de gestion d'événements"
+                "EventFlow - Plateforme de gestion d evenements"
         );
     }
 
@@ -218,25 +224,98 @@ public class HelloApplication extends Application {
         );
     }
 
-    /** Page publique des événements */
+    /** Page profil utilisateur */
+    public static void loadProfilePage() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("/com/example/pidev/fxml/user/profil.fxml")
+            );
+            Parent profileRoot = loader.load();
+
+            Button backBtn = new Button("Back");
+            backBtn.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #1e293b; -fx-font-weight: bold; " +
+                    "-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 8; " +
+                    "-fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+            backBtn.setOnAction(e -> navigateBackFromProfile());
+
+            javafx.scene.control.Label title = new javafx.scene.control.Label("Mon profil");
+            title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #334155;");
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            HBox header = new HBox(12, backBtn, title, spacer);
+            header.setStyle("-fx-background-color: white; -fx-padding: 12 28; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;");
+            header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            VBox wrapped = new VBox(header, profileRoot);
+            VBox.setVgrow(profileRoot, Priority.ALWAYS);
+
+            Scene currentScene = primaryStage.getScene();
+            if (currentScene != null) {
+                if (!currentScene.getStylesheets().stream().anyMatch(s -> s.contains("atlantafx-custom"))) {
+                    applyCSS(currentScene);
+                }
+                currentScene.setRoot(wrapped);
+            } else {
+                Rectangle2D screen = Screen.getPrimary().getVisualBounds();
+                double w = Math.min(1400, screen.getWidth() * 0.92);
+                double h = Math.min(900, screen.getHeight() * 0.92);
+                Scene scene = new Scene(wrapped, w, h);
+                applyCSS(scene);
+                primaryStage.setScene(scene);
+            }
+
+            primaryStage.setTitle("EventFlow - Profil");
+            primaryStage.show();
+        } catch (Exception e) {
+            System.err.println("Erreur navigation profil: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void navigateBackFromProfile() {
+        UserSession session = UserSession.getInstance();
+        String role = session.getRole() == null ? "" : session.getRole().trim().toLowerCase();
+        if (role.contains("sponsor")) {
+            loadLandingPage();
+            return;
+        }
+        if (canAccessDashboard()) {
+            loadMainLayout();
+            return;
+        }
+        loadPublicEventsPage();
+    }
+
+    /** Page publique des Ã©vÃ©nements */
     public static void loadPublicEventsPage() {
         UserSession session = UserSession.getInstance();
         UserModel currentUser = session.getCurrentUser();
         boolean fromLoginPage = primaryStage != null
                 && primaryStage.getTitle() != null
                 && primaryStage.getTitle().toLowerCase().contains("connexion");
-        if (fromLoginPage && currentUser != null && !session.hasPendingEvent()) {
+        if (fromLoginPage && currentUser != null && !session.hasPendingEvent() && canAccessDashboard()) {
             loadMainLayout();
             return;
         }
 
         navigateTo(
                 "/com/example/pidev/fxml/front/events.fxml",
-                "EventFlow - Événements"
+                "EventFlow - Evenements"
         );
     }
+    private static boolean canAccessDashboard() {
+        UserSession session = UserSession.getInstance();
+        String role = session.getRole();
+        if (role == null) {
+            return false;
+        }
+        String lowerRole = role.trim().toLowerCase();
+        return lowerRole.contains("organisateur") || lowerRole.contains("admin");
+    }
 
-    /** Page de détail d'un événement */
+    /** Page de dÃ©tail d'un Ã©vÃ©nement */
     public static void loadEventDetailsPage(com.example.pidev.model.event.Event event) {
         com.example.pidev.controller.front.EventDetailController ctrl =
                 navigateToWithController(
@@ -307,6 +386,40 @@ public class HelloApplication extends Application {
         }
         if (contactBtn != null) {
             contactBtn.setOnAction(e -> loadLandingPageAndScrollTo("contact"));
+        }
+
+        List<Button> authButtons = collectButtons(navBar).stream()
+                .filter(btn -> {
+                    String text = normalize(btn.getText());
+                    return "connexion".equals(text) || "inscription".equals(text);
+                })
+                .toList();
+        if (authButtons.size() == 2) {
+            Button loginBtn = authButtons.stream()
+                    .filter(btn -> "connexion".equals(normalize(btn.getText())))
+                    .findFirst()
+                    .orElse(authButtons.get(0));
+            Button signupBtn = authButtons.stream()
+                    .filter(btn -> "inscription".equals(normalize(btn.getText())))
+                    .findFirst()
+                    .orElse(authButtons.get(1));
+
+            if (UserSession.getInstance().isLoggedIn()) {
+                String fullName = UserSession.getInstance().getFullName();
+                loginBtn.setText((fullName == null || fullName.isBlank()) ? "Profil" : fullName);
+                loginBtn.setOnAction(e -> loadProfilePage());
+
+                signupBtn.setText("Deconnexion");
+                signupBtn.setOnAction(e -> {
+                    UserSession.getInstance().clearSession();
+                    loadLandingPage();
+                });
+            } else {
+                loginBtn.setText("Connexion");
+                loginBtn.setOnAction(e -> loadLoginPage());
+                signupBtn.setText("Inscription");
+                signupBtn.setOnAction(e -> loadSignupPage());
+            }
         }
     }
 
@@ -481,7 +594,7 @@ public class HelloApplication extends Application {
             return "";
         }
         String normalized = value.trim().toLowerCase();
-        normalized = normalized.replace("é", "e").replace("è", "e").replace("ê", "e");
+        normalized = normalized.replace("Ã©", "e").replace("Ã¨", "e").replace("Ãª", "e");
         return normalized;
     }
 

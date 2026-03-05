@@ -141,11 +141,6 @@
                                     maxWidth="1.7976931348623157E308" prefHeight="34">
                                 <graphic><Text text="📋" style="-fx-font-size: 12px;"/></graphic>
                             </Button>
-                            <Button fx:id="sponsorPortalBtn" text="  Portail Sponsor"
-                                    styleClass="submenu-button"
-                                    maxWidth="1.7976931348623157E308" prefHeight="34">
-                                <graphic><Text text="🔑" style="-fx-font-size: 12px;"/></graphic>
-                            </Button>
                             <Button fx:id="budgetBtn" text="  Budget"
                                     styleClass="submenu-button"
                                     maxWidth="1.7976931348623157E308" prefHeight="34">

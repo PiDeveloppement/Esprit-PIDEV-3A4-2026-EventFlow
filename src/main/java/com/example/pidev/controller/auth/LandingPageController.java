@@ -2,6 +2,8 @@ package com.example.pidev.controller.auth;
 
 import com.example.pidev.HelloApplication;
 import com.example.pidev.service.questionnaire.FeedbackService;
+import com.example.pidev.utils.UserSession;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -30,41 +32,262 @@ public class LandingPageController implements Initializable {
     @FXML private VBox homeSection;
     @FXML private VBox featuresSection;
     @FXML private VBox contactSection;
+    @FXML private Button eventsBtn;
+    @FXML private Button sponsorRecoBtn;
+    @FXML private HBox authButtonsBox;
+    @FXML private MenuButton profileMenuButton;
+    @FXML private MenuItem profileMenuItem;
+    @FXML private MenuItem logoutMenuItem;
 
     private Scene currentScene;
     private final FeedbackService feedbackService = new FeedbackService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        System.out.println("✅ LandingPageController initialisé");
+        updateTopRightActionsBySession();
+        updateSponsorAccessVisibility();
+        Platform.runLater(() -> {
+            updateTopRightActionsBySession();
+            updateSponsorAccessVisibility();
+            applyLegacyNavbarFallback();
+        });
+        System.out.println("LandingPageController initialise");
     }
 
     // ==================== NAVIGATION ====================
 
     @FXML
     private void handleLogin() {
-        System.out.println("📂 Redirection vers la page de connexion");
         HelloApplication.loadLoginPage();
     }
 
     @FXML
     private void handleSignup() {
-        System.out.println("📂 Redirection vers la page d'inscription");
         HelloApplication.loadSignupPage();
     }
 
     @FXML
     private void handleGoToEvents() {
-        System.out.println("📂 Redirection vers la page des événements");
         HelloApplication.loadPublicEventsPage();
     }
 
     @FXML
     private void handleSponsorPortal() {
-        System.out.println("ðŸ‘¤ Redirection vers le portail sponsor");
-        HelloApplication.loadSponsorPortal();
+        if (!isCurrentUserSponsor()) {
+            showAlert("Acces refuse", "Cette section est reservee aux sponsors.");
+            return;
+        }
+        try {
+            Scene scene = sponsorRecoBtn != null ? sponsorRecoBtn.getScene() : null;
+            if (scene == null && mainScrollPane != null) scene = mainScrollPane.getScene();
+            if (scene == null && homeSection != null) scene = homeSection.getScene();
+
+            VBox root = null;
+            if (scene != null && scene.getRoot() instanceof VBox pageRoot) {
+                root = pageRoot;
+            } else if (mainScrollPane != null && mainScrollPane.getParent() instanceof VBox pageRoot) {
+                root = pageRoot;
+            }
+            if (root == null) {
+                showAlert("Erreur", "Impossible d'afficher la section sponsor dans l'accueil.");
+                return;
+            }
+
+            Parent sponsorContent = FXMLLoader.load(
+                    getClass().getResource("/com/example/pidev/fxml/Sponsor/sponsor_portal.fxml")
+            );
+            if (root.getChildren().size() > 1) {
+                root.getChildren().set(1, sponsorContent);
+            } else {
+                root.getChildren().add(sponsorContent);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la page sponsor : " + e.getMessage());
+        }
     }
 
+    @FXML
+    private void handleProfile() {
+        HelloApplication.loadProfilePage();
+    }
+
+    @FXML
+    private void handleLogout() {
+        UserSession.getInstance().clearSession();
+        HelloApplication.loadLandingPage();
+    }
+
+    private void updateSponsorAccessVisibility() {
+        boolean sponsor = isCurrentUserSponsor();
+        if (sponsorRecoBtn != null) {
+            sponsorRecoBtn.setVisible(sponsor);
+            sponsorRecoBtn.setManaged(sponsor);
+            sponsorRecoBtn.setDisable(!sponsor);
+        }
+
+        // Fallback si le FXML integre n'a pas le bouton sponsorRecoBtn.
+        if (sponsorRecoBtn == null && eventsBtn != null) {
+            if (sponsor) {
+                eventsBtn.setText("Recommandations sponsor");
+                eventsBtn.setOnAction(e -> handleSponsorPortal());
+            } else {
+                eventsBtn.setText("Evenements");
+                eventsBtn.setOnAction(e -> handleGoToEvents());
+            }
+        }
+    }
+
+    private void updateTopRightActionsBySession() {
+        boolean loggedIn = UserSession.getInstance().isLoggedIn();
+        if (authButtonsBox != null) {
+            authButtonsBox.setVisible(!loggedIn);
+            authButtonsBox.setManaged(!loggedIn);
+        }
+        if (profileMenuButton != null) {
+            profileMenuButton.setVisible(loggedIn);
+            profileMenuButton.setManaged(loggedIn);
+            if (loggedIn) {
+                String fullName = UserSession.getInstance().getFullName();
+                profileMenuButton.setText((fullName == null || fullName.isBlank()) ? "Profil" : fullName);
+            }
+        }
+
+        // Fallback pour FXML legacy sans fx:id authButtonsBox/profileMenuButton.
+        if (authButtonsBox == null || profileMenuButton == null) {
+            updateLegacyAuthButtons(loggedIn);
+        }
+    }
+
+    private boolean isCurrentUserSponsor() {
+        String role = UserSession.getInstance().getRole();
+        if ((role == null || role.isBlank()) && UserSession.getInstance().getCurrentUser() != null
+                && UserSession.getInstance().getCurrentUser().getRole() != null) {
+            role = UserSession.getInstance().getCurrentUser().getRole().getRoleName();
+        }
+        return role != null && role.trim().toLowerCase().contains("sponsor");
+    }
+
+    private void applyLegacyNavbarFallback() {
+        if (mainScrollPane == null) {
+            return;
+        }
+        Parent root = mainScrollPane.getParent();
+        if (!(root instanceof VBox pageRoot) || pageRoot.getChildren().isEmpty()) {
+            return;
+        }
+        if (!(pageRoot.getChildren().get(0) instanceof HBox navBar)) {
+            return;
+        }
+
+        HBox linksHBox = null;
+        for (javafx.scene.Node node : navBar.getChildren()) {
+            if (node instanceof HBox candidate) {
+                boolean hasEvents = candidate.getChildren().stream()
+                        .anyMatch(n -> n instanceof Button b && normalizeButtonText(b.getText()).contains("evenement"));
+                boolean hasContact = candidate.getChildren().stream()
+                        .anyMatch(n -> n instanceof Button b && normalizeButtonText(b.getText()).contains("contact"));
+                if (hasEvents && hasContact) {
+                    linksHBox = candidate;
+                    break;
+                }
+            }
+        }
+        if (linksHBox == null) {
+            return;
+        }
+
+        Button recoButton = null;
+        for (javafx.scene.Node n : linksHBox.getChildren()) {
+            if (n instanceof Button b && normalizeButtonText(b.getText()).contains("recommand")) {
+                recoButton = b;
+                break;
+            }
+        }
+
+        if (isCurrentUserSponsor()) {
+            if (recoButton == null) {
+                Button btn = new Button("Recommandations sponsor");
+                btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #0D47A1; -fx-font-size: 16px; -fx-font-weight: 700; -fx-cursor: hand;");
+                btn.setOnAction(e -> handleSponsorPortal());
+                linksHBox.getChildren().add(2, btn);
+            } else {
+                recoButton.setVisible(true);
+                recoButton.setManaged(true);
+                recoButton.setOnAction(e -> handleSponsorPortal());
+            }
+        } else if (recoButton != null) {
+            linksHBox.getChildren().remove(recoButton);
+        }
+    }
+
+    private void updateLegacyAuthButtons(boolean loggedIn) {
+        if (mainScrollPane == null) {
+            return;
+        }
+        Parent root = mainScrollPane.getParent();
+        if (!(root instanceof VBox pageRoot) || pageRoot.getChildren().isEmpty()) {
+            return;
+        }
+        if (!(pageRoot.getChildren().get(0) instanceof HBox navBar)) {
+            return;
+        }
+
+        HBox authBox = null;
+        for (javafx.scene.Node node : navBar.getChildren()) {
+            if (node instanceof HBox candidate) {
+                long countAuth = candidate.getChildren().stream()
+                        .filter(n -> n instanceof Button b &&
+                                (normalizeButtonText(b.getText()).contains("connexion")
+                                        || normalizeButtonText(b.getText()).contains("inscription")
+                                        || normalizeButtonText(b.getText()).contains("profil")
+                                        || normalizeButtonText(b.getText()).contains("deconnexion")))
+                        .count();
+                if (countAuth >= 2) {
+                    authBox = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (authBox == null) {
+            return;
+        }
+
+        List<Button> buttons = authBox.getChildren().stream()
+                .filter(n -> n instanceof Button)
+                .map(n -> (Button) n)
+                .toList();
+        if (buttons.size() < 2) {
+            return;
+        }
+
+        Button first = buttons.get(0);
+        Button second = buttons.get(1);
+        if (loggedIn) {
+            String fullName = UserSession.getInstance().getFullName();
+            first.setText((fullName == null || fullName.isBlank()) ? "Profil" : fullName);
+            first.setOnAction(e -> handleProfile());
+            second.setText("Deconnexion");
+            second.setOnAction(e -> handleLogout());
+        } else {
+            first.setText("Connexion");
+            first.setOnAction(e -> handleLogin());
+            second.setText("Inscription");
+            second.setOnAction(e -> handleSignup());
+        }
+    }
+
+    private String normalizeButtonText(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.toLowerCase()
+                .replace("é", "e")
+                .replace("è", "e")
+                .replace("ê", "e")
+                .replace("à", "a");
+    }
     // ==================== SCROLL ====================
 
     @FXML
@@ -113,19 +336,19 @@ public class LandingPageController implements Initializable {
 
     @FXML
     private void handleDemo() {
-        System.out.println("▶️ Ouverture de la vidéo de démonstration...");
-        playVideo("/com/example/pidev/videos/Média1.mp4");
+        System.out.println("Ã¢â€“Â¶Ã¯Â¸Â Ouverture de la vidÃƒÂ©o de dÃƒÂ©monstration...");
+        playVideo("/com/example/pidev/videos/MÃƒÂ©dia1.mp4");
     }
 
     private void playVideo(String videoPath) {
         try {
             URL videoUrl = getClass().getResource(videoPath);
             if (videoUrl == null) {
-                showAlert("Erreur", "Vidéo non trouvée: " + videoPath);
+                showAlert("Erreur", "VidÃƒÂ©o non trouvÃƒÂ©e: " + videoPath);
                 return;
             }
             Stage videoStage = new Stage();
-            videoStage.setTitle("EventFlow - Vidéo de démonstration");
+            videoStage.setTitle("EventFlow - VidÃƒÂ©o de dÃƒÂ©monstration");
             videoStage.initModality(Modality.APPLICATION_MODAL);
             videoStage.setWidth(1000);
             videoStage.setHeight(650);
@@ -143,7 +366,7 @@ public class LandingPageController implements Initializable {
             videoStage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Erreur", "Impossible de lire la vidéo: " + e.getMessage());
+            showAlert("Erreur", "Impossible de lire la vidÃƒÂ©o: " + e.getMessage());
         }
     }
 
@@ -169,7 +392,7 @@ public class LandingPageController implements Initializable {
             } else if (newState == Worker.State.SUCCEEDED) {
                 loadingIndicator.setVisible(false);
                 webView.setVisible(true);
-                System.out.println("✅ Vidéo chargée avec succès");
+                System.out.println("Ã¢Å“â€¦ VidÃƒÂ©o chargÃƒÂ©e avec succÃƒÂ¨s");
             } else if (newState == Worker.State.FAILED) {
                 loadingIndicator.setVisible(false);
                 webView.setVisible(true);
@@ -184,11 +407,11 @@ public class LandingPageController implements Initializable {
         HBox headerBox = new HBox(15);
         headerBox.setAlignment(Pos.CENTER_LEFT);
         headerBox.setPadding(new Insets(0, 0, 20, 0));
-        Label titleLabel = new Label("🎬 Démonstration EventFlow");
+        Label titleLabel = new Label("Ã°Å¸Å½Â¬ DÃƒÂ©monstration EventFlow");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button closeBtn = new Button("✕");
+        Button closeBtn = new Button("Ã¢Å“â€¢");
         closeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; " +
                 "-fx-cursor: hand; -fx-padding: 5 10; -fx-font-weight: bold;");
         closeBtn.setOnAction(e -> videoStage.close());
@@ -223,7 +446,7 @@ public class LandingPageController implements Initializable {
             <body>
                 <video controls autoplay>
                     <source src="%s" type="video/mp4">
-                    Votre navigateur ne supporte pas la lecture de vidéos.
+                    Votre navigateur ne supporte pas la lecture de vidÃƒÂ©os.
                 </video>
             </body>
             </html>
@@ -234,15 +457,15 @@ public class LandingPageController implements Initializable {
         VBox infoBox = new VBox(10);
         infoBox.setAlignment(Pos.CENTER_LEFT);
         infoBox.setPadding(new Insets(20, 0, 0, 0));
-        Label infoTitle = new Label("✨ Découvrez EventFlow en action");
+        Label infoTitle = new Label("Ã¢Å“Â¨ DÃƒÂ©couvrez EventFlow en action");
         infoTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
         Label infoText = new Label(
-                "Cette démonstration vous montre comment :\n" +
-                        "✓ Créer et gérer vos événements en quelques clics\n" +
-                        "✓ Ajouter des participants et suivre leurs inscriptions\n" +
-                        "✓ Gérer vos sponsors et leurs contrats\n" +
-                        "✓ Visualiser les statistiques en temps réel\n" +
-                        "✓ Générer des rapports détaillés"
+                "Cette dÃƒÂ©monstration vous montre comment :\n" +
+                        "Ã¢Å“â€œ CrÃƒÂ©er et gÃƒÂ©rer vos ÃƒÂ©vÃƒÂ©nements en quelques clics\n" +
+                        "Ã¢Å“â€œ Ajouter des participants et suivre leurs inscriptions\n" +
+                        "Ã¢Å“â€œ GÃƒÂ©rer vos sponsors et leurs contrats\n" +
+                        "Ã¢Å“â€œ Visualiser les statistiques en temps rÃƒÂ©el\n" +
+                        "Ã¢Å“â€œ GÃƒÂ©nÃƒÂ©rer des rapports dÃƒÂ©taillÃƒÂ©s"
         );
         infoText.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-line-spacing: 5;");
         infoText.setWrapText(true);
@@ -254,7 +477,7 @@ public class LandingPageController implements Initializable {
         HBox actionBox = new HBox(15);
         actionBox.setAlignment(Pos.CENTER_RIGHT);
         actionBox.setPadding(new Insets(20, 0, 0, 0));
-        Button replayBtn = new Button("🔄 Revoir la démo");
+        Button replayBtn = new Button("Ã°Å¸â€â€ž Revoir la dÃƒÂ©mo");
         replayBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; " +
                 "-fx-padding: 12 25; -fx-background-radius: 8; -fx-cursor: hand; " +
                 "-fx-border-color: #3b82f6; -fx-border-width: 1.5; -fx-font-size: 14px;");
@@ -304,7 +527,7 @@ public class LandingPageController implements Initializable {
         VBox inner = new VBox(30);
         inner.setStyle("-fx-padding: 40; -fx-background-color: #f8fafc;");
 
-        Label titrePage = new Label("⭐  Feedbacks des participants");
+        Label titrePage = new Label("Ã¢Â­Â  Feedbacks des participants");
         titrePage.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0A1929;");
 
         Map<String, Object> stats = feedbackService.getStatistiquesDetaillees();
@@ -328,7 +551,7 @@ public class LandingPageController implements Initializable {
             ligne.setAlignment(Pos.CENTER_LEFT);
             Label lblNom = new Label(labels[5 - i]);
             lblNom.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-pref-width: 55;");
-            Label lblStar = new Label("★");
+            Label lblStar = new Label("Ã¢Ëœâ€¦");
             lblStar.setStyle("-fx-text-fill: #f59e0b;");
             ProgressBar bar = new ProgressBar((double) nb / maxVal);
             bar.setPrefWidth(260); bar.setPrefHeight(12);
@@ -348,7 +571,7 @@ public class LandingPageController implements Initializable {
         HBox etoilesGlobales = new HBox(3);
         etoilesGlobales.setAlignment(Pos.CENTER);
         for (int i = 0; i < 5; i++) {
-            Label s = new Label(i < (int) Math.round(moyenne) ? "★" : "☆");
+            Label s = new Label(i < (int) Math.round(moyenne) ? "Ã¢Ëœâ€¦" : "Ã¢Ëœâ€ ");
             s.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 20px;");
             etoilesGlobales.getChildren().add(s);
         }
@@ -365,7 +588,7 @@ public class LandingPageController implements Initializable {
         String eventActuel = "";
         for (Map<String, Object> fb : feedbacks) {
             String nomEvent = (String) fb.get("nomEvent");
-            if (nomEvent == null) nomEvent = "Événement inconnu";
+            if (nomEvent == null) nomEvent = "Ãƒâ€°vÃƒÂ©nement inconnu";
             if (!nomEvent.equals(eventActuel)) {
                 eventActuel = nomEvent;
                 listeFeedbacks.getChildren().add(creerTitreEvent(nomEvent));
@@ -383,7 +606,7 @@ public class LandingPageController implements Initializable {
         HBox box = new HBox(10);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setStyle("-fx-padding: 15 0 8 0;");
-        Label icon = new Label("📅");
+        Label icon = new Label("Ã°Å¸â€œâ€¦");
         icon.setStyle("-fx-font-size: 18px;");
         Label titre = new Label(nomEvent);
         titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
@@ -418,7 +641,7 @@ public class LandingPageController implements Initializable {
         int etoiles = (int) fb.get("etoiles");
         HBox starsBox = new HBox(2);
         for (int i = 0; i < 5; i++) {
-            Label star = new Label(i < etoiles ? "★" : "☆");
+            Label star = new Label(i < etoiles ? "Ã¢Ëœâ€¦" : "Ã¢Ëœâ€ ");
             star.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 15px;");
             starsBox.getChildren().add(star);
         }

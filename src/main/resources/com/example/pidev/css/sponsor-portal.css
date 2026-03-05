@@ -1,0 +1,122 @@
+.sponsor-portal-root {
+    -fx-background-color: linear-gradient(to bottom, #f4f8ff 0%, #f7faff 45%, #f2f6fb 100%);
+}
+
+.sponsor-header-block {
+    -fx-background-color: linear-gradient(to right, #ffffff 0%, #f6faff 45%, #eef6ff 100%);
+    -fx-border-color: #d5e5ff;
+    -fx-border-width: 0 0 1 0;
+}
+
+.sponsor-badge {
+    -fx-background-color: #e0ebff;
+    -fx-background-radius: 12;
+}
+
+.sponsor-badge-text {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #1e3a8a;
+}
+
+.sponsor-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.sponsor-subtitle {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #5b6b83;
+}
+
+.sponsor-date-chip {
+    -fx-text-fill: #334155;
+    -fx-font-weight: 700;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 9;
+    -fx-padding: 6 14;
+    -fx-border-color: #d7e3f4;
+    -fx-border-width: 1;
+    -fx-border-radius: 9;
+}
+
+.sponsor-top-btn {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8fbff);
+    -fx-border-color: #bfd3f3;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-text-fill: #1e293b;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.sponsor-top-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #eef6ff, #e5f0ff);
+    -fx-border-color: #7fb3ff;
+}
+
+.sponsor-section-card {
+    -fx-background-color: #fdfefe;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #d7e3f5;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.07), 12, 0, 0, 3);
+}
+
+.sponsor-events-grid {
+    -fx-padding: 2 2 2 2;
+}
+
+.sponsor-event-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0, 0, 2);
+}
+
+.sponsor-event-card:hover {
+    -fx-border-color: #bfd4f8;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.12), 14, 0, 0, 4);
+}
+
+.sponsor-event-category-chip {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-background-color: #f8fbff;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-padding: 4 10;
+}
+
+.sponsor-event-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 2 0 2 0;
+}
+
+.sponsor-event-meta {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.sponsor-event-btn {
+    -fx-background-color: #0D47A1;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 9 20;
+    -fx-cursor: hand;
+}
+
+.sponsor-event-btn:hover {
+    -fx-background-color: #0b3b86;
+}

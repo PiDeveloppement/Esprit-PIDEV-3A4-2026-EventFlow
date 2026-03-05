@@ -1,213 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
 
-<BorderPane prefHeight="900" prefWidth="1600"
-            style="-fx-background-color: #f1f5f9;"
-            stylesheets="@../../css/design-system.css"
-            xmlns="http://javafx.com/javafx/17.0.12"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.pidev.controller.sponsor.SponsorPortalController">
+<BorderPane fx:id="rootPane" prefHeight="900" prefWidth="1600" styleClass="sponsor-portal-root" stylesheets="@../../css/design-system.css,@../../css/sponsor-portal.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.sponsor.SponsorPortalController">
 
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background: #f1f5f9;
-                           -fx-background-color: #f1f5f9;
-                           -fx-border-color: transparent;">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: #f1f5f9; -fx-background-color: #f1f5f9; -fx-border-color: transparent;" vbarPolicy="AS_NEEDED">
             <VBox spacing="0" style="-fx-background-color: #f1f5f9;">
 
-                <!-- ===== EN-TETE ===== -->
-                <VBox spacing="14"
-                      style="-fx-padding: 22 35; -fx-background-color: white;
-                             -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
-
-                    <!-- Titre + date -->
+                <VBox spacing="14" style="-fx-padding: 22 35;" styleClass="sponsor-header-block">
+                     <Button fx:id="homeBtn" prefHeight="45.0" prefWidth="112.0" styleClass="sponsor-top-btn" text="Back" visible="false" managed="false" />
                     <HBox alignment="CENTER_LEFT" spacing="12">
-                        <StackPane prefWidth="44" prefHeight="44"
-                                   style="-fx-background-color: #dbeafe; -fx-background-radius: 12;">
-                            <Label text="🧾" style="-fx-font-size: 22px;"/>
-                        </StackPane>
-                        <Label text="Sponsor Portal"
-                               style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #0f172a;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="todayLabel" text="--"
-                               style="-fx-text-fill: #64748b; -fx-font-weight: 700;
-                                      -fx-background-color: #f8fafc; -fx-background-radius: 8;
-                                      -fx-padding: 6 14; -fx-border-color: #e2e8f0;
-                                      -fx-border-width: 1; -fx-border-radius: 8;"/>
+                        <VBox spacing="2">
+                            <Label styleClass="sponsor-title" text="Portail Sponsoring" />
+                            <Label styleClass="sponsor-subtitle" text="Recommandations IA et opportunites de sponsoring" />
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="exportCsvBtn" cacheShape="false" centerShape="false" focusTraversable="false" scaleShape="false" styleClass="sponsor-top-btn" visible="false" />
+                        <Label fx:id="todayLabel" styleClass="sponsor-date-chip" text="--" />
                     </HBox>
 
-                    <!-- Selecteur email -->
-                    <HBox alignment="CENTER_LEFT" spacing="12"
-                          style="-fx-background-color: #f8fafc; -fx-background-radius: 10;
-                                 -fx-padding: 10 16; -fx-border-color: #e2e8f0;
-                                 -fx-border-width: 1; -fx-border-radius: 10;">
-                        <Label text="📧" style="-fx-font-size: 16px;"/>
-                        <Label text="Compte email :"
-                               style="-fx-text-fill: #334155; -fx-font-weight: 800;"/>
-                        <ComboBox fx:id="emailAccount" prefWidth="300"
-                                  promptText="Choisir un email"
-                                  style="-fx-background-color: white;
-                                         -fx-border-color: #cbd5e1;
-                                         -fx-border-radius: 8;
-                                         -fx-background-radius: 8;"/>
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Button fx:id="exportExcelBtn" styleClass="sponsor-top-btn" text="Exporter Excel" />
+                        <Button fx:id="historyBtn" styleClass="sponsor-top-btn" text="Historique" />
                     </HBox>
 
-                    <!-- STAT CARDS -->
                     <HBox spacing="16">
-
-                        <!-- Card Mes Sponsors -->
-                        <VBox HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: white; -fx-background-radius: 14;
-                                     -fx-border-radius: 14; -fx-border-color: #e2e8f0;
-                                     -fx-border-width: 1; -fx-padding: 18;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 3);">
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-padding: 18;" HBox.hgrow="ALWAYS">
                             <HBox alignment="CENTER_LEFT" spacing="12">
-                                <StackPane prefWidth="46" prefHeight="46"
-                                           style="-fx-background-color: #ede9fe; -fx-background-radius: 12;">
-                                    <Label text="👤" style="-fx-font-size: 22px;"/>
-                                </StackPane>
                                 <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="mySponsorsSectionLabel" text="Mes Sponsors"
-                                           style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: 700;"/>
-                                    <Label fx:id="mySponsorsLabel" text="0"
-                                           style="-fx-text-fill: #7c3aed; -fx-font-size: 28px; -fx-font-weight: 900;"/>
+                                    <Label fx:id="myContributionSectionLabel" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: 700;" text="Ma contribution" />
+                                    <Label fx:id="myContributionLabel" style="-fx-text-fill: #15803d; -fx-font-size: 24px; -fx-font-weight: 900;" text="0,00 DT" />
                                 </VBox>
                             </HBox>
-                            <Pane prefHeight="5" style="-fx-background-color: #7c3aed; -fx-background-radius: 4;">
-                                <VBox.margin><Insets top="12"/></VBox.margin>
-                            </Pane>
                         </VBox>
 
-                        <!-- Card Ma Contribution -->
-                        <VBox HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: white; -fx-background-radius: 14;
-                                     -fx-border-radius: 14; -fx-border-color: #e2e8f0;
-                                     -fx-border-width: 1; -fx-padding: 18;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 3);">
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-padding: 18;" HBox.hgrow="ALWAYS">
                             <HBox alignment="CENTER_LEFT" spacing="12">
-                                <StackPane prefWidth="46" prefHeight="46"
-                                           style="-fx-background-color: #d1fae5; -fx-background-radius: 12;">
-                                    <Label text="💰" style="-fx-font-size: 22px;"/>
-                                </StackPane>
                                 <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="myContributionSectionLabel" text="Ma Contribution"
-                                           style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: 700;"/>
-                                    <Label fx:id="myContributionLabel" text="0,00 DT"
-                                           style="-fx-text-fill: #15803d; -fx-font-size: 24px; -fx-font-weight: 900;"/>
+                                    <Label fx:id="myEventsSectionLabel" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: 700;" text="Mes evenements" />
+                                    <Label fx:id="myEventsLabel" style="-fx-text-fill: #1e40af; -fx-font-size: 28px; -fx-font-weight: 900;" text="0" />
                                 </VBox>
                             </HBox>
-                            <Pane prefHeight="5" style="-fx-background-color: #10b981; -fx-background-radius: 4;">
-                                <VBox.margin><Insets top="12"/></VBox.margin>
-                            </Pane>
                         </VBox>
-
-                        <!-- Card Mes Evenements -->
-                        <VBox HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: white; -fx-background-radius: 14;
-                                     -fx-border-radius: 14; -fx-border-color: #e2e8f0;
-                                     -fx-border-width: 1; -fx-padding: 18;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 3);">
-                            <HBox alignment="CENTER_LEFT" spacing="12">
-                                <StackPane prefWidth="46" prefHeight="46"
-                                           style="-fx-background-color: #dbeafe; -fx-background-radius: 12;">
-                                    <Label text="🗓" style="-fx-font-size: 22px;"/>
-                                </StackPane>
-                                <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="myEventsSectionLabel" text="Mes Evenements"
-                                           style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: 700;"/>
-                                    <Label fx:id="myEventsLabel" text="0"
-                                           style="-fx-text-fill: #1e40af; -fx-font-size: 28px; -fx-font-weight: 900;"/>
-                                </VBox>
-                            </HBox>
-                            <Pane prefHeight="5" style="-fx-background-color: #3b82f6; -fx-background-radius: 4;">
-                                <VBox.margin><Insets top="12"/></VBox.margin>
-                            </Pane>
-                        </VBox>
-                    </HBox>
-
-                    <!-- Graphique BarChart -->
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 14;
-                                 -fx-border-radius: 14; -fx-border-color: #e2e8f0;
-                                 -fx-border-width: 1; -fx-padding: 16;
-                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);">
-                        <BarChart fx:id="myContributionsChart" prefHeight="260" prefWidth="800"
-                                  title="Mes contributions par sponsor">
-                            <xAxis><CategoryAxis label="Entreprise"/></xAxis>
-                            <yAxis><NumberAxis label="Montant (DT)"/></yAxis>
-                        </BarChart>
-                    </VBox>
-
-                    <!-- FILTRES + BOUTONS -->
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <TextField fx:id="searchField" prefWidth="220"
-                                   promptText="🔍 Rechercher..."
-                                   style="-fx-background-color: white;
-                                          -fx-border-color: #cbd5e1;
-                                          -fx-border-radius: 8; -fx-background-radius: 8;
-                                          -fx-padding: 8 12;"/>
-                        <ComboBox fx:id="companyFilter" prefWidth="190"
-                                  promptText="🏢 Entreprise"
-                                  style="-fx-background-color: white;
-                                         -fx-border-color: #cbd5e1;
-                                         -fx-border-radius: 8; -fx-background-radius: 8;"/>
-                        <ComboBox fx:id="eventFilter" prefWidth="190"
-                                  promptText="📅 Evenement"
-                                  style="-fx-background-color: white;
-                                         -fx-border-color: #cbd5e1;
-                                         -fx-border-radius: 8; -fx-background-radius: 8;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="exportExcelBtn" text="📥 Exporter Excel"
-                                minHeight="42" minWidth="160"
-                                style="-fx-background-color: #1d4ed8; -fx-text-fill: white;
-                                       -fx-font-weight: 800; -fx-font-size: 13px;
-                                       -fx-background-radius: 10; -fx-padding: 10 20;
-                                       -fx-cursor: hand;"/>
-                        <Button fx:id="addSponsorBtn" text="➕ Nouveau Sponsor"
-                                minHeight="42" minWidth="180"
-                                style="-fx-background-color: #10b981; -fx-text-fill: white;
-                                       -fx-font-weight: 800; -fx-font-size: 13px;
-                                       -fx-background-radius: 10; -fx-padding: 10 22;
-                                       -fx-cursor: hand;"/>
                     </HBox>
                 </VBox>
 
-                <!-- ===== LISTE SPONSORS ===== -->
-                <VBox spacing="14" style="-fx-padding: 20 35; -fx-background-color: #f1f5f9;">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="📋" style="-fx-font-size: 16px;"/>
-                        <Label text="Mes Sponsors"
-                               style="-fx-font-size: 17px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
-                        <Label fx:id="statusLabel" text="..."
-                               style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
-                    </HBox>
-                    <TilePane fx:id="cardsPane" hgap="16" prefColumns="3"
-                              style="-fx-padding: 6; -fx-background-color: transparent;" vgap="16"/>
-                </VBox>
-
-                <!-- ===== EVENEMENTS RECOMMANDES ===== -->
                 <VBox style="-fx-padding: 0 35 28 35; -fx-background-color: #f1f5f9;">
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 16;
-                                 -fx-border-radius: 16; -fx-border-color: #e2e8f0;
-                                 -fx-border-width: 1; -fx-padding: 20;
-                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 4);">
-                        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 12 0;">
-                            <StackPane prefWidth="36" prefHeight="36"
-                                       style="-fx-background-color: #fef3c7; -fx-background-radius: 10;">
-                                <Label text="🎯" style="-fx-font-size: 18px;"/>
-                            </StackPane>
-                            <Label text="Evenements recommandes pour vous"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
-                        </HBox>
-                        <ListView fx:id="suggestedEventsListView" prefHeight="260"
-                                  style="-fx-background-color: white;
-                                         -fx-background-radius: 10;
-                                         -fx-border-radius: 10;
-                                         -fx-border-color: #e2e8f0;
-                                         -fx-border-width: 1;"/>
+                    <VBox style="-fx-padding: 20;" styleClass="sponsor-section-card">
+                        <StackPane mouseTransparent="true" pickOnBounds="false" prefHeight="45.0" prefWidth="60.0" styleClass="sponsor-badge">
+                            <Label cacheShape="false" centerShape="false" focusTraversable="false" scaleShape="false" styleClass="sponsor-badge-text" visible="false" />
+                           <Label style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-padding: 0 0 12 0;" text="Evenements recommandes " />
+                        </StackPane>
+                        <FlowPane fx:id="recommendedEventsGrid" hgap="18" prefWrapLength="1080" vgap="18" styleClass="sponsor-events-grid" />
+                        <VBox fx:id="noRecommendedMessage" alignment="CENTER" managed="false" spacing="8" style="-fx-padding: 20 0 6 0;" visible="false">
+                            <Label style="-fx-font-size: 14px; -fx-text-fill: #64748b; -fx-font-weight: 600;" text="Renseignez votre biographie (secteur) dans votre profil pour activer les recommandations." wrapText="true" />
+                        </VBox>
+                    </VBox>
+                </VBox>
+
+                <VBox style="-fx-padding: 0 35 28 35; -fx-background-color: #f1f5f9;">
+                    <VBox prefHeight="92.0" prefWidth="1516.0" style="-fx-padding: 20;" styleClass="sponsor-section-card">
+                  <StackPane mouseTransparent="true" pickOnBounds="false" prefHeight="45.0" prefWidth="60.0" styleClass="sponsor-badge">
+                     <children>
+                        <Label cacheShape="false" centerShape="false" focusTraversable="false" scaleShape="false" styleClass="sponsor-badge-text" visible="false" />
+                        <Label style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-padding: 0 0 12 0;" />
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-padding: 0 0 12 0;" text="Catalogue des evenements a sponsoriser" />
+                     </children>
+                  </StackPane>
+                        <FlowPane fx:id="allEventsGrid" hgap="18" prefWrapLength="1080" vgap="18" styleClass="sponsor-events-grid" />
+                        <VBox fx:id="noEventsMessage" alignment="CENTER" managed="false" spacing="10" style="-fx-padding: 25 0 10 0;" visible="false">
+                            <Label style="-fx-font-size: 16px; -fx-text-fill: #64748b;" text="Aucun evenement trouve" />
+                        </VBox>
                     </VBox>
                 </VBox>
 

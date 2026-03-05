@@ -1,8 +1,8 @@
 package com.example.pidev.controller.sponsor;
 
 import com.example.pidev.model.sponsor.Sponsor;
-import com.example.pidev.service.sponsor.SponsorService;
 import com.example.pidev.service.pdf.LocalSponsorPdfService;
+import com.example.pidev.service.sponsor.SponsorService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -19,6 +19,7 @@ public class SponsorDetailsController {
 
     @FXML private Label companyLabel;
     @FXML private Label emailLabel;
+    @FXML private Label eventLabel;
     @FXML private Label contributionLabel;
     @FXML private Label logoUrlLabel;
     @FXML private Label contractUrlLabel;
@@ -38,12 +39,12 @@ public class SponsorDetailsController {
 
         if (companyLabel != null) companyLabel.setText(nvl(sponsor.getCompany_name()));
         if (emailLabel != null) emailLabel.setText(nvl(sponsor.getContact_email()));
+        if (eventLabel != null) eventLabel.setText(resolveEventTitle(sponsor.getEvent_id()));
         if (contributionLabel != null) contributionLabel.setText(String.format("%,.2f DT", sponsor.getContribution_name()));
         if (logoUrlLabel != null) logoUrlLabel.setText(nvl(sponsor.getLogo_url()));
         if (contractUrlLabel != null) contractUrlLabel.setText(nvl(sponsor.getContract_url()));
         if (taxIdLabel != null) taxIdLabel.setText(nvl(sponsor.getTax_id()));
 
-        // Gestion du lien justificatif
         if (documentLink != null) {
             String docUrl = sponsor.getDocument_url();
             if (docUrl != null && !docUrl.isBlank()) {
@@ -66,9 +67,9 @@ public class SponsorDetailsController {
             if (sponsorLogoView != null && sponsor.getLogo_url() != null && !sponsor.getLogo_url().isBlank()) {
                 sponsorLogoView.setImage(new Image(sponsor.getLogo_url(), true));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
-        // Le bouton contrat est toujours actif (on génère localement si pas d'URL)
         if (openContractBtn != null) {
             openContractBtn.setDisable(false);
         }
@@ -83,21 +84,19 @@ public class SponsorDetailsController {
         try {
             if (sponsor == null) return;
 
-            // 1. Si une URL de contrat existe, l'ouvrir dans le navigateur
             String url = sponsor.getContract_url();
             if (url != null && !url.isBlank()) {
                 Desktop.getDesktop().browse(URI.create(url));
                 return;
             }
 
-            // 2. Sinon, générer un contrat local et l'ouvrir
             SponsorService sponsorService = new SponsorService();
             String eventTitle = sponsorService.getEventTitleById(sponsor.getEvent_id());
             File pdf = new LocalSponsorPdfService().generateSponsorContractPdf(sponsor, eventTitle);
             if (pdf.exists() && pdf.length() > 0) {
                 Desktop.getDesktop().open(pdf);
             } else {
-                showAlert("Erreur", "Le fichier PDF n'a pas pu être généré.");
+                showAlert("Erreur", "Le fichier PDF n'a pas pu etre genere.");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,8 +109,20 @@ public class SponsorDetailsController {
         if (onBack != null) onBack.run();
     }
 
+    private String resolveEventTitle(int eventId) {
+        if (eventId <= 0) {
+            return "Non assigne";
+        }
+        try {
+            String title = new SponsorService().getEventTitleById(eventId);
+            return (title == null || title.isBlank()) ? "Non assigne" : title;
+        } catch (Exception ignored) {
+            return "Non assigne";
+        }
+    }
+
     private String nvl(String s) {
-        return (s == null || s.isBlank()) ? "—" : s;
+        return (s == null || s.isBlank()) ? "-" : s;
     }
 
     private void showAlert(String title, String message) {

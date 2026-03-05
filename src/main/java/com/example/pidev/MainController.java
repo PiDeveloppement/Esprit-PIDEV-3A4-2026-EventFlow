@@ -636,9 +636,24 @@ public class MainController {
 
     // ===================== SIDEBAR ROLE CONFIG =====================
     private void configureSidebarByRole() {
-        // 🔥 MODIFICATION TEMPORAIRE : afficher tous les boutons
+        UserSession session = UserSession.getInstance();
+        String role = session.getRole() == null ? "" : session.getRole().trim().toLowerCase();
+
+        if (role.contains("sponsor")) {
+            showOnlySponsorButtons();
+            System.out.println("🔐 Sidebar sponsor activée");
+            return;
+        }
+
+        if (role.contains("participant")) {
+            showOnlyParticipantButtons();
+            System.out.println("🔐 Sidebar participant activée");
+            return;
+        }
+
+        // Admin / organisateur / autres rôles internes
         showAllButtons();
-        System.out.println("🔧 Mode développement : tous les boutons affichés (sidebar complète)");
+        System.out.println("🔧 Sidebar complète activée");
     }
 
     private void showOnlyParticipantButtons() {
@@ -655,7 +670,6 @@ public class MainController {
     private void showOnlySponsorButtons() {
         showNode(dashboardBtn);
         showNode(sponsorsBtn);
-        showNode(sponsorPortalBtn);
         showNode(budgetBtn);
         hideNode(eventsToggleBtn);
         hideNode(usersToggleBtn);
@@ -768,7 +782,6 @@ public class MainController {
         if ("sponsors".contains(lowerQuery)) {
             results.add("💼 Sponsors");
             results.add("   📋 Liste sponsors");
-            results.add("   🔑 Portail Sponsor");
             results.add("   💰 Budget");
             results.add("   📄 Dépenses");
         }
@@ -836,6 +849,22 @@ public class MainController {
     }
 
     private void navigateFromSearch(String selected) {
+        String role = UserSession.getInstance().getRole();
+        boolean isSponsor = role != null && role.trim().toLowerCase().contains("sponsor");
+        if (isSponsor) {
+            String lowerSelected = selected == null ? "" : selected.toLowerCase();
+            boolean allowedForSponsor =
+                    lowerSelected.contains("dashboard")
+                            || lowerSelected.contains("sponsor")
+                            || lowerSelected.contains("budget")
+                            || lowerSelected.contains("depens")
+                            || lowerSelected.contains("param");
+            if (!allowedForSponsor) {
+                showSimpleAlert("Acces refuse", "Vous n'avez pas le droit d'ouvrir cette page.");
+                return;
+            }
+        }
+
         if (selected.contains("Dashboard")) dashboardBtn.fire();
         else if (selected.contains("Événements") && !selected.contains("  ")) eventsToggleBtn.fire();
         else if (selected.contains("Liste événements")) eventsListBtn.fire();
@@ -846,7 +875,6 @@ public class MainController {
         else if (selected.contains("Inscriptions")) inscriptionsBtn.fire();
         else if (selected.contains("Sponsors") && !selected.contains("  ")) sponsorsBtn.fire();
         else if (selected.contains("Liste sponsors")) sponsorsListBtn.fire();
-        else if (selected.contains("Portail Sponsor")) sponsorPortalBtn.fire();
         else if (selected.contains("Budget")) budgetBtn.fire();
         else if (selected.contains("Dépenses")) contratsBtn.fire();
         else if (selected.contains("Ressources") && !selected.contains("  ")) resourcesToggleBtn.fire();

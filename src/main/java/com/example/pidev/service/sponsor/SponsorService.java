@@ -264,6 +264,9 @@ public class SponsorService {
     }
 
     public String getEventTitleById(int eventId) throws SQLException {
+        if (eventId <= 0) {
+            return null;
+        }
         String sql = "SELECT title FROM event WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, eventId);

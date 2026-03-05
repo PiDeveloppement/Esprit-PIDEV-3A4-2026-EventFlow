@@ -16,22 +16,18 @@
               style="-fx-padding: 18 22; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
             <ImageView fx:id="appLogoView" fitWidth="42" fitHeight="42" preserveRatio="true"/>
             <VBox spacing="2">
-                <Label text="Détails du Sponsor"
-                       styleClass="h2"/>
-                <Label text="Récapitulatif des informations saisies"
-                       styleClass="text-muted"/>
+                <Label text="Details du Sponsor" styleClass="h2"/>
+                <Label text="Recapitulatif des informations saisies" styleClass="text-muted"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label text="EventFlow"
-                   style="-fx-font-weight: 800; -fx-text-fill: #0ea5e9;"/>
+            <Label text="EventFlow" style="-fx-font-weight: 800; -fx-text-fill: #0ea5e9;"/>
         </HBox>
     </top>
 
     <center>
         <HBox spacing="18" style="-fx-padding: 22;">
             <VBox spacing="12" prefWidth="560" styleClass="stat-card">
-                <Label text="Informations"
-                       style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+                <Label text="Informations" style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
 
                 <GridPane hgap="12" vgap="10">
                     <columnConstraints>
@@ -40,42 +36,40 @@
                     </columnConstraints>
 
                     <Label text="Entreprise :" style="-fx-font-weight:700;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <Label fx:id="companyLabel" text="—" style="-fx-font-weight:500;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label fx:id="companyLabel" text="-" style="-fx-font-weight:500;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
                     <Label text="Email :" style="-fx-font-weight:700;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <Label fx:id="emailLabel" text="—" style="-fx-font-weight:500;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Label fx:id="emailLabel" text="-" style="-fx-font-weight:500;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                    <Label text="Contribution :" style="-fx-font-weight:700;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <Label fx:id="contributionLabel" text="—"
-                           style="-fx-text-fill:#059669; -fx-font-weight:800;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    <Label text="Evenement :" style="-fx-font-weight:700;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="eventLabel" text="-" style="-fx-font-weight:500;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                    <Label text="Numéro fiscal :" style="-fx-font-weight:700;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <Label fx:id="taxIdLabel" text="—" style="-fx-font-weight:500;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    <Label text="Contribution :" style="-fx-font-weight:700;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <Label fx:id="contributionLabel" text="-" style="-fx-text-fill:#059669; -fx-font-weight:800;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                    <Label text="Justificatif :" style="-fx-font-weight:700;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                    <Hyperlink fx:id="documentLink" text="Aucun justificatif" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                    <Label text="Numero fiscal :" style="-fx-font-weight:700;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <Label fx:id="taxIdLabel" text="-" style="-fx-font-weight:500;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-                    <Label text="Logo URL :" style="-fx-font-weight:700;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                    <Label fx:id="logoUrlLabel" text="—" wrapText="true" style="-fx-font-weight:500;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                    <Label text="Justificatif :" style="-fx-font-weight:700;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <Hyperlink fx:id="documentLink" text="Aucun justificatif" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-                    <Label text="Contract URL :" style="-fx-font-weight:700;" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                    <Label fx:id="contractUrlLabel" text="—" wrapText="true" style="-fx-font-weight:500;" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                    <Label text="Logo URL :" style="-fx-font-weight:700;" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <Label fx:id="logoUrlLabel" text="-" wrapText="true" style="-fx-font-weight:500;" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                    <Label text="Contrat URL :" style="-fx-font-weight:700;" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                    <Label fx:id="contractUrlLabel" text="-" wrapText="true" style="-fx-font-weight:500;" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
                 </GridPane>
             </VBox>
 
             <VBox spacing="12" prefWidth="300" styleClass="stat-card" alignment="TOP_CENTER">
-                <Label text="Logo Sponsor"
-                       style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+                <Label text="Logo Sponsor" style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
 
                 <StackPane prefHeight="220" prefWidth="260"
                            style="-fx-background-color:#f1f5f9; -fx-background-radius: 14; -fx-border-radius:14; -fx-border-color:#e2e8f0;">
                     <ImageView fx:id="sponsorLogoView" fitWidth="180" fitHeight="180" preserveRatio="true"/>
                 </StackPane>
 
-                <Button fx:id="openContractBtn"
-                        text="📄 Ouvrir le contrat"
-                        onAction="#onOpenContract"
-                        styleClass="btn-warning"/>
+                <Button fx:id="openContractBtn" text="Ouvrir le contrat" onAction="#onOpenContract" styleClass="btn-warning"/>
             </VBox>
         </HBox>
     </center>
@@ -83,10 +77,7 @@
     <bottom>
         <HBox alignment="CENTER_RIGHT" spacing="10"
               style="-fx-padding: 14 22; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;">
-            <Button fx:id="okBtn"
-                    text="OK"
-                    onAction="#onOk"
-                    styleClass="btn-primary"/>
+            <Button fx:id="okBtn" text="OK" onAction="#onOk" styleClass="btn-primary"/>
         </HBox>
     </bottom>
 </BorderPane>

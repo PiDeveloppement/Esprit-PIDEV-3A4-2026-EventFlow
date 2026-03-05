@@ -115,9 +115,14 @@ public class LoginController implements Initializable {
                     HelloApplication.loadPublicEventsPage();
                 } else {
                     String roleName = user.getRoleName() != null ? user.getRoleName().trim().toLowerCase() : "";
-                    boolean isOrganizer = user.getRole_Id() == 2 || roleName.equals("organisateur");
+                    boolean isOrganizer = user.getRole_Id() == 2
+                            || roleName.contains("organisateur")
+                            || roleName.contains("admin");
+                    boolean isSponsor = roleName.contains("sponsor");
                     if (isOrganizer) {
                         HelloApplication.loadDashboard();
+                    } else if (isSponsor) {
+                        HelloApplication.loadLandingPage();
                     } else {
                         HelloApplication.loadPublicEventsPage();
                     }
