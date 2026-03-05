@@ -10,14 +10,18 @@ import java.util.Base64;
 
 public class WhatsAppService {
 
-    // Twilio credentials from env vars or JVM properties.
+    // Read from env vars (or JVM properties as fallback)
     private static final String ACCOUNT_SID = readConfig("TWILIO_ACCOUNT_SID");
     private static final String AUTH_TOKEN = readConfig("TWILIO_AUTH_TOKEN");
-    private static final String API_KEY_SID = readConfig("TWILIO_API_KEY_SID");
-    private static final String API_KEY_SECRET = readConfig("TWILIO_API_KEY_SECRET");
     private static final String FROM_NUMBER = readConfig("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886");
 
     private static volatile String lastError = "";
+
+    static {
+        if (ACCOUNT_SID.isBlank() || AUTH_TOKEN.isBlank()) {
+            System.err.println("Twilio config missing: TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN");
+        }
+    }
 
     public static String getLastError() {
         return lastError;
@@ -25,18 +29,13 @@ public class WhatsAppService {
 
     public static boolean sendConfirmation(String phoneNumber, String company, double amount) {
         lastError = "";
-        try {
-            if (ACCOUNT_SID.isBlank()) {
-                lastError = "Configuration Twilio manquante: TWILIO_ACCOUNT_SID.";
-                return false;
-            }
-            boolean hasApiKeyAuth = !API_KEY_SID.isBlank() && !API_KEY_SECRET.isBlank();
-            boolean hasAccountAuth = !AUTH_TOKEN.isBlank();
-            if (!hasApiKeyAuth && !hasAccountAuth) {
-                lastError = "Configuration Twilio manquante: TWILIO_AUTH_TOKEN ou TWILIO_API_KEY_SID/TWILIO_API_KEY_SECRET.";
-                return false;
-            }
 
+        if (ACCOUNT_SID.isBlank() || AUTH_TOKEN.isBlank()) {
+            lastError = "Identifiants Twilio manquants (variables d'environnement)";
+            return false;
+        }
+
+        try {
             String normalizedPhone = normalizePhone(phoneNumber);
             if (normalizedPhone.isBlank()) {
                 lastError = "Numero WhatsApp invalide.";
@@ -53,9 +52,7 @@ public class WhatsAppService {
                     + "&From=" + URLEncoder.encode(FROM_NUMBER, StandardCharsets.UTF_8)
                     + "&Body=" + URLEncoder.encode(messageBody, StandardCharsets.UTF_8);
 
-            String authUser = hasApiKeyAuth ? API_KEY_SID : ACCOUNT_SID;
-            String authPass = hasApiKeyAuth ? API_KEY_SECRET : AUTH_TOKEN;
-            String auth = authUser + ":" + authPass;
+            String auth = ACCOUNT_SID + ":" + AUTH_TOKEN;
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
 
             HttpClient client = HttpClient.newHttpClient();
