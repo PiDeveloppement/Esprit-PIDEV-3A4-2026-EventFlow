@@ -77,34 +77,7 @@ public class LandingPageController implements Initializable {
             showAlert("Acces refuse", "Cette section est reservee aux sponsors.");
             return;
         }
-        try {
-            Scene scene = sponsorRecoBtn != null ? sponsorRecoBtn.getScene() : null;
-            if (scene == null && mainScrollPane != null) scene = mainScrollPane.getScene();
-            if (scene == null && homeSection != null) scene = homeSection.getScene();
-
-            VBox root = null;
-            if (scene != null && scene.getRoot() instanceof VBox pageRoot) {
-                root = pageRoot;
-            } else if (mainScrollPane != null && mainScrollPane.getParent() instanceof VBox pageRoot) {
-                root = pageRoot;
-            }
-            if (root == null) {
-                showAlert("Erreur", "Impossible d'afficher la section sponsor dans l'accueil.");
-                return;
-            }
-
-            Parent sponsorContent = FXMLLoader.load(
-                    getClass().getResource("/com/example/pidev/fxml/Sponsor/sponsor_portal.fxml")
-            );
-            if (root.getChildren().size() > 1) {
-                root.getChildren().set(1, sponsorContent);
-            } else {
-                root.getChildren().add(sponsorContent);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la page sponsor : " + e.getMessage());
-        }
+        HelloApplication.showSponsorPortalInLanding();
     }
 
     @FXML
@@ -283,10 +256,10 @@ public class LandingPageController implements Initializable {
             return "";
         }
         return text.toLowerCase()
-                .replace("é", "e")
-                .replace("è", "e")
-                .replace("ê", "e")
-                .replace("à", "a");
+                .replace("ÃƒÆ’Ã‚Â©", "e")
+                .replace("ÃƒÆ’Ã‚Â¨", "e")
+                .replace("ÃƒÆ’Ã‚Âª", "e")
+                .replace("ÃƒÆ’Ã‚Â ", "a");
     }
     // ==================== SCROLL ====================
 
@@ -336,19 +309,19 @@ public class LandingPageController implements Initializable {
 
     @FXML
     private void handleDemo() {
-        System.out.println("Ã¢â€“Â¶Ã¯Â¸Â Ouverture de la vidÃƒÂ©o de dÃƒÂ©monstration...");
-        playVideo("/com/example/pidev/videos/MÃƒÂ©dia1.mp4");
+        System.out.println("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Ouverture de la vidÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©o de dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©monstration...");
+        playVideo("/com/example/pidev/videos/MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©dia1.mp4");
     }
 
     private void playVideo(String videoPath) {
         try {
             URL videoUrl = getClass().getResource(videoPath);
             if (videoUrl == null) {
-                showAlert("Erreur", "VidÃƒÂ©o non trouvÃƒÂ©e: " + videoPath);
+                showAlert("Erreur", "VidÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©o non trouvÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e: " + videoPath);
                 return;
             }
             Stage videoStage = new Stage();
-            videoStage.setTitle("EventFlow - VidÃƒÂ©o de dÃƒÂ©monstration");
+            videoStage.setTitle("EventFlow - VidÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©o de dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©monstration");
             videoStage.initModality(Modality.APPLICATION_MODAL);
             videoStage.setWidth(1000);
             videoStage.setHeight(650);
@@ -366,7 +339,7 @@ public class LandingPageController implements Initializable {
             videoStage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Erreur", "Impossible de lire la vidÃƒÂ©o: " + e.getMessage());
+            showAlert("Erreur", "Impossible de lire la vidÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©o: " + e.getMessage());
         }
     }
 
@@ -392,7 +365,7 @@ public class LandingPageController implements Initializable {
             } else if (newState == Worker.State.SUCCEEDED) {
                 loadingIndicator.setVisible(false);
                 webView.setVisible(true);
-                System.out.println("Ã¢Å“â€¦ VidÃƒÂ©o chargÃƒÂ©e avec succÃƒÂ¨s");
+                System.out.println("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ VidÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©o chargÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e avec succÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨s");
             } else if (newState == Worker.State.FAILED) {
                 loadingIndicator.setVisible(false);
                 webView.setVisible(true);
@@ -407,11 +380,11 @@ public class LandingPageController implements Initializable {
         HBox headerBox = new HBox(15);
         headerBox.setAlignment(Pos.CENTER_LEFT);
         headerBox.setPadding(new Insets(0, 0, 20, 0));
-        Label titleLabel = new Label("Ã°Å¸Å½Â¬ DÃƒÂ©monstration EventFlow");
+        Label titleLabel = new Label("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â½ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ DÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©monstration EventFlow");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button closeBtn = new Button("Ã¢Å“â€¢");
+        Button closeBtn = new Button("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢");
         closeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; " +
                 "-fx-cursor: hand; -fx-padding: 5 10; -fx-font-weight: bold;");
         closeBtn.setOnAction(e -> videoStage.close());
@@ -446,7 +419,7 @@ public class LandingPageController implements Initializable {
             <body>
                 <video controls autoplay>
                     <source src="%s" type="video/mp4">
-                    Votre navigateur ne supporte pas la lecture de vidÃƒÂ©os.
+                    Votre navigateur ne supporte pas la lecture de vidÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©os.
                 </video>
             </body>
             </html>
@@ -457,15 +430,15 @@ public class LandingPageController implements Initializable {
         VBox infoBox = new VBox(10);
         infoBox.setAlignment(Pos.CENTER_LEFT);
         infoBox.setPadding(new Insets(20, 0, 0, 0));
-        Label infoTitle = new Label("Ã¢Å“Â¨ DÃƒÂ©couvrez EventFlow en action");
+        Label infoTitle = new Label("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨ DÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©couvrez EventFlow en action");
         infoTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
         Label infoText = new Label(
-                "Cette dÃƒÂ©monstration vous montre comment :\n" +
-                        "Ã¢Å“â€œ CrÃƒÂ©er et gÃƒÂ©rer vos ÃƒÂ©vÃƒÂ©nements en quelques clics\n" +
-                        "Ã¢Å“â€œ Ajouter des participants et suivre leurs inscriptions\n" +
-                        "Ã¢Å“â€œ GÃƒÂ©rer vos sponsors et leurs contrats\n" +
-                        "Ã¢Å“â€œ Visualiser les statistiques en temps rÃƒÂ©el\n" +
-                        "Ã¢Å“â€œ GÃƒÂ©nÃƒÂ©rer des rapports dÃƒÂ©taillÃƒÂ©s"
+                "Cette dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©monstration vous montre comment :\n" +
+                        "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ CrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©er et gÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rer vos ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©nements en quelques clics\n" +
+                        "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ Ajouter des participants et suivre leurs inscriptions\n" +
+                        "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ GÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rer vos sponsors et leurs contrats\n" +
+                        "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ Visualiser les statistiques en temps rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©el\n" +
+                        "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ GÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rer des rapports dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©taillÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©s"
         );
         infoText.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-line-spacing: 5;");
         infoText.setWrapText(true);
@@ -477,7 +450,7 @@ public class LandingPageController implements Initializable {
         HBox actionBox = new HBox(15);
         actionBox.setAlignment(Pos.CENTER_RIGHT);
         actionBox.setPadding(new Insets(20, 0, 0, 0));
-        Button replayBtn = new Button("Ã°Å¸â€â€ž Revoir la dÃƒÂ©mo");
+        Button replayBtn = new Button("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ Revoir la dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©mo");
         replayBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; " +
                 "-fx-padding: 12 25; -fx-background-radius: 8; -fx-cursor: hand; " +
                 "-fx-border-color: #3b82f6; -fx-border-width: 1.5; -fx-font-size: 14px;");
@@ -500,8 +473,12 @@ public class LandingPageController implements Initializable {
     @FXML
     private void handleFeedback() {
         try {
-            currentScene = homeSection.getScene();
-            VBox root = (VBox) currentScene.getRoot();
+            VBox root = resolveRootContainer();
+            if (root == null) {
+                showAlert("Erreur", "Impossible d'afficher la section feedback.");
+                return;
+            }
+            currentScene = root.getScene();
             VBox feedbackContenu = construireFeedbackContenu();
             if (root.getChildren().size() > 1) {
                 root.getChildren().set(1, feedbackContenu);
@@ -527,7 +504,7 @@ public class LandingPageController implements Initializable {
         VBox inner = new VBox(30);
         inner.setStyle("-fx-padding: 40; -fx-background-color: #f8fafc;");
 
-        Label titrePage = new Label("Ã¢Â­Â  Feedbacks des participants");
+        Label titrePage = new Label("Avis des participants");
         titrePage.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0A1929;");
 
         Map<String, Object> stats = feedbackService.getStatistiquesDetaillees();
@@ -543,7 +520,7 @@ public class LandingPageController implements Initializable {
 
         VBox barresBox = new VBox(12);
         HBox.setHgrow(barresBox, Priority.ALWAYS);
-        String[] labels = {"FIVE", "FOUR", "THREE", "TWO", "ONE"};
+        String[] labels = {"5 etoiles", "4 etoiles", "3 etoiles", "2 etoiles", "1 etoile"};
         int maxVal = total > 0 ? total : 1;
         for (int i = 5; i >= 1; i--) {
             int nb = repartition.getOrDefault(i, 0);
@@ -551,7 +528,7 @@ public class LandingPageController implements Initializable {
             ligne.setAlignment(Pos.CENTER_LEFT);
             Label lblNom = new Label(labels[5 - i]);
             lblNom.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-pref-width: 55;");
-            Label lblStar = new Label("Ã¢Ëœâ€¦");
+            Label lblStar = new Label("\u2605");
             lblStar.setStyle("-fx-text-fill: #f59e0b;");
             ProgressBar bar = new ProgressBar((double) nb / maxVal);
             bar.setPrefWidth(260); bar.setPrefHeight(12);
@@ -571,16 +548,16 @@ public class LandingPageController implements Initializable {
         HBox etoilesGlobales = new HBox(3);
         etoilesGlobales.setAlignment(Pos.CENTER);
         for (int i = 0; i < 5; i++) {
-            Label s = new Label(i < (int) Math.round(moyenne) ? "Ã¢Ëœâ€¦" : "Ã¢Ëœâ€ ");
+            Label s = new Label(i < (int) Math.round(moyenne) ? "\u2605" : "\u2606");
             s.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 20px;");
             etoilesGlobales.getChildren().add(s);
         }
-        Label lblTotal = new Label(total + " Ratings");
+        Label lblTotal = new Label(total + " notes");
         lblTotal.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px;");
         noteGlobale.getChildren().addAll(lblMoy, etoilesGlobales, lblTotal);
         blocStats.getChildren().addAll(barresBox, noteGlobale);
 
-        Label titreListe = new Label("Recent Feedbacks");
+        Label titreListe = new Label("Avis recents");
         titreListe.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
         VBox listeFeedbacks = new VBox(12);
@@ -588,7 +565,7 @@ public class LandingPageController implements Initializable {
         String eventActuel = "";
         for (Map<String, Object> fb : feedbacks) {
             String nomEvent = (String) fb.get("nomEvent");
-            if (nomEvent == null) nomEvent = "Ãƒâ€°vÃƒÂ©nement inconnu";
+            if (nomEvent == null) nomEvent = "Evenement inconnu";
             if (!nomEvent.equals(eventActuel)) {
                 eventActuel = nomEvent;
                 listeFeedbacks.getChildren().add(creerTitreEvent(nomEvent));
@@ -606,7 +583,7 @@ public class LandingPageController implements Initializable {
         HBox box = new HBox(10);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setStyle("-fx-padding: 15 0 8 0;");
-        Label icon = new Label("Ã°Å¸â€œâ€¦");
+        Label icon = new Label("Evenement");
         icon.setStyle("-fx-font-size: 18px;");
         Label titre = new Label(nomEvent);
         titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
@@ -641,7 +618,7 @@ public class LandingPageController implements Initializable {
         int etoiles = (int) fb.get("etoiles");
         HBox starsBox = new HBox(2);
         for (int i = 0; i < 5; i++) {
-            Label star = new Label(i < etoiles ? "Ã¢Ëœâ€¦" : "Ã¢Ëœâ€ ");
+            Label star = new Label(i < etoiles ? "\u2605" : "\u2606");
             star.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 15px;");
             starsBox.getChildren().add(star);
         }
@@ -664,8 +641,12 @@ public class LandingPageController implements Initializable {
                     getClass().getResource("/com/example/pidev/fxml/questionnaire/Participant.fxml")
             );
             Parent root = loader.load();
-            currentScene = homeSection.getScene();
-            VBox rootVBox = (VBox) currentScene.getRoot();
+            VBox rootVBox = resolveRootContainer();
+            if (rootVBox == null) {
+                showAlert("Erreur", "Impossible d'afficher le questionnaire.");
+                return;
+            }
+            currentScene = rootVBox.getScene();
             if (rootVBox.getChildren().size() > 1) {
                 rootVBox.getChildren().set(1, root);
             } else {
@@ -694,6 +675,23 @@ public class LandingPageController implements Initializable {
         }
     }
 
+    private VBox resolveRootContainer() {
+        Scene scene = null;
+        if (mainScrollPane != null) {
+            scene = mainScrollPane.getScene();
+        }
+        if (scene == null && homeSection != null) {
+            scene = homeSection.getScene();
+        }
+        if (scene == null && HelloApplication.getPrimaryStage() != null) {
+            scene = HelloApplication.getPrimaryStage().getScene();
+        }
+        if (scene != null && scene.getRoot() instanceof VBox root) {
+            return root;
+        }
+        return null;
+    }
+
     // ==================== UTILITAIRES ====================
 
     private void showAlert(String title, String message) {
@@ -704,3 +702,4 @@ public class LandingPageController implements Initializable {
         alert.showAndWait();
     }
 }
+

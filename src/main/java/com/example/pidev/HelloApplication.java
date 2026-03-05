@@ -300,9 +300,10 @@ public class HelloApplication extends Application {
             return;
         }
 
-        navigateTo(
+        loadLandingContentFromFrontPage(
                 "/com/example/pidev/fxml/front/events.fxml",
-                "EventFlow - Evenements"
+                "EventFlow - Evenements",
+                "evenements"
         );
     }
     private static boolean canAccessDashboard() {
@@ -317,13 +318,38 @@ public class HelloApplication extends Application {
 
     /** Page de dÃ©tail d'un Ã©vÃ©nement */
     public static void loadEventDetailsPage(com.example.pidev.model.event.Event event) {
-        com.example.pidev.controller.front.EventDetailController ctrl =
-                navigateToWithController(
-                        "/com/example/pidev/fxml/front/event-detail.fxml",
-                        "EventFlow - " + event.getTitle()
-                );
-        if (ctrl != null) {
-            ctrl.setEvent(event);
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("/com/example/pidev/fxml/front/event-detail.fxml")
+            );
+            Parent loadedRoot = loader.load();
+            com.example.pidev.controller.front.EventDetailController ctrl = loader.getController();
+            if (ctrl != null) {
+                ctrl.setEvent(event);
+            }
+
+            Parent content = extractFrontContent(loadedRoot);
+            if (!setLandingMainContent(content, "EventFlow - " + event.getTitle(), "evenements")) {
+                com.example.pidev.controller.front.EventDetailController fallbackCtrl =
+                        navigateToWithController(
+                                "/com/example/pidev/fxml/front/event-detail.fxml",
+                                "EventFlow - " + event.getTitle()
+                        );
+                if (fallbackCtrl != null) {
+                    fallbackCtrl.setEvent(event);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur chargement detail evenement dans le layout landing: " + e.getMessage());
+            e.printStackTrace();
+            com.example.pidev.controller.front.EventDetailController fallbackCtrl =
+                    navigateToWithController(
+                            "/com/example/pidev/fxml/front/event-detail.fxml",
+                            "EventFlow - " + event.getTitle()
+                    );
+            if (fallbackCtrl != null) {
+                fallbackCtrl.setEvent(event);
+            }
         }
     }
 
@@ -333,6 +359,10 @@ public class HelloApplication extends Application {
                 "/com/example/pidev/fxml/front/my-tickets-list.fxml",
                 "EventFlow - Mes billets"
         );
+    }
+
+    public static void showSponsorPortalInLanding() {
+        loadLandingAndShowSponsorPortal();
     }
 
     private static void postConfigureView(Parent root, String fxmlPath) {
@@ -388,6 +418,8 @@ public class HelloApplication extends Application {
             contactBtn.setOnAction(e -> loadLandingPageAndScrollTo("contact"));
         }
 
+        ensureSponsorRecommendationInFrontNav(navBar);
+
         List<Button> authButtons = collectButtons(navBar).stream()
                 .filter(btn -> {
                     String text = normalize(btn.getText());
@@ -423,6 +455,88 @@ public class HelloApplication extends Application {
         }
     }
 
+    private static void ensureSponsorRecommendationInFrontNav(HBox navBar) {
+        if (navBar == null) {
+            return;
+        }
+
+        HBox linksBox = findFrontLinksBox(navBar);
+        if (linksBox == null) {
+            return;
+        }
+
+        Button recoBtn = linksBox.getChildren().stream()
+                .filter(node -> node instanceof Button)
+                .map(node -> (Button) node)
+                .filter(btn -> normalize(btn.getText()).contains("recommand"))
+                .findFirst()
+                .orElse(null);
+
+        if (!isCurrentUserSponsor()) {
+            if (recoBtn != null) {
+                linksBox.getChildren().remove(recoBtn);
+            }
+            return;
+        }
+
+        if (recoBtn == null) {
+            recoBtn = new Button("Recommandations sponsor");
+            recoBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #0D47A1; -fx-font-size: 16px; -fx-font-weight: 700; -fx-cursor: hand;");
+            int index = findInsertionIndexAfterEvents(linksBox);
+            linksBox.getChildren().add(index, recoBtn);
+        } else {
+            recoBtn.setVisible(true);
+            recoBtn.setManaged(true);
+            recoBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #0D47A1; -fx-font-size: 16px; -fx-font-weight: 700; -fx-cursor: hand;");
+        }
+
+        Button finalRecoBtn = recoBtn;
+        finalRecoBtn.setOnAction(e -> loadLandingAndShowSponsorPortal());
+    }
+
+    private static HBox findFrontLinksBox(HBox navBar) {
+        for (Node node : navBar.getChildren()) {
+            if (node instanceof HBox candidate) {
+                boolean hasAccueil = candidate.getChildren().stream()
+                        .anyMatch(n -> n instanceof Button b && "accueil".equals(normalize(b.getText())));
+                boolean hasContact = candidate.getChildren().stream()
+                        .anyMatch(n -> n instanceof Button b && "contact".equals(normalize(b.getText())));
+                if (hasAccueil && hasContact) {
+                    return candidate;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static int findInsertionIndexAfterEvents(HBox linksBox) {
+        for (int i = 0; i < linksBox.getChildren().size(); i++) {
+            Node child = linksBox.getChildren().get(i);
+            if (child instanceof Button b && "evenements".equals(normalize(b.getText()))) {
+                return i + 1;
+            }
+        }
+        return Math.min(2, linksBox.getChildren().size());
+    }
+
+    private static void loadLandingAndShowSponsorPortal() {
+        loadLandingContentFromFrontPage(
+                "/com/example/pidev/fxml/Sponsor/sponsor_portal.fxml",
+                "EventFlow - Plateforme de gestion d evenements",
+                "recommandations sponsor"
+        );
+    }
+
+    private static boolean isCurrentUserSponsor() {
+        UserSession session = UserSession.getInstance();
+        String role = session.getRole();
+        if ((role == null || role.isBlank()) && session.getCurrentUser() != null
+                && session.getCurrentUser().getRole() != null) {
+            role = session.getCurrentUser().getRole().getRoleName();
+        }
+        return role != null && role.trim().toLowerCase().contains("sponsor");
+    }
+
     private static void configureLandingTopNav(Parent root) {
         if (!(root instanceof VBox landingRoot) || landingRoot.getChildren().size() < 2) {
             return;
@@ -441,13 +555,7 @@ public class HelloApplication extends Application {
         Node feedbackSection = contentRoot.getChildren().get(2);
         Node contactSection = contentRoot.getChildren().get(3);
 
-        List<Button> allNavButtons = collectButtons(navBar).stream()
-                .filter(btn -> {
-                    String text = normalize(btn.getText());
-                    return "accueil".equals(text) || "evenements".equals(text) || "fonctionnalites".equals(text)
-                            || "feedback".equals(text) || "contact".equals(text);
-                })
-                .toList();
+        List<Button> allNavButtons = getLandingNavButtons(navBar);
 
         if (allNavButtons.isEmpty()) {
             return;
@@ -464,6 +572,15 @@ public class HelloApplication extends Application {
         Button featuresBtn = findNavButton(allNavButtons, "fonctionnalites");
         Button feedbackBtn = findNavButton(allNavButtons, "feedback");
         Button contactBtn = findNavButton(allNavButtons, "contact");
+        Button recoBtn = findRecommendationButton(allNavButtons);
+        javafx.event.EventHandler<javafx.event.ActionEvent> accueilDefaultHandler =
+                accueilBtn != null ? accueilBtn.getOnAction() : null;
+        javafx.event.EventHandler<javafx.event.ActionEvent> featuresDefaultHandler =
+                featuresBtn != null ? featuresBtn.getOnAction() : null;
+        javafx.event.EventHandler<javafx.event.ActionEvent> feedbackDefaultHandler =
+                feedbackBtn != null ? feedbackBtn.getOnAction() : null;
+        javafx.event.EventHandler<javafx.event.ActionEvent> contactDefaultHandler =
+                contactBtn != null ? contactBtn.getOnAction() : null;
 
         if (eventsBtn != null && !eventsBtn.getStyleClass().contains("landing-nav-link")) {
             eventsBtn.getStyleClass().add("landing-nav-link");
@@ -472,32 +589,70 @@ public class HelloApplication extends Application {
         if (accueilBtn != null) {
             accueilBtn.setOnAction(e -> {
                 setLandingNavActive(allNavButtons, accueilBtn);
-                mainScrollPane.setVvalue(0.0);
+                if (mainScrollPane == null || mainScrollPane.getScene() == null) {
+                    loadLandingPage();
+                    return;
+                }
+                if (accueilDefaultHandler != null) {
+                    accueilDefaultHandler.handle(e);
+                } else {
+                    mainScrollPane.setVvalue(0.0);
+                }
             });
             setLandingNavActive(allNavButtons, accueilBtn);
         }
         if (featuresBtn != null) {
             featuresBtn.setOnAction(e -> {
                 setLandingNavActive(allNavButtons, featuresBtn);
-                scrollToNodeDeferred(mainScrollPane, contentRoot, featuresSection);
+                if (mainScrollPane == null || mainScrollPane.getScene() == null) {
+                    loadLandingPageAndScrollTo("fonctionnalites");
+                    return;
+                }
+                if (featuresDefaultHandler != null) {
+                    featuresDefaultHandler.handle(e);
+                } else {
+                    scrollToNodeDeferred(mainScrollPane, contentRoot, featuresSection);
+                }
             });
         }
         if (feedbackBtn != null) {
             feedbackBtn.setOnAction(e -> {
                 setLandingNavActive(allNavButtons, feedbackBtn);
-                scrollToNodeDeferred(mainScrollPane, contentRoot, feedbackSection);
+                if (mainScrollPane == null || mainScrollPane.getScene() == null) {
+                    loadLandingPageAndScrollTo("feedback");
+                    return;
+                }
+                if (feedbackDefaultHandler != null) {
+                    feedbackDefaultHandler.handle(e);
+                } else {
+                    scrollToNodeDeferred(mainScrollPane, contentRoot, feedbackSection);
+                }
             });
         }
         if (contactBtn != null) {
             contactBtn.setOnAction(e -> {
                 setLandingNavActive(allNavButtons, contactBtn);
-                scrollToNodeDeferred(mainScrollPane, contentRoot, contactSection);
+                if (mainScrollPane == null || mainScrollPane.getScene() == null) {
+                    loadLandingPageAndScrollTo("contact");
+                    return;
+                }
+                if (contactDefaultHandler != null) {
+                    contactDefaultHandler.handle(e);
+                } else {
+                    scrollToNodeDeferred(mainScrollPane, contentRoot, contactSection);
+                }
             });
         }
         if (eventsBtn != null) {
             eventsBtn.setOnAction(e -> {
                 setLandingNavActive(allNavButtons, eventsBtn);
                 loadPublicEventsPage();
+            });
+        }
+        if (recoBtn != null) {
+            recoBtn.setOnAction(e -> {
+                setLandingNavActive(allNavButtons, recoBtn);
+                loadLandingAndShowSponsorPortal();
             });
         }
     }
@@ -519,31 +674,108 @@ public class HelloApplication extends Application {
             if (!(landingRoot.getChildren().get(0) instanceof HBox navBar)) {
                 return;
             }
-            if (!(landingRoot.getChildren().get(1) instanceof ScrollPane mainScrollPane)) {
-                return;
-            }
-            if (!(mainScrollPane.getContent() instanceof VBox contentRoot) || contentRoot.getChildren().size() < 4) {
+            List<Button> navButtons = getLandingNavButtons(navBar);
+            Button targetBtn = findNavButton(navButtons, section);
+            if (targetBtn != null) {
+                targetBtn.fire();
                 return;
             }
 
-            Node target = switch (section) {
-                case "fonctionnalites" -> contentRoot.getChildren().get(1);
-                case "feedback" -> contentRoot.getChildren().get(2);
-                case "contact" -> contentRoot.getChildren().get(3);
-                default -> contentRoot.getChildren().get(0);
-            };
-            scrollToNodeDeferred(mainScrollPane, contentRoot, target);
-
-            List<Button> navButtons = collectButtons(navBar).stream()
-                    .filter(btn -> {
-                        String text = normalize(btn.getText());
-                        return "accueil".equals(text) || "fonctionnalites".equals(text)
-                                || "feedback".equals(text) || "contact".equals(text);
-                    })
-                    .toList();
-            Button activeBtn = findNavButton(navButtons, section);
+            Button activeBtn = findNavButton(navButtons, "accueil");
             setLandingNavActive(navButtons, activeBtn);
         });
+    }
+
+    private static void loadLandingContentFromFrontPage(String fxmlPath, String title, String activeNav) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
+            Parent loadedRoot = loader.load();
+            Parent content = extractFrontContent(loadedRoot);
+
+            if (!setLandingMainContent(content, title, activeNav)) {
+                navigateTo(fxmlPath, title);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur chargement contenu front dans landing: " + e.getMessage());
+            e.printStackTrace();
+            navigateTo(fxmlPath, title);
+        }
+    }
+
+    private static Parent extractFrontContent(Parent loadedRoot) {
+        if (loadedRoot instanceof VBox container && container.getChildren().size() > 1) {
+            Node contentNode = container.getChildren().remove(1);
+            if (contentNode instanceof Parent contentParent) {
+                return contentParent;
+            }
+        }
+        return loadedRoot;
+    }
+
+    private static boolean setLandingMainContent(Parent content, String title, String activeNav) {
+        if (primaryStage == null) {
+            return false;
+        }
+
+        Scene scene = primaryStage.getScene();
+        VBox currentRoot = null;
+        if (scene != null && scene.getRoot() instanceof VBox root && isLandingRoot(root)) {
+            currentRoot = root;
+        }
+
+        if (currentRoot == null) {
+            loadLandingPage();
+            scene = primaryStage.getScene();
+            if (scene == null || !(scene.getRoot() instanceof VBox loadedRoot) || !isLandingRoot(loadedRoot)) {
+                return false;
+            }
+            currentRoot = loadedRoot;
+        }
+
+        if (currentRoot.getChildren().size() > 1) {
+            currentRoot.getChildren().set(1, content);
+        } else {
+            currentRoot.getChildren().add(content);
+        }
+
+        VBox.setVgrow(content, Priority.ALWAYS);
+        if (primaryStage.getTitle() == null || !primaryStage.getTitle().equals(title)) {
+            primaryStage.setTitle(title);
+        }
+
+        if (currentRoot.getChildren().get(0) instanceof HBox navBar) {
+            List<Button> navButtons = getLandingNavButtons(navBar);
+            Button activeButton = "recommandations sponsor".equals(activeNav)
+                    ? findRecommendationButton(navButtons)
+                    : findNavButton(navButtons, activeNav);
+            setLandingNavActive(navButtons, activeButton);
+        }
+        return true;
+    }
+
+    private static boolean isLandingRoot(VBox root) {
+        return root != null
+                && root.getChildren().size() >= 2
+                && root.getChildren().get(0) instanceof HBox;
+    }
+
+    private static List<Button> getLandingNavButtons(HBox navBar) {
+        return collectButtons(navBar).stream()
+                .filter(btn -> {
+                    String text = normalize(btn.getText());
+                    return "accueil".equals(text) || "evenements".equals(text) || "fonctionnalites".equals(text)
+                            || "feedback".equals(text) || "contact".equals(text) || text.contains("recommand");
+                })
+                .toList();
+    }
+
+    private static Button findRecommendationButton(List<Button> buttons) {
+        for (Button btn : buttons) {
+            if (normalize(btn.getText()).contains("recommand")) {
+                return btn;
+            }
+        }
+        return null;
     }
 
     private static void scrollToNode(ScrollPane scrollPane, VBox contentRoot, Node target) {
