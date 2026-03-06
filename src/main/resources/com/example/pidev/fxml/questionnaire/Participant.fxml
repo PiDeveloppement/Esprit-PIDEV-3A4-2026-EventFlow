@@ -8,22 +8,22 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pidev.controller.questionnaire.ParticipantController"
       style="-fx-background-color: #f0f4f8;"
-      prefWidth="1100" prefHeight="720">
+      prefWidth="1100" prefHeight="720"
+      fillHeight="true">
 
-    <VBox HBox.hgrow="ALWAYS" spacing="0" style="-fx-background-color: #f0f4f8;">
+    <VBox HBox.hgrow="ALWAYS" spacing="0"
+          style="-fx-background-color: #f0f4f8;"
+          fillWidth="true">
 
         <VBox style="-fx-background-color: white; -fx-padding: 28 40 20 40;
                      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 3);">
-
             <Label text="EventFlow Quiz"
                    style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
-
             <HBox alignment="CENTER_LEFT" spacing="12" VBox.vgrow="NEVER" style="-fx-padding: 12 0 0 0;">
                 <ProgressBar fx:id="pgBar" prefWidth="600" prefHeight="10"
                              style="-fx-accent: #2563eb; -fx-background-color: #e2e8f0; -fx-background-radius: 10; -fx-pref-height: 10;"
                              progress="0.47" />
-                <Label fx:id="lblProgression"
-                       text="47%"
+                <Label fx:id="lblProgression" text="47%"
                        style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748b;" />
             </HBox>
         </VBox>
@@ -36,14 +36,11 @@
                       style="-fx-background-color: white; -fx-padding: 30;
                              -fx-background-radius: 14;
                              -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.07), 12, 0, 0, 4);">
-
                     <Label fx:id="lblQuestion"
                            text="Chargement de la question..."
                            wrapText="true"
                            style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-line-spacing: 3;" />
-
                     <Separator style="-fx-opacity: 0.4;" />
-
                     <VBox fx:id="vboxOptions" spacing="12" style="-fx-padding: 6 0 0 0;" />
                 </VBox>
 
@@ -51,10 +48,8 @@
                       style="-fx-background-color: white; -fx-padding: 28;
                              -fx-background-radius: 14;
                              -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.07), 12, 0, 0, 4);">
-
                     <Label text="Notez globalement l'événement :"
                            style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #1e293b;" />
-
                     <HBox fx:id="starContainer" spacing="8" alignment="CENTER_LEFT">
                         <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
                         <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
@@ -62,7 +57,6 @@
                         <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
                         <Button text="★" style="-fx-background-color: transparent; -fx-font-size: 32; -fx-text-fill: #cbd5e1; -fx-cursor: hand; -fx-padding: 0;" />
                     </HBox>
-
                     <VBox spacing="8">
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="Votre avis :"
@@ -71,12 +65,9 @@
                                     style="-fx-background-color: #f1f5f9; -fx-font-size: 16; -fx-cursor: hand;
                                            -fx-background-radius: 8; -fx-padding: 4 10;" />
                         </HBox>
-
                         <FlowPane fx:id="emojiPicker" visible="false" managed="false" hgap="8" vgap="8"
                                   style="-fx-background-color: #f8fafc; -fx-padding: 10;
-                                         -fx-background-radius: 10; -fx-border-color: #e2e8f0;
-                                         -fx-border-radius: 10;" />
-
+                                         -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" />
                         <TextArea fx:id="txtCommentaire"
                                   promptText="Un commentaire additionnel (facultatif)..."
                                   prefHeight="100" wrapText="true"
@@ -86,36 +77,33 @@
                 </VBox>
 
                 <TextField fx:id="txtReponseParticipant" visible="false" managed="false" />
-
             </VBox>
         </ScrollPane>
 
         <HBox alignment="CENTER_RIGHT" spacing="16"
               style="-fx-background-color: white; -fx-padding: 18 40;
                      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, -3, 0);">
-
             <Button text="← Précédent"
                     style="-fx-background-color: white; -fx-text-fill: #2563eb;
                            -fx-font-weight: bold; -fx-font-size: 14px;
                            -fx-padding: 12 30; -fx-background-radius: 8;
-                           -fx-border-color: #2563eb; -fx-border-radius: 8;
-                           -fx-cursor: hand;" />
-
-            <Button fx:id="btnSuivant" onAction="#handleSuivant"
-                    text="Suivant →"
+                           -fx-border-color: #2563eb; -fx-border-radius: 8; -fx-cursor: hand;" />
+            <Button fx:id="btnSuivant" onAction="#handleSuivant" text="Suivant →"
                     style="-fx-background-color: #2563eb; -fx-text-fill: white;
                            -fx-font-weight: bold; -fx-font-size: 14px;
-                           -fx-padding: 12 36; -fx-background-radius: 8;
-                           -fx-cursor: hand;
+                           -fx-padding: 12 36; -fx-background-radius: 8; -fx-cursor: hand;
                            -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.35), 10, 0, 0, 4);" />
         </HBox>
     </VBox>
 
-    <VBox prefWidth="240" spacing="16"
+    <!-- SIDEBAR CORRIGÉ -->
+    <VBox prefWidth="240" minWidth="240" maxWidth="240"
+          HBox.hgrow="NEVER"
+          fillWidth="true"
           style="-fx-background-color: white; -fx-padding: 28 20;
                  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, -3, 0, 0);">
 
-        <VBox alignment="CENTER" spacing="4"
+        <VBox alignment="CENTER" spacing="4" VBox.vgrow="NEVER"
               style="-fx-background-color: #f8fafc; -fx-padding: 20;
                      -fx-background-radius: 12; -fx-border-color: #e2e8f0;
                      -fx-border-radius: 12; -fx-border-width: 1.5;">
@@ -125,10 +113,12 @@
                    style="-fx-font-size: 12px; -fx-text-fill: #64748b;" wrapText="true" />
         </VBox>
 
-        <Separator />
+        <Separator VBox.vgrow="NEVER" />
 
-        <Label text="Questions" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #94a3b8;" />
+        <Label text="Questions" VBox.vgrow="NEVER"
+               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #94a3b8; -fx-padding: 4 0;" />
 
+        <!-- ScrollPane prend tout l'espace restant → sidebar toujours visible -->
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
                     style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
             <VBox fx:id="sidebarQuestionsVBox" spacing="8" style="-fx-padding: 2;">

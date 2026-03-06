@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -8,7 +9,6 @@
       style="-fx-background-color: #f1f5f9;"
       spacing="0">
 
-    <!-- HEADER BLANC -->
     <VBox style="-fx-background-color: white;
                  -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;
                  -fx-padding: 16 40 16 40;">
@@ -16,9 +16,9 @@
         <HBox alignment="CENTER_LEFT" spacing="15">
             <VBox spacing="2" HBox.hgrow="ALWAYS">
                 <Label text="Customer Reviews"
-                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                <Label text="See what customers are saying about your work"
-                       style="-fx-font-size: 12px; -fx-text-fill: #9ca3af;"/>
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="AI-powered sentiment analysis and feedback management"
+                       style="-fx-font-size: 13px; -fx-text-fill: #9ca3af;"/>
             </VBox>
             <Button fx:id="btnExport" text="⬆  Export" onAction="#handleExport"
                     style="-fx-background-color: white; -fx-text-fill: #374151;
@@ -34,15 +34,14 @@
                            -fx-padding: 7 15; -fx-cursor: hand;"/>
         </HBox>
 
-        <!-- KPI CARDS -->
         <HBox spacing="14" style="-fx-padding: 14 0 0 0;">
 
             <VBox style="-fx-background-color: white; -fx-background-radius: 12;
-                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-padding: 16 20; -fx-pref-width: 180;
                          -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
                   spacing="6">
                 <Label fx:id="lblMoyenne" text="0.0"
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
                 <HBox fx:id="starsKpi1" spacing="2"/>
                 <Separator/>
                 <Label fx:id="lblBasedOn" text="Based on 0 reviews"
@@ -50,53 +49,75 @@
             </VBox>
 
             <VBox style="-fx-background-color: white; -fx-background-radius: 12;
-                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-padding: 16 20; -fx-pref-width: 180;
                          -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
                   spacing="6">
                 <Label fx:id="lblTotalReviews" text="0"
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                <Label text="Total Reviews"
-                       style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="Total Reviews" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                 <Separator/>
-                <Label fx:id="lblTrend" text="+17% from last month"
+                <Label fx:id="lblTrend" text="+0% from last month"
                        style="-fx-font-size: 11px; -fx-text-fill: #16a34a; -fx-font-weight: 600;"/>
             </VBox>
 
+            <VBox style="-fx-background-color: #f8fafc; -fx-background-radius: 12;
+                         -fx-padding: 16 20; -fx-pref-width: 240;
+                         -fx-border-color: #3b82f6; -fx-border-width: 1; -fx-border-radius: 12;"
+                  spacing="6">
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <Label text="✨ AI Sentiment" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1e40af;"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox alignment="CENTER">
+                        <Label fx:id="lblSentimentPos" text="0%" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+                        <Label text="Pos." style="-fx-font-size: 9px; -fx-text-fill: #6b7280;"/>
+                    </VBox>
+                    <VBox alignment="CENTER">
+                        <Label fx:id="lblSentimentNeu" text="0%" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                        <Label text="Neu." style="-fx-font-size: 9px; -fx-text-fill: #6b7280;"/>
+                    </VBox>
+                    <VBox alignment="CENTER">
+                        <Label fx:id="lblSentimentNeg" text="0%" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                        <Label text="Neg." style="-fx-font-size: 9px; -fx-text-fill: #6b7280;"/>
+                    </VBox>
+                </HBox>
+                <ProgressBar fx:id="sentimentBar" progress="0.0" prefWidth="200" maxHeight="8"
+                             style="-fx-accent: #16a34a; -fx-background-radius: 10;"/>
+                <Label text="Powered by HuggingFace" style="-fx-font-size: 9px; -fx-text-fill: #9ca3af; -fx-font-style: italic;"/>
+            </VBox>
+
             <VBox style="-fx-background-color: white; -fx-background-radius: 12;
-                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-padding: 16 20; -fx-pref-width: 180;
                          -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
                   spacing="6">
                 <Label fx:id="lblFiveStarPct" text="0%"
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                <Label text="5-Star reviews"
-                       style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="5-Star reviews" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                 <Separator/>
-                <Label fx:id="lblQuality" text="Excellent ratings"
+                <Label fx:id="lblQuality" text="Analyzing..."
                        style="-fx-font-size: 11px; -fx-text-fill: #16a34a; -fx-font-weight: 600;"/>
             </VBox>
 
             <VBox style="-fx-background-color: white; -fx-background-radius: 12;
-                         -fx-padding: 16 20; -fx-pref-width: 190;
+                         -fx-padding: 16 20; -fx-pref-width: 180;
                          -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;"
                   spacing="6">
                 <Label fx:id="lblThisMonth" text="0.0"
-                       style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                <Label text="This Month"
-                       style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label text="This Month" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                 <Separator/>
-                <Label fx:id="lblMonthTrend" text="+0.1 from last month"
+                <Label fx:id="lblMonthTrend" text="+0.0 from last month"
                        style="-fx-font-size: 11px; -fx-text-fill: #2563eb; -fx-font-weight: 600;"/>
             </VBox>
 
         </HBox>
     </VBox>
 
-    <!-- CORPS -->
     <HBox spacing="0" VBox.vgrow="ALWAYS">
 
-        <!-- PANNEAU GAUCHE — 320px -->
         <VBox style="-fx-background-color: #f1f5f9; -fx-padding: 16 14;"
               prefWidth="360" minWidth="360" spacing="12">
+
             <VBox style="-fx-background-color: white; -fx-background-radius: 12;
                          -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;
                          -fx-padding: 14 10;" spacing="10">
@@ -115,7 +136,6 @@
 
         </VBox>
 
-        <!-- PANNEAU DROIT -->
         <VBox VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
               style="-fx-background-color: #f1f5f9;" spacing="0">
 

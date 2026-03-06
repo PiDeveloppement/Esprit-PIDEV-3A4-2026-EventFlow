@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.example.pidev.service.resource.UnsplashService;
+
 public class EquipementFormController implements Initializable {
     @FXML private TextField nameField, typeField, quantityField;
     @FXML private ComboBox<String> statusCombo;
@@ -34,6 +36,8 @@ public class EquipementFormController implements Initializable {
     private final EquipementService service = new EquipementService();
     private String currentImagePath = "";
     private int selectedId = -1;
+
+    private final UnsplashService unsplashService = new UnsplashService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -103,6 +107,9 @@ public class EquipementFormController implements Initializable {
         }
         if (cmd.contains("annuler") || cmd.contains("quitter")) {
             annuler();
+        }
+        if (cmd.contains("image") || cmd.contains("photo")) {
+            rechercherImageAutomatique();
         }
     }
 
@@ -180,5 +187,29 @@ public class EquipementFormController implements Initializable {
     void annuler() {
         stopVoiceControl();
         MainController.getInstance().showEquipements();
+    }
+    @FXML
+    void rechercherImageAutomatique() {
+        String query = nameField.getText().trim();
+        if (query.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez saisir un nom d'équipement d'abord.");
+            alert.show();
+            return;
+        }
+
+        // Exécuter dans un thread séparé pour ne pas figer l'interface
+        new Thread(() -> {
+            String imageUrl = unsplashService.getImageUrl(query);
+
+            Platform.runLater(() -> {
+                if (imageUrl != null) {
+                    currentImagePath = imageUrl; // On stocke l'URL au lieu du chemin local
+                    previewImage.setImage(new Image(imageUrl));
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune image trouvée pour : " + query);
+                    alert.show();
+                }
+            });
+        }).start();
     }
 }

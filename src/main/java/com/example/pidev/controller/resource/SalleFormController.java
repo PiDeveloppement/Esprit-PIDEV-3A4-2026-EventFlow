@@ -3,6 +3,7 @@ package com.example.pidev.controller.resource;
 import com.example.pidev.MainController;
 import com.example.pidev.model.resource.Salle;
 import com.example.pidev.service.resource.SalleService;
+import com.example.pidev.service.resource.UnsplashService;
 import com.example.pidev.service.resource.VoiceRecognitionService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -34,6 +35,8 @@ public class SalleFormController implements Initializable {
     private final SalleService service = new SalleService();
     private String currentImagePath = "";
     private int selectedId = -1;
+
+    private final UnsplashService unsplashService = new UnsplashService(); // INITIALISATION
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -111,6 +114,7 @@ public class SalleFormController implements Initializable {
         // 6. ACTIONS GLOBALES
         if (cmd.contains("enregistrer") || cmd.contains("valider")) enregistrer();
         if (cmd.contains("annuler") || cmd.contains("retour")) annuler();
+        if (cmd.contains("image") || cmd.contains("cherche")) rechercherImageAutomatique();
     }
 
     // ================= RESTE DU CODE (SANS CHANGEMENT) =================
@@ -174,5 +178,25 @@ public class SalleFormController implements Initializable {
     @FXML private void annuler() {
         stopVoiceControl();
         MainController.getInstance().showSalles();
+    }
+    @FXML
+    void rechercherImageAutomatique() {
+        String query = nameField.getText().trim();
+        if (query.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Veuillez entrer le nom d'une salle.").show();
+            return;
+        }
+
+        new Thread(() -> {
+            String urlImage = unsplashService.getImageUrl(query);
+            Platform.runLater(() -> {
+                if (urlImage != null) {
+                    currentImagePath = urlImage;
+                    previewImage.setImage(new Image(urlImage));
+                } else {
+                    new Alert(Alert.AlertType.INFORMATION, "Aucune image trouvée pour : " + query).show();
+                }
+            });
+        }).start();
     }
 }

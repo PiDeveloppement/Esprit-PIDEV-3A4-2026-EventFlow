@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -52,11 +53,7 @@ public class EventsFrontController {
         loadEvents();
     }
 
-    /**
-     * Configure les filtres
-     */
     private void setupFilters() {
-        // Filtre par date
         dateFilter.getItems().addAll(
                 "Toutes les dates",
                 "Aujourd'hui",
@@ -66,7 +63,6 @@ public class EventsFrontController {
         );
         dateFilter.setValue("Toutes les dates");
 
-        // Filtre par prix
         priceFilter.getItems().addAll(
                 "Tous les prix",
                 "Gratuit",
@@ -74,22 +70,23 @@ public class EventsFrontController {
         );
         priceFilter.setValue("Tous les prix");
 
-        // Listeners pour filtrage automatique
         searchField.textProperty().addListener((obs, old, newVal) -> applyFilters());
         categoryFilter.valueProperty().addListener((obs, old, newVal) -> applyFilters());
         dateFilter.valueProperty().addListener((obs, old, newVal) -> applyFilters());
         priceFilter.valueProperty().addListener((obs, old, newVal) -> applyFilters());
     }
 
-    /**
-     * Charge tous les événements depuis la base de données
-     */
     private void loadEvents() {
         try {
-            // Charger tous les événements (sans filtre de statut)
+            // Charger TOUS les événements depuis la base
             allEvents = eventService.getAllEvents();
 
-            // Charger les catégories pour le filtre
+            // Filtrer pour exclure les événements TERMINÉS (endDate < maintenant)
+            LocalDateTime now = LocalDateTime.now();
+            allEvents = allEvents.stream()
+                    .filter(event -> event.getEndDate() == null || event.getEndDate().isAfter(now))
+                    .collect(Collectors.toList());
+
             allCategories = categoryService.getAllCategories();
             categoryFilter.getItems().clear();
             categoryFilter.getItems().add("Toutes les catégories");
@@ -98,11 +95,10 @@ public class EventsFrontController {
             }
             categoryFilter.setValue("Toutes les catégories");
 
-            // Afficher tous les événements
             filteredEvents = allEvents;
             displayEvents(filteredEvents);
 
-            System.out.println("✅ " + allEvents.size() + " événements chargés");
+            System.out.println("✅ " + allEvents.size() + " événements chargés (événements terminés exclus)");
 
         } catch (Exception e) {
             System.err.println("❌ Erreur chargement événements: " + e.getMessage());
@@ -111,13 +107,8 @@ public class EventsFrontController {
         }
     }
 
-    /**
-     * Applique les filtres de recherche
-     */
     private void applyFilters() {
-        if (allEvents == null || allEvents.isEmpty()) {
-            return;
-        }
+        if (allEvents == null || allEvents.isEmpty()) return;
 
         String searchText = searchField.getText().toLowerCase().trim();
         String category = categoryFilter.getValue();
@@ -128,20 +119,17 @@ public class EventsFrontController {
 
         filteredEvents = allEvents.stream()
                 .filter(event -> {
-                    // Filtre recherche
                     boolean matchSearch = searchText.isEmpty() ||
                             event.getTitle().toLowerCase().contains(searchText) ||
                             (event.getDescription() != null && event.getDescription().toLowerCase().contains(searchText)) ||
                             (event.getLocation() != null && event.getLocation().toLowerCase().contains(searchText));
 
-                    // Filtre catégorie
                     boolean matchCategory = category == null || "Toutes les catégories".equals(category);
                     if (!matchCategory) {
                         String eventCategoryName = getCategoryName(event.getCategoryId());
                         matchCategory = eventCategoryName.equals(category);
                     }
 
-                    // Filtre date
                     boolean matchDate = true;
                     if (date != null && event.getStartDate() != null) {
                         switch (date) {
@@ -162,16 +150,11 @@ public class EventsFrontController {
                         }
                     }
 
-                    // Filtre prix
                     boolean matchPrice = true;
                     if (price != null) {
                         switch (price) {
-                            case "Gratuit":
-                                matchPrice = event.isFree();
-                                break;
-                            case "Payant":
-                                matchPrice = !event.isFree();
-                                break;
+                            case "Gratuit": matchPrice = event.isFree(); break;
+                            case "Payant": matchPrice = !event.isFree(); break;
                         }
                     }
 
@@ -182,9 +165,6 @@ public class EventsFrontController {
         displayEvents(filteredEvents);
     }
 
-    /**
-     * Affiche les événements dans la grille
-     */
     private void displayEvents(List<Event> events) {
         eventsGrid.getChildren().clear();
 
@@ -205,31 +185,25 @@ public class EventsFrontController {
         }
     }
 
-    /**
-     * Crée une carte pour un événement avec couleurs dynamiques de la BD
-     */
     private VBox createEventCard(Event event) {
-        // Récupérer la catégorie et ses couleurs/icônes depuis la BD
         EventCategory category = getCategoryById(event.getCategoryId());
         String categoryColor = (category != null && category.getColor() != null)
-            ? category.getColor()
-            : "#6A1B9A"; // Violet par défaut
+                ? category.getColor() : "#6A1B9A";
         String categoryEmoji = (category != null && category.getIcon() != null)
-            ? category.getIcon()
-            : "📌"; // Épingle par défaut
+                ? category.getIcon() : "📌";
         String categoryName = (category != null) ? category.getName() : "Autre";
 
-        VBox card = new VBox(15);
+        // ==================== CARD ====================
+        VBox card = new VBox(0);
         card.setPrefWidth(360);
         card.setMaxWidth(360);
+        // Pas de hauteur fixe : la card s'adapte au contenu
 
-        // Style de base avec bordure top colorée (vraie couleur de la catégorie)
         card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
                 "-fx-border-color: " + categoryColor + "; -fx-border-width: 4 0 0 0; " +
                 "-fx-border-radius: 16; " +
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);");
 
-        // Effet hover avec la couleur réelle de la catégorie
         String hoverColor = categoryColor.replace("#", "");
         long colorLong = Long.parseLong(hoverColor, 16);
         double r = ((colorLong >> 16) & 0xFF) / 255.0;
@@ -238,48 +212,99 @@ public class EventsFrontController {
 
         card.setOnMouseEntered(e -> card.setStyle(
                 "-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
-                "-fx-border-color: " + categoryColor + "; -fx-border-width: 4 0 0 0; " +
-                "-fx-border-radius: 16; " +
-                "-fx-effect: dropshadow(gaussian, rgba(" +
-                (int)(r*255) + "," + (int)(g*255) + "," + (int)(b*255) + ",0.3), 15, 0, 0, 4); " +
-                "-fx-cursor: hand;"
+                        "-fx-border-color: " + categoryColor + "; -fx-border-width: 4 0 0 0; " +
+                        "-fx-border-radius: 16; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(" +
+                        (int)(r*255) + "," + (int)(g*255) + "," + (int)(b*255) + ",0.3), 15, 0, 0, 4); " +
+                        "-fx-cursor: hand;"
         ));
         card.setOnMouseExited(e -> card.setStyle(
                 "-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 0; " +
-                "-fx-border-color: " + categoryColor + "; -fx-border-width: 4 0 0 0; " +
-                "-fx-border-radius: 16; " +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);"
+                        "-fx-border-color: " + categoryColor + "; -fx-border-width: 4 0 0 0; " +
+                        "-fx-border-radius: 16; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);"
         ));
 
-        // Image container avec gradient basé sur la vraie couleur
+        // ==================== IMAGE CONTAINER ====================
         StackPane imageContainer = new StackPane();
-        imageContainer.setPrefHeight(200);
+        imageContainer.setPrefSize(360, 450);
+        imageContainer.setMinSize(360, 450);
+        // Pas de maxHeight fixe : l'image remplit l'espace
+        VBox.setVgrow(imageContainer, Priority.ALWAYS);
+        imageContainer.setStyle("-fx-background-color: #e0e0e0; -fx-background-radius: 16 16 0 0;");
 
-        String gradientColor1 = categoryColor;
-        String gradientColor2 = shiftColorBrightness(categoryColor, -30);
-        imageContainer.setStyle("-fx-background-color: linear-gradient(135deg, " +
-                gradientColor1 + " 0%, " + gradientColor2 + " 100%); " +
-                "-fx-background-radius: 16 16 0 0;");
+        String posterPath = event.getImageUrl();
+        System.out.println("🖼️ DEBUG - Tentative chargement image pour: " + event.getTitle());
+        System.out.println("   posterPath = " + posterPath);
 
-        if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+        if (posterPath != null && !posterPath.trim().isEmpty()) {
             try {
-                ImageView imageView = new ImageView(new Image(event.getImageUrl()));
-                imageView.setFitWidth(360);
-                imageView.setFitHeight(200);
-                imageView.setPreserveRatio(false);
-                imageContainer.getChildren().add(imageView);
-            } catch (Exception e) {
-                Label placeholder = new Label(categoryEmoji);
-                placeholder.setStyle("-fx-font-size: 80px; -fx-text-fill: rgba(255,255,255,0.3);");
-                imageContainer.getChildren().add(placeholder);
+                Image image = null;
+
+                // Méthode 1 : Via getResource
+                try {
+                    String resourcePath = posterPath.startsWith("/") ? posterPath : "/" + posterPath;
+                    var resourceUrl = getClass().getResource(resourcePath);
+                    if (resourceUrl != null) {
+                        System.out.println("   ✅ Méthode 1 (getResource) - URL trouvée: " + resourceUrl);
+                        image = new Image(resourceUrl.toExternalForm(), true);
+                    } else {
+                        System.out.println("   ❌ Méthode 1 (getResource) - Resource introuvable");
+                    }
+                } catch (Exception e1) {
+                    System.out.println("   ❌ Méthode 1 échouée: " + e1.getMessage());
+                }
+
+                // Méthode 2 : Via File
+                if (image == null) {
+                    try {
+                        File posterFile = new File("src/main/resources" + posterPath);
+                        System.out.println("   Test Méthode 2 (File) - Chemin: " + posterFile.getAbsolutePath());
+                        if (posterFile.exists()) {
+                            image = new Image(posterFile.toURI().toString(), true);
+                            System.out.println("   ✅ Méthode 2 (File) - Image chargée");
+                        }
+                    } catch (Exception e2) {
+                        System.out.println("   ❌ Méthode 2 échouée: " + e2.getMessage());
+                    }
+                }
+
+                // Méthode 3 : Chemin direct file:
+                if (image == null) {
+                    try {
+                        String directPath = "file:src/main/resources" + posterPath;
+                        image = new Image(directPath, true);
+                        if (!image.isError()) {
+                            System.out.println("   ✅ Méthode 3 (direct) - Image chargée");
+                        }
+                    } catch (Exception e3) {
+                        System.out.println("   ❌ Méthode 3 échouée: " + e3.getMessage());
+                    }
+                }
+
+                if (image != null && !image.isError()) {
+                    System.out.println("   🎉 Image chargée avec succès!");
+                    if (image.getProgress() < 1.0) {
+                        Image finalImage = image;
+                        image.progressProperty().addListener((obs, oldVal, newVal) -> {
+                            if (newVal.doubleValue() >= 1.0) {
+                                applyImageCover(imageContainer, finalImage);
+                            }
+                        });
+                    } else {
+                        applyImageCover(imageContainer, image);
+                    }
+                } else {
+                    System.out.println("   ❌ Aucune méthode n'a réussi à charger l'image");
+                }
+            } catch (Exception ex) {
+                System.err.println("❌ Erreur générale chargement image: " + ex.getMessage());
             }
         } else {
-            Label placeholder = new Label(categoryEmoji);
-            placeholder.setStyle("-fx-font-size: 80px; -fx-text-fill: rgba(255,255,255,0.3);");
-            imageContainer.getChildren().add(placeholder);
+            System.out.println("   ℹ️ Pas d'image (posterPath vide ou null)");
         }
 
-        // Badge catégorie avec la vraie couleur et l'emoji de la BD
+        // Badge catégorie
         Label categoryBadge = new Label(categoryEmoji + " " + categoryName);
         categoryBadge.setStyle("-fx-background-color: " + categoryColor + "; -fx-text-fill: white; " +
                 "-fx-padding: 8 15; -fx-background-radius: 20; -fx-font-size: 12px; -fx-font-weight: bold;");
@@ -287,107 +312,141 @@ public class EventsFrontController {
         StackPane.setMargin(categoryBadge, new Insets(15, 15, 0, 0));
         imageContainer.getChildren().add(categoryBadge);
 
-        // Contenu
-        VBox content = new VBox(12);
-        content.setPadding(new Insets(20));
+        // ==================== CONTENU FIXE EN BAS ====================
+        VBox content = new VBox(8);
+        content.setPadding(new Insets(16));
+        // Pas de VgGrow ici : le contenu reste compact en bas
 
-        // Titre
         Label titleLabel = new Label(event.getTitle());
-        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0A1929; -fx-wrap-text: true;");
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0A1929; -fx-wrap-text: true;");
         titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(320);
+        titleLabel.setMaxWidth(328);
+        titleLabel.setMaxHeight(45);
 
-        // Date
-        HBox dateBox = new HBox(8);
+        HBox dateBox = new HBox(6);
         dateBox.setAlignment(Pos.CENTER_LEFT);
         Label dateIcon = new Label("📅");
-        dateIcon.setStyle("-fx-font-size: 16px;");
+        dateIcon.setStyle("-fx-font-size: 14px;");
         Label dateLabel = new Label(event.getFormattedStartDate());
-        dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px;");
+        dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
         dateBox.getChildren().addAll(dateIcon, dateLabel);
 
-        // Lieu
-        HBox locationBox = new HBox(8);
+        HBox locationBox = new HBox(6);
         locationBox.setAlignment(Pos.CENTER_LEFT);
         Label locationIcon = new Label("📍");
-        locationIcon.setStyle("-fx-font-size: 16px;");
+        locationIcon.setStyle("-fx-font-size: 14px;");
         Label locationLabel = new Label(event.getLocation() != null ?
-                (event.getLocation().length() > 40 ? event.getLocation().substring(0, 37) + "..." : event.getLocation())
+                (event.getLocation().length() > 35 ? event.getLocation().substring(0, 32) + "..." : event.getLocation())
                 : "Lieu non spécifié");
-        locationLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px;");
+        locationLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
         locationBox.getChildren().addAll(locationIcon, locationLabel);
 
-        // Prix avec la couleur de la catégorie
-        HBox priceBox = new HBox(8);
+        HBox priceBox = new HBox(6);
         priceBox.setAlignment(Pos.CENTER_LEFT);
         Label priceIcon = new Label("💰");
-        priceIcon.setStyle("-fx-font-size: 16px;");
+        priceIcon.setStyle("-fx-font-size: 14px;");
         Label priceLabel = new Label(event.getPriceDisplay());
         priceLabel.setStyle("-fx-text-fill: " + (event.isFree() ? "#10b981" : categoryColor) + "; " +
-                "-fx-font-size: 16px; -fx-font-weight: bold;");
+                "-fx-font-size: 15px; -fx-font-weight: bold;");
         priceBox.getChildren().addAll(priceIcon, priceLabel);
 
-        // Boutons d'action
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER);
         buttonsBox.setPadding(new Insets(10, 0, 0, 0));
 
         Button viewDetailsBtn = new Button("Voir détails");
+        viewDetailsBtn.setPrefWidth(155);
+        viewDetailsBtn.setPrefHeight(36);
         viewDetailsBtn.setStyle("-fx-background-color: #E3F2FD; -fx-text-fill: #0D47A1; -fx-font-weight: bold; " +
-                "-fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;");
+                "-fx-background-radius: 8; -fx-cursor: hand;");
         viewDetailsBtn.setOnAction(e -> handleViewDetails(event));
 
         Button participateBtn = new Button("Participer");
+        participateBtn.setPrefWidth(155);
+        participateBtn.setPrefHeight(36);
         participateBtn.setStyle("-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: bold; " +
-                "-fx-background-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;");
+                "-fx-background-radius: 8; -fx-cursor: hand;");
         participateBtn.setOnAction(e -> handleParticipate(event));
 
         buttonsBox.getChildren().addAll(viewDetailsBtn, participateBtn);
 
         content.getChildren().addAll(titleLabel, dateBox, locationBox, priceBox, buttonsBox);
-
         card.getChildren().addAll(imageContainer, content);
 
         return card;
     }
 
-    /**
-     * Retourne le nom de la catégorie
-     */
+    private void applyImageCover(StackPane container, Image image) {
+        double targetWidth = 360.0;
+        double targetHeight = 450.0;
+
+        double imageWidth = image.getWidth();
+        double imageHeight = image.getHeight();
+
+        if (imageWidth == 0 || imageHeight == 0) return;
+
+        double scaleX = targetWidth / imageWidth;
+        double scaleY = targetHeight / imageHeight;
+        double scale = Math.max(scaleX, scaleY);
+
+        double finalWidth = imageWidth * scale;
+        double finalHeight = imageHeight * scale;
+
+        ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setFitWidth(finalWidth);
+        imageView.setFitHeight(finalHeight);
+        imageView.setCache(true);
+        imageView.setCacheHint(javafx.scene.CacheHint.SPEED);
+
+        StackPane.setAlignment(imageView, Pos.CENTER);
+
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(targetWidth, targetHeight);
+        clip.setArcWidth(32);
+        clip.setArcHeight(32);
+        container.setClip(clip);
+
+        container.getChildren().add(0, imageView);
+
+        System.out.println("   ✅ Image appliquée avec effet cover");
+    }
+
     private String getCategoryName(int categoryId) {
         if (allCategories != null) {
             for (EventCategory cat : allCategories) {
-                if (cat.getId() == categoryId) {
-                    return cat.getName();
-                }
+                if (cat.getId() == categoryId) return cat.getName();
             }
         }
         return "Autre";
     }
 
-    /**
-     * Affiche les détails d'un événement
-     */
+    private EventCategory getCategoryById(int categoryId) {
+        if (allCategories != null) {
+            for (EventCategory cat : allCategories) {
+                if (cat.getId() == categoryId) return cat;
+            }
+        }
+        return null;
+    }
+
     @FXML
     private void handleViewDetails(Event event) {
         System.out.println("👁️ Voir détails de: " + event.getTitle());
         HelloApplication.loadEventDetailsPage(event);
     }
 
-    /**
-     * Gère la participation à un événement
-     */
     @FXML
     private void handleParticipate(Event event) {
         System.out.println("🎫 Participer à: " + event.getTitle());
 
-        // Vérifier si l'utilisateur est connecté
         UserSession session = UserSession.getInstance();
         if (session.getCurrentUser() == null) {
-            // Sauvegarder l'ID de l'événement pour y participer après connexion
             session.setPendingEventId(event.getId());
 
-            // Rediriger vers la page de connexion
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Connexion requise");
             alert.setHeaderText("Vous devez être connecté");
@@ -406,20 +465,15 @@ public class EventsFrontController {
                 } else if (response == signupBtn) {
                     HelloApplication.loadSignupPage();
                 } else {
-                    // Annuler : nettoyer le pendingEventId
                     session.clearPendingEventId();
                 }
             });
             return;
         }
 
-        // Utilisateur connecté : créer un ticket immédiatement
         createTicketForEvent(event.getId(), event.getTitle());
     }
 
-    /**
-     * Crée un ticket pour un événement
-     */
     private void createTicketForEvent(int eventId, String eventTitle) {
         try {
             com.example.pidev.service.event.EventTicketService ticketService =
@@ -427,11 +481,9 @@ public class EventsFrontController {
 
             int userId = UserSession.getInstance().getCurrentUser().getId_User();
 
-            // Créer le ticket dans la base de données
             com.example.pidev.model.event.EventTicket ticket = ticketService.createTicket(eventId, userId);
 
             if (ticket != null) {
-                // Succès : afficher le ticket généré
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("✅ Participation confirmée");
                 alert.setHeaderText("Vous participez à l'événement !");
@@ -441,35 +493,19 @@ public class EventsFrontController {
                                 "Un email de confirmation vous sera envoyé.\n" +
                                 "Conservez votre code de ticket pour accéder à l'événement."
                 );
-
-                // Style personnalisé
-                alert.getDialogPane().setStyle(
-                        "-fx-background-color: white; " +
-                                "-fx-font-size: 14px;"
-                );
-
+                alert.getDialogPane().setStyle("-fx-background-color: white; -fx-font-size: 14px;");
                 alert.showAndWait();
-
                 System.out.println("✅ Ticket créé avec succès: " + ticket.getTicketCode());
-
             } else {
-                // Erreur de création
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Erreur");
                 alert.setHeaderText("Impossible de créer le ticket");
-                alert.setContentText(
-                        "Une erreur est survenue lors de la création de votre ticket.\n" +
-                                "Veuillez réessayer plus tard ou contacter le support."
-                );
+                alert.setContentText("Une erreur est survenue. Veuillez réessayer plus tard.");
                 alert.showAndWait();
-
-                System.err.println("❌ Échec de la création du ticket");
             }
 
         } catch (Exception e) {
             System.err.println("❌ Erreur lors de la participation: " + e.getMessage());
-            e.printStackTrace();
-
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Erreur");
             alert.setHeaderText("Une erreur est survenue");
@@ -478,10 +514,7 @@ public class EventsFrontController {
         }
     }
 
-    @FXML
-    private void handleSearch() {
-        applyFilters();
-    }
+    @FXML private void handleSearch() { applyFilters(); }
 
     @FXML
     private void handleResetFilters() {
@@ -492,37 +525,12 @@ public class EventsFrontController {
         applyFilters();
     }
 
-    @FXML
-    private void handleGoToHome() {
-        HelloApplication.loadLandingPage();
-    }
-
-    @FXML
-    private void handleGoToContact() {
-        HelloApplication.loadLandingPage();
-    }
-
-    @FXML
-    private void handleGoToFeatures() {
-        // Redirection vers la section fonctionnalités (landing page)
-        HelloApplication.loadLandingPage();
-    }
-
-    @FXML
-    private void handleGoToFeedback() {
-        // Redirection vers la section feedback (landing page)
-        HelloApplication.loadLandingPage();
-    }
-
-    @FXML
-    private void handleLogin() {
-        HelloApplication.loadLoginPage();
-    }
-
-    @FXML
-    private void handleSignup() {
-        HelloApplication.loadSignupPage();
-    }
+    @FXML private void handleGoToHome() { HelloApplication.loadLandingPage(); }
+    @FXML private void handleGoToContact() { HelloApplication.loadLandingPage(); }
+    @FXML private void handleGoToFeatures() { HelloApplication.loadLandingPage(); }
+    @FXML private void handleGoToFeedback() { HelloApplication.loadLandingPage(); }
+    @FXML private void handleLogin() { HelloApplication.loadLoginPage(); }
+    @FXML private void handleSignup() { HelloApplication.loadSignupPage(); }
 
     @FXML
     private void handleMyTickets() {
@@ -542,58 +550,19 @@ public class EventsFrontController {
         alert.showAndWait();
     }
 
-    /**
-     * Classe interne pour stocker le style d'une catégorie (couleur + emoji)
-     */
-    private static class CategoryStyle {
-        String color;
-        String emoji;
-
-        CategoryStyle(String color, String emoji) {
-            this.color = color;
-            this.emoji = emoji;
-        }
-    }
-
-    /**
-     * Récupère la catégorie par son ID depuis le cache allCategories
-     */
-    private EventCategory getCategoryById(int categoryId) {
-        if (allCategories != null) {
-            for (EventCategory cat : allCategories) {
-                if (cat.getId() == categoryId) {
-                    return cat;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Décale la luminosité d'une couleur hexadécimale
-     * @param hexColor couleur au format #RRGGBB
-     * @param amount montant du décalage (-100 à +100)
-     */
     private String shiftColorBrightness(String hexColor, int amount) {
         try {
-            // Enlever le # et convertir
             hexColor = hexColor.replace("#", "");
             long num = Long.parseLong(hexColor, 16);
-
             int r = (int) ((num >> 16) & 0xFF);
             int g = (int) ((num >> 8) & 0xFF);
             int b = (int) (num & 0xFF);
-
-            // Appliquer le décalage
             r = Math.min(255, Math.max(0, r + amount));
             g = Math.min(255, Math.max(0, g + amount));
             b = Math.min(255, Math.max(0, b + amount));
-
-            // Reconvertir en hex
             return String.format("#%02x%02x%02x", r, g, b);
         } catch (Exception e) {
-            return hexColor; // Retourner la couleur originale en cas d'erreur
+            return hexColor;
         }
     }
 }
-

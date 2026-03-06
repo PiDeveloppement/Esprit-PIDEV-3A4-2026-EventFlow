@@ -43,7 +43,6 @@ import javafx.stage.Stage;
 import com.example.pidev.utils.UserSession;
 import com.example.pidev.model.user.UserModel;
 
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -52,7 +51,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import javafx.event.ActionEvent;    // ✅ À AJOUTER
+import javafx.event.ActionEvent;
+
 public class MainController {
 
     private static MainController instance;
@@ -84,6 +84,7 @@ public class MainController {
     @FXML private Label pageSubtitle;
     @FXML private Button chatFloatingButton;
     @FXML private HBox kpiContainer;
+
     // ===================== CHAT PANEL FIELDS =====================
     @FXML private VBox chatPanel;
     @FXML private ScrollPane chatScrollPane;
@@ -93,6 +94,7 @@ public class MainController {
     @FXML private Button clearButton;
     @FXML private Button closeChatButton;
     @FXML private Label statusIndicator;
+
     // ===================== TOP BAR =====================
     @FXML private Label navDateLabel;
     @FXML private Label navTimeLabel;
@@ -144,11 +146,12 @@ public class MainController {
     @FXML private VBox questionnairesSubmenu;
     @FXML private Text questionnairesArrow;
     @FXML private Button questionsBtn;
-    // Ajouté depuis event
+    @FXML private Button reponsesBtn;
 
     @FXML private Button settingsBtn;
     @FXML private Button logoutBtn;
     @FXML private TextField globalSearchField;
+
     private String lastSuggestion;
     private ChatController chatController;
     private final Map<String, PageInfo> pageInfoMap = new HashMap<>();
@@ -215,8 +218,6 @@ public class MainController {
             setActiveButton(dashboardBtn);
             loadDashboardView();
         }
-
-
 
         // Animer le bouton flottant au démarrage
         animateFloatingButton();
@@ -372,7 +373,7 @@ public class MainController {
                 usersToggleBtn, rolesBtn, inscriptionsBtn,
                 sponsorsBtn, sponsorsListBtn, sponsorPortalBtn, budgetBtn, contratsBtn,
                 resourcesToggleBtn, sallesBtn, equipementsBtn, reservationsBtn,
-                questionnairesToggleBtn, questionsBtn, settingsBtn
+                questionnairesToggleBtn, questionsBtn, reponsesBtn, settingsBtn
         };
         for (Button btn : allButtons) {
             if (btn != null) {
@@ -380,7 +381,8 @@ public class MainController {
                 boolean isSub = btn == eventsListBtn || btn == categoriesBtn || btn == ticketsBtn ||
                         btn == rolesBtn || btn == inscriptionsBtn ||
                         btn == sponsorsListBtn || btn == sponsorPortalBtn || btn == budgetBtn || btn == contratsBtn ||
-                        btn == sallesBtn || btn == equipementsBtn || btn == reservationsBtn ;
+                        btn == sallesBtn || btn == equipementsBtn || btn == reservationsBtn ||
+                        btn == questionsBtn || btn == reponsesBtn;
                 btn.getStyleClass().add(isSub ? "submenu-button" : "main-menu-button");
             }
         }
@@ -411,6 +413,7 @@ public class MainController {
         if (equipementsBtn != null) equipementsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(equipementsBtn); loadEquipementsView(); });
         if (reservationsBtn != null) reservationsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reservationsBtn); loadReservationsView(); });
         if (questionsBtn != null) questionsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(questionsBtn); showQuestionEditor(); });
+        if (reponsesBtn != null) reponsesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reponsesBtn); showResultats(); });
         if (settingsBtn != null) settingsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(settingsBtn); loadSettingsView(); });
         if (logoutBtn != null) logoutBtn.setOnAction(e -> logout());
     }
@@ -533,8 +536,9 @@ public class MainController {
         else if (selected.contains("Réservations")) reservationsBtn.fire();
         else if (selected.contains("Questionnaires") && !selected.contains("  ")) questionnairesToggleBtn.fire();
         else if (selected.contains("Questions")) questionsBtn.fire();
+        else if (selected.contains("Résultats")) reponsesBtn.fire();
         else if (selected.contains("Historique")) showHistorique();
-        else if (selected.contains("Passer le Quiz")) loadParticipantQuizView();  // Modifié pour utiliser la nouvelle méthode
+        else if (selected.contains("Passer le Quiz")) showParticipantQuiz();
         else if (selected.contains("Paramètres")) settingsBtn.fire();
     }
 
@@ -768,8 +772,30 @@ public class MainController {
         }
     }
 
+    // ===================== FONCTIONS AJOUTÉES DEPUIS LE MAINCONTROLLER DE GESTION EVENT =====================
+
     /**
-     * Affiche le calendrier interactif des événements (ajouté depuis event)
+     * Affiche le formulaire de modification d'événement (avec refresh KPI après sauvegarde)
+     */
+    public void showEventFormWithRefresh(Event event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/event-form.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof EventFormController) {
+                ((EventFormController) controller).setMainController(this);
+                if (event != null) ((EventFormController) controller).setEvent(event);
+            }
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+            hideKPIs();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Affiche le calendrier interactif des événements
      */
     public void showEventCalendar() {
         try {
@@ -799,6 +825,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Affiche la vue détaillée d'un événement
+     */
     public void showEventView(Event event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/event-view.fxml"));
@@ -816,22 +845,9 @@ public class MainController {
         }
     }
 
-    public void showCategories() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-list.fxml"));
-            Parent page = loader.load();
-            Object controller = loader.getController();
-            if (controller instanceof CategoryListController) ((CategoryListController) controller).setMainController(this);
-            updatePageHeader("categories");
-            showCategoryKPIs();
-            pageContentContainer.getChildren().clear();
-            pageContentContainer.getChildren().add(page);
-        } catch (IOException e) {
-            System.err.println("❌ Erreur chargement liste catégories: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Affiche le formulaire de catégorie
+     */
     public void showCategoryForm(EventCategory category) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-form.fxml"));
@@ -849,6 +865,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Affiche la vue détaillée d'une catégorie
+     */
     public void showCategoryView(EventCategory category) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-view.fxml"));
@@ -866,22 +885,9 @@ public class MainController {
         }
     }
 
-    public void showTicketsList() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-list.fxml"));
-            Parent page = loader.load();
-            Object controller = loader.getController();
-            if (controller instanceof EventTicketListController) ((EventTicketListController) controller).setMainController(this);
-            updatePageHeader("tickets");
-            showTicketKPIs();
-            pageContentContainer.getChildren().clear();
-            pageContentContainer.getChildren().add(page);
-        } catch (IOException e) {
-            System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Affiche la vue détaillée d'un ticket
+     */
     public void showTicketView(EventTicket ticket) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-view.fxml"));
@@ -899,7 +905,40 @@ public class MainController {
         }
     }
 
-    public void showTickets() { showTicketsList(); }
+    // ===================== MÉTHODES DE RAFRAÎCHISSEMENT SPÉCIFIQUES =====================
+
+    /**
+     * Rafraîchit les événements affichés dans la vitrine (front office)
+     * Appelé après la création/modification d'un événement
+     */
+    public void refreshEventsFrontPage() {
+        System.out.println("🔄 Rafraîchissement de la vitrine des événements...");
+
+        try {
+            // Chercher le contrôleur EventsFrontController s'il est actif
+            if (pageContentContainer != null && pageContentContainer.getChildren().size() > 0) {
+                Node currentPage = pageContentContainer.getChildren().get(0);
+
+                // Vérifier si c'est une page qui contient le contrôleur des événements front
+                if (currentPage instanceof VBox) {
+                    // Parcourir la hiérarchie pour trouver le contrôleur
+                    for (Node node : ((VBox) currentPage).getChildren()) {
+                        if (node instanceof ScrollPane) {
+                            ScrollPane scroll = (ScrollPane) node;
+                            if (scroll.getContent() instanceof VBox) {
+                                VBox content = (VBox) scroll.getContent();
+                                // La page des événements front a été trouvée
+                                System.out.println("✅ Vitrine des événements en attente de rafraîchissement");
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Impossible de rafraîchir la vitrine: " + e.getMessage());
+        }
+    }
 
     // ===================== NAVIGATION - QUESTIONNAIRES =====================
     public void loadQuestionEditor() {
@@ -912,10 +951,7 @@ public class MainController {
         hideKPIs();
     }
 
-    /**
-     * Charge la vue du quiz participant (ajouté depuis event)
-     */
-    private void loadParticipantQuizView() {
+    public void loadParticipantQuizView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/questionnaire/Participant.fxml"));
             Parent view = loader.load();
@@ -934,9 +970,6 @@ public class MainController {
         hideKPIs();
     }
 
-    /**
-     * Méthode utilitaire pour charger les pages questionnaire (ajoutée depuis event)
-     */
     public void loadView(String fxmlPath) {
         try {
             URL fileUrl = getClass().getResource(fxmlPath);
@@ -965,7 +998,7 @@ public class MainController {
     }
 
     @FXML public void showQuestionEditor() { collapseAllSubmenus(); setActiveButton(questionsBtn); loadQuestionEditor(); }
-
+    @FXML public void showResultats() { collapseAllSubmenus(); setActiveButton(reponsesBtn); loadResultatsView(); }
     @FXML public void showParticipantQuiz() { collapseAllSubmenus(); loadParticipantQuizView(); }
     @FXML public void showHistorique() { collapseAllSubmenus(); loadHistoriqueView(); }
 
@@ -1056,7 +1089,6 @@ public class MainController {
             chatStage.setResizable(false);
             chatStage.show();
 
-            // Optionnel : stocker la référence
             ChatController chatController = loader.getController();
 
         } catch (Exception e) {
@@ -1215,38 +1247,66 @@ public class MainController {
         return card;
     }
 
+    // ===================== MÉTHODES DE CHARGEMENT DES DONNÉES KPI (COMPLÉMENTS) =====================
+
+    /**
+     * Charge les données pour les KPI des catégories
+     */
     private void loadCategoryData() {
         try {
             java.util.List<EventCategory> categories = categoryService.getAllCategoriesWithCount();
             int totalCategories = categories.size();
             int totalEvents = categories.stream().mapToInt(EventCategory::getEventCount).sum();
+
             updateLabel("totalCategoriesLabel", String.valueOf(totalCategories));
             updateLabel("totalEventsLabel", String.valueOf(totalEvents));
+            System.out.println("✅ KPI Catégories mis à jour: " + totalCategories + " catégories, " + totalEvents + " événements");
         } catch (Exception e) {
+            System.err.println("❌ Erreur chargement KPI catégories: " + e.getMessage());
             updateLabel("totalCategoriesLabel", "0");
             updateLabel("totalEventsLabel", "0");
         }
     }
 
+    /**
+     * Charge les données pour les KPI des événements
+     */
     private void loadEventData() {
         try {
             java.util.List<Event> events = eventService.getAllEvents();
+            int totalEvents = events.size();
+
             java.util.List<EventTicket> tickets = ticketService.getAllTickets();
-            updateLabel("totalEventsLabel", String.valueOf(events.size()));
-            updateLabel("totalTicketsLabel", String.valueOf(tickets.size()));
+            int totalTickets = tickets.size();
+
+            updateLabel("totalEventsLabel", String.valueOf(totalEvents));
+            updateLabel("totalTicketsLabel", String.valueOf(totalTickets));
+            System.out.println("✅ KPI Événements mis à jour: " + totalEvents + " événements, " + totalTickets + " tickets");
         } catch (Exception e) {
+            System.err.println("❌ Erreur chargement KPI événements: " + e.getMessage());
             updateLabel("totalEventsLabel", "0");
             updateLabel("totalTicketsLabel", "0");
         }
     }
 
+    /**
+     * Charge les données pour les KPI des tickets
+     */
     private void loadTicketData() {
         try {
             java.util.List<EventTicket> tickets = ticketService.getAllTickets();
-            long totalEvents = tickets.stream().map(EventTicket::getEventId).distinct().count();
-            updateLabel("totalTicketsLabel", String.valueOf(tickets.size()));
+            int totalTickets = tickets.size();
+
+            long totalEvents = tickets.stream()
+                    .map(EventTicket::getEventId)
+                    .distinct()
+                    .count();
+
+            updateLabel("totalTicketsLabel", String.valueOf(totalTickets));
             updateLabel("totalEventsLabel", String.valueOf(totalEvents));
+            System.out.println("✅ KPI Tickets mis à jour: " + totalTickets + " tickets, " + totalEvents + " événements");
         } catch (Exception e) {
+            System.err.println("❌ Erreur chargement KPI tickets: " + e.getMessage());
             updateLabel("totalTicketsLabel", "0");
             updateLabel("totalEventsLabel", "0");
         }
@@ -1287,7 +1347,7 @@ public class MainController {
         return pageContentContainer;
     }
 
-// ===================== CHAT PANEL METHODS =====================
+    // ===================== CHAT PANEL METHODS =====================
 
     @FXML
     private void toggleChatPanel() {
@@ -1296,7 +1356,6 @@ public class MainController {
             chatPanel.setVisible(!isVisible);
             chatPanel.setManaged(!isVisible);
 
-            // Focus sur le champ de saisie quand on ouvre
             if (!isVisible && inputField != null) {
                 inputField.requestFocus();
             }
@@ -1312,11 +1371,9 @@ public class MainController {
         String message = inputField.getText().trim();
         if (message.isEmpty()) return;
 
-        // Afficher le message de l'utilisateur
         addMessageToChat("Vous", message, true);
         inputField.clear();
 
-        // Simuler une réponse (à remplacer par votre logique)
         String response = getBotResponse(message);
         addMessageToChat("Assistant", response, false);
     }
@@ -1340,7 +1397,6 @@ public class MainController {
         messageBox.getChildren().add(messageFlow);
         chatBox.getChildren().add(messageBox);
 
-        // Scroll vers le bas
         Platform.runLater(() -> {
             if (chatScrollPane != null) {
                 chatScrollPane.setVvalue(1.0);
@@ -1349,7 +1405,6 @@ public class MainController {
     }
 
     private String getBotResponse(String userMessage) {
-        // Logique simple - à remplacer par votre ChatbotService
         userMessage = userMessage.toLowerCase();
 
         if (userMessage.contains("combien") && userMessage.contains("utilisateur")) {
@@ -1371,29 +1426,21 @@ public class MainController {
         }
     }
 
-    // ===================== CHAT METHODS =====================
-
     @FXML
     private void handleSuggestion(ActionEvent event) {
         try {
-            // Récupérer le bouton qui a déclenché l'événement
             Button sourceButton = (Button) event.getSource();
             String suggestion = sourceButton.getText();
-
-            // Nettoyer le texte pour enlever les emojis et garder la question
             String cleanSuggestion = suggestion.replaceAll("[📊👥📅✨]", "").trim();
 
             System.out.println("💡 Suggestion sélectionnée: " + cleanSuggestion);
 
-            // Ouvrir le chat si fermé
             if (!chatPanel.isVisible()) {
                 toggleChatPanel();
             }
 
-            // Mettre la suggestion dans le champ de saisie
             if (inputField != null) {
                 inputField.setText(cleanSuggestion);
-                // Envoyer automatiquement le message
                 handleSendMessage();
             }
         } catch (Exception e) {
@@ -1430,7 +1477,6 @@ public class MainController {
         chatBox.getChildren().add(messageBox);
     }
 
-    // Initialisation du chat (à appeler dans initialize())
     private void initChatPanel() {
         if (chatBox != null) {
             addWelcomeMessage();
@@ -1439,7 +1485,67 @@ public class MainController {
             statusIndicator.setText("● Connecté");
         }
     }
+    // ===================== NAVIGATION - EVENTS (AJOUT POUR CORRIGER LES ERREURS) =====================
 
+    /**
+     * Affiche la liste des catégories
+     */
+    public void showCategories() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-list.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof CategoryListController) {
+                ((CategoryListController) controller).setMainController(this);
+            }
+            updatePageHeader("categories");
+            showCategoryKPIs();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement liste catégories: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
-
+    /**
+     * Affiche la liste des tickets
+     */
+    public void showTicketsList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-list.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof EventTicketListController) {
+                ((EventTicketListController) controller).setMainController(this);
+            }
+            updatePageHeader("tickets");
+            showTicketKPIs();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Affiche la liste des tickets
+     */
+    public void showTickets() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-list.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof EventTicketListController) {
+                ((EventTicketListController) controller).setMainController(this);
+            }
+            updatePageHeader("tickets");
+            showTicketKPIs();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

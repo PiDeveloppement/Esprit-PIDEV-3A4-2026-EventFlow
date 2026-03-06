@@ -36,11 +36,6 @@
                 style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-padding: 8 20;
                        -fx-background-radius: 8; -fx-cursor: hand;"
                 minWidth="140"/>
-
-        <Button fx:id="addBtn" text="➕ Créer un ticket" onAction="#handleAdd"
-                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 20;
-                       -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;"
-                minWidth="140"/>
     </HBox>
 
     <!-- SCROLLPANE GLOBAL -->

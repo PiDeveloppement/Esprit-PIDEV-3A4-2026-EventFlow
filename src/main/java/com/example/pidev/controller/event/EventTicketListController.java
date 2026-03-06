@@ -52,7 +52,6 @@ public class EventTicketListController {
     @FXML private Label timeLabel;
 
     // ========== BOUTONS ==========
-    @FXML private Button addBtn;
     @FXML private Button scanBtn;
 
     // ========== PAGINATION ==========
@@ -215,9 +214,8 @@ public class EventTicketListController {
         // Actions
         actionsCol.setCellFactory(col -> new TableCell<>() {
             private final Button viewBtn = createIconButton("eye", "#17a2b8");
-            private final Button scanBtn = createIconButton("qrcode", "#0d47a1");
             private final Button deleteBtn = createIconButton("trash", "#dc3545");
-            private final HBox container = new HBox(8, viewBtn, scanBtn, deleteBtn);
+            private final HBox container = new HBox(8, viewBtn, deleteBtn);
             {
                 container.setAlignment(Pos.CENTER);
             }
@@ -229,7 +227,6 @@ public class EventTicketListController {
                 } else {
                     EventTicket ticket = getTableView().getItems().get(getIndex());
                     viewBtn.setOnAction(e -> handleView(ticket));
-                    scanBtn.setOnAction(e -> handleScan(ticket));
                     deleteBtn.setOnAction(e -> handleDelete(ticket));
                     setGraphic(container);
                 }
@@ -383,15 +380,6 @@ public class EventTicketListController {
         setupPagination();
     }
 
-    @FXML
-    private void handleAdd() {
-        // Pour l'instant, créer un ticket de test
-        EventTicket ticket = ticketService.createTicket(1, 16); // Event 1, User Ons
-        if (ticket != null) {
-            loadTickets();
-            showSuccess("Succès", "Ticket créé: " + ticket.getTicketCode());
-        }
-    }
 
     @FXML
     private void handleScan() {
@@ -401,18 +389,11 @@ public class EventTicketListController {
     }
 
     private void handleView(EventTicket ticket) {
-        Alert details = new Alert(Alert.AlertType.INFORMATION);
-        details.setTitle("Détails du ticket");
-        details.setHeaderText("Ticket: " + ticket.getTicketCode());
-        details.setContentText(String.format(
-                "Événement ID: %d\nUtilisateur ID: %d\nStatut: %s\nCréé le: %s\nUtilisé le: %s",
-                ticket.getEventId(),
-                ticket.getUserId(),
-                ticket.isUsed() ? "✅ Utilisé" : "❌ Non utilisé",
-                ticket.getFormattedCreatedAt(),
-                ticket.getFormattedUsedAt()
-        ));
-        details.showAndWait();
+        if (helloController != null) {
+            helloController.showTicketView(ticket);
+        } else {
+            System.err.println("❌ MainController est null !");
+        }
     }
 
     private void handleScan(EventTicket ticket) {

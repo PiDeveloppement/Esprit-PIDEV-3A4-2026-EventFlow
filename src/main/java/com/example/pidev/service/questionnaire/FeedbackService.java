@@ -5,6 +5,10 @@ import com.example.pidev.model.questionnaire.FeedbackStats;
 import com.example.pidev.model.questionnaire.Question;
 import com.example.pidev.utils.DBConnection;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -203,5 +207,46 @@ public class FeedbackService {
 
         // Si on ne trouve rien en BDD, on retourne une valeur par défaut pour ne pas avoir un PDF vide
         return nomComplet.isEmpty() ? "Participant #" + idUser : nomComplet;
+    }
+    public String analyzeSentiment(String text) {
+        if (text == null || text.isBlank()) return "NEUTRAL";
+
+        try {
+            // 1. Ton nouveau Token (Assure-toi qu'il est valide)
+            String API_TOKEN = System.getenv("comment_API_KEY");
+
+
+
+            // 2. NOUVELLE URL ROUTER (Format obligatoire maintenant)
+            String API_URL = "https://router.huggingface.co/hf-inference/models/nlptown/bert-base-multilingual-uncased-sentiment";
+
+            String cleanedText = text.replace("\"", "\\\"").replace("\n", " ");
+            String jsonInput = "{\"inputs\": \"" + cleanedText + "\"}";
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_URL))
+                    .header("Authorization", "Bearer " + API_TOKEN)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonInput))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String body = response.body().toUpperCase();
+
+            System.out.println("DEBUG API STATUS " + response.statusCode() + " : " + body);
+
+            // Si le modèle charge (Error 503), on renvoie "LOADING"
+            if (body.contains("LOADING") || body.contains("ESTIMATED_TIME")) {
+                return "LOADING";
+            }
+
+            if (response.statusCode() == 200) {
+                return body;
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur IA: " + e.getMessage());
+        }
+        return "NEUTRAL";
     }
 }

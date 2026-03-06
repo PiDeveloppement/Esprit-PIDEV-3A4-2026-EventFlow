@@ -61,15 +61,13 @@
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="📝" style="-fx-font-size: 18px;"/>
                             <Label text="INFORMATIONS GÉNÉRALES"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
-                                          -fx-letter-spacing: 0.5px;"/>
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                         </HBox>
 
                         <!-- Titre -->
                         <VBox spacing="6">
                             <HBox spacing="5" alignment="CENTER_LEFT">
-                                <Label text="Titre"
-                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Titre" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                 <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                             </HBox>
                             <TextField fx:id="titleField" promptText="Ex: Conférence IA, Hackathon 2025..."
@@ -83,15 +81,13 @@
                         <!-- Description -->
                         <VBox spacing="6">
                             <HBox spacing="10" alignment="CENTER_LEFT">
-                                <Label text="Description"
-                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Description" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                 <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 <Label fx:id="descriptionCounter" text="(0/1000)"
                                        style="-fx-text-fill: #6c757d; -fx-font-size: 12px;"/>
                             </HBox>
                             <TextArea fx:id="descriptionArea" promptText="Décrivez cet événement..."
-                                      prefRowCount="4"
-                                      wrapText="true"
+                                      prefRowCount="4" wrapText="true"
                                       style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
                                              -fx-border-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"
                                       prefHeight="100"/>
@@ -100,7 +96,6 @@
                         </VBox>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
                     <!-- SECTION 2: DATES ET HORAIRES -->
@@ -108,8 +103,7 @@
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="⏰" style="-fx-font-size: 18px;"/>
                             <Label text="DATES ET HORAIRES"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
-                                          -fx-letter-spacing: 0.5px;"/>
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                         </HBox>
 
                         <GridPane hgap="20" vgap="15">
@@ -121,21 +115,18 @@
                             <!-- Date début -->
                             <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                 <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Date de début"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="Date de début" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                     <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 </HBox>
                                 <DatePicker fx:id="startDatePicker"
-                                            style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
-                                                   -fx-border-radius: 8;"
+                                            style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da; -fx-border-radius: 8;"
                                             prefHeight="42"/>
                             </VBox>
 
                             <!-- Heure début -->
                             <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Heure de début"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="Heure de début" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                     <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 </HBox>
                                 <HBox spacing="8" alignment="CENTER_LEFT">
@@ -160,21 +151,18 @@
                             <!-- Date fin -->
                             <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                 <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Date de fin"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="Date de fin" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                     <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 </HBox>
                                 <DatePicker fx:id="endDatePicker"
-                                            style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
-                                                   -fx-border-radius: 8;"
+                                            style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da; -fx-border-radius: 8;"
                                             prefHeight="42"/>
                             </VBox>
 
                             <!-- Heure fin -->
                             <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                 <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Heure de fin"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="Heure de fin" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                     <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 </HBox>
                                 <HBox spacing="8" alignment="CENTER_LEFT">
@@ -201,7 +189,6 @@
                                style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
                     <!-- SECTION 3: LIEU ET CAPACITÉ -->
@@ -209,8 +196,7 @@
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="📍" style="-fx-font-size: 18px;"/>
                             <Label text="LIEU ET CAPACITÉ"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
-                                          -fx-letter-spacing: 0.5px;"/>
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                         </HBox>
 
                         <GridPane hgap="20" vgap="15">
@@ -222,53 +208,20 @@
                             <!-- Gouvernorat -->
                             <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                 <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Gouvernorat"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="Gouvernorat" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                     <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 </HBox>
                                 <ComboBox fx:id="gouvernoratCombo" promptText="Sélectionner un gouvernorat"
-                                          style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
-                                                 -fx-border-radius: 8;"
+                                          style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da; -fx-border-radius: 8;"
                                           prefHeight="42" maxWidth="Infinity"/>
                                 <Label fx:id="gouvernoratError" text=""
                                        style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                             </VBox>
 
-                            <!-- Ville -->
+                            <!-- Capacité -->
                             <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Ville"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
-                                    <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
-                                </HBox>
-                                <ComboBox fx:id="villeCombo" promptText="Sélectionner une ville"
-                                          style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
-                                                 -fx-border-radius: 8;"
-                                          prefHeight="42" maxWidth="Infinity"/>
-                                <Label fx:id="villeError" text=""
-                                       style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
-                            </VBox>
-
-                            <!-- Lieu (Faculté) -->
-                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Lieu (Faculté/Salle)"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
-                                </HBox>
-                                <ComboBox fx:id="locationCombo" promptText="Sélectionner un lieu"
-                                          editable="true"
-                                          style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
-                                                 -fx-border-radius: 8;"
-                                          prefHeight="42" maxWidth="Infinity"/>
-                                <Label fx:id="locationError" text=""
-                                       style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
-                            </VBox>
-
-                            <!-- Capacité -->
-                            <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                <HBox spacing="5" alignment="CENTER_LEFT">
-                                    <Label text="Capacité max"
-                                           style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="Capacité max" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                     <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                                 </HBox>
                                 <TextField fx:id="capacityField" promptText="Ex: 100"
@@ -276,6 +229,20 @@
                                                   -fx-border-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"
                                            prefHeight="42"/>
                                 <Label fx:id="capacityError" text=""
+                                       style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
+                            </VBox>
+
+                            <!-- Lieu (Faculté) - pleine largeur -->
+                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                                <HBox spacing="5" alignment="CENTER_LEFT">
+                                    <Label text="Lieu (Faculté/Salle)" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                    <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
+                                </HBox>
+                                <ComboBox fx:id="locationCombo" promptText="Sélectionner ou saisir un lieu"
+                                          editable="true"
+                                          style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da; -fx-border-radius: 8;"
+                                          prefHeight="42" maxWidth="Infinity"/>
+                                <Label fx:id="locationError" text=""
                                        style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                             </VBox>
 
@@ -291,7 +258,6 @@
                         </GridPane>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
                     <!-- SECTION MÉTÉO DYNAMIQUE -->
@@ -301,17 +267,12 @@
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="🌤️" style="-fx-font-size: 18px;"/>
                             <Label text="MÉTÉO PRÉVUE"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #92400e;
-                                          -fx-letter-spacing: 0.5px;"/>
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #92400e;"/>
                         </HBox>
-
-                        <!-- Contenu météo -->
                         <HBox spacing="20" alignment="TOP_LEFT">
-                            <!-- Colonne gauche : température et description -->
                             <VBox spacing="12" HBox.hgrow="ALWAYS">
                                 <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label fx:id="formWeatherEmoji" text="☀️"
-                                           style="-fx-font-size: 40px;"/>
+                                    <Label fx:id="formWeatherEmoji" text="☀️" style="-fx-font-size: 40px;"/>
                                     <VBox spacing="4">
                                         <Label fx:id="formWeatherTemp" text="22°C"
                                                style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e40af;"/>
@@ -320,8 +281,6 @@
                                     </VBox>
                                 </HBox>
                             </VBox>
-
-                            <!-- Colonne droite : infos complémentaires -->
                             <VBox spacing="10" HBox.hgrow="ALWAYS">
                                 <HBox spacing="8" alignment="CENTER_LEFT">
                                     <Label text="💧" style="-fx-font-size: 16px;"/>
@@ -331,7 +290,6 @@
                                                style="-fx-text-fill: #1e40af; -fx-font-size: 13px; -fx-font-weight: 600;"/>
                                     </VBox>
                                 </HBox>
-
                                 <HBox spacing="8" alignment="CENTER_LEFT">
                                     <Label text="💨" style="-fx-font-size: 16px;"/>
                                     <VBox spacing="2">
@@ -342,21 +300,16 @@
                                 </HBox>
                             </VBox>
                         </HBox>
-
-                        <!-- Alerte si mauvaises conditions -->
                         <Label fx:id="formWeatherAlert" text="" visible="false" managed="false"
                                style="-fx-text-fill: #b91c1c; -fx-font-size: 13px; -fx-font-weight: 600;
                                       -fx-background-color: #fee2e2; -fx-padding: 10; -fx-background-radius: 8;
                                       -fx-wrap-text: true;"/>
-
-                        <!-- Message erreur -->
                         <Label fx:id="formWeatherError" text="" visible="false" managed="false"
                                style="-fx-text-fill: #b91c1c; -fx-font-size: 12px;
                                       -fx-background-color: #fee2e2; -fx-padding: 10; -fx-background-radius: 8;
                                       -fx-wrap-text: true;"/>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
                     <!-- SECTION 4: CATÉGORIE -->
@@ -364,19 +317,14 @@
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="🏷️" style="-fx-font-size: 18px;"/>
                             <Label text="CATÉGORIE"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
-                                          -fx-letter-spacing: 0.5px;"/>
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                         </HBox>
-
                         <VBox spacing="6">
                             <HBox spacing="5" alignment="CENTER_LEFT">
-                                <Label text="Catégorie"
-                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Catégorie" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                 <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
                             </HBox>
-                            <ComboBox fx:id="categoryCombo"
-                                      prefWidth="300"
-                                      visibleRowCount="5"
+                            <ComboBox fx:id="categoryCombo" prefWidth="300" visibleRowCount="5"
                                       style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
                                              -fx-border-radius: 8; -fx-padding: 8 12;"/>
                             <Label fx:id="categoryError" text=""
@@ -384,7 +332,6 @@
                         </VBox>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
                     <!-- SECTION 5: PRIX -->
@@ -392,27 +339,19 @@
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="💰" style="-fx-font-size: 18px;"/>
                             <Label text="PRIX"
-                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
-                                          -fx-letter-spacing: 0.5px;"/>
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                         </HBox>
-
                         <GridPane hgap="20" vgap="15">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="ALWAYS" percentWidth="30"/>
                                 <ColumnConstraints hgrow="ALWAYS" percentWidth="70"/>
                             </columnConstraints>
-
-                            <!-- Gratuit -->
                             <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label text="Gratuit ?"
-                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Gratuit ?" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                 <CheckBox fx:id="freeCheckbox" selected="true"/>
                             </VBox>
-
-                            <!-- Prix -->
                             <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label text="Prix (DT)"
-                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Prix (DT)" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
                                 <TextField fx:id="priceField" text="0" disable="true"
                                            style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
                                                   -fx-border-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"
@@ -422,6 +361,40 @@
                             </VBox>
                         </GridPane>
                     </VBox>
+
+                    <Separator style="-fx-background-color: transparent;"/>
+
+                    <!-- SECTION 6: AFFICHE IA -->
+                    <VBox spacing="15">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="🎨" style="-fx-font-size: 18px;"/>
+                            <Label text="AFFICHE DE L'ÉVÉNEMENT"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
+                        </HBox>
+                        <VBox spacing="12" style="-fx-background-color: #f8f9fa; -fx-padding: 16; -fx-background-radius: 12;
+                                                  -fx-border-color: #e9ecef; -fx-border-radius: 12;">
+                            <StackPane fx:id="affichePreview"
+                                       prefWidth="300" prefHeight="450"
+                                       minWidth="300" minHeight="450"
+                                       maxWidth="300" maxHeight="450"
+                                       style="-fx-background-color: #e9ecef; -fx-background-radius: 12;
+                                              -fx-border-color: #dee2e6; -fx-border-radius: 12; -fx-border-width: 1;">
+                                <Label text="Aperçu de l'affiche"
+                                       style="-fx-text-fill: #6c757d; -fx-font-size: 13px;"/>
+                            </StackPane>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Button fx:id="btnGenererAffiche" text="✨ Générer avec IA"
+                                        onAction="#handleGenererAffiche"
+                                        style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: 600;
+                                               -fx-padding: 10 18; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 13px;"/>
+                                <ProgressIndicator fx:id="loadingSpinner" visible="false" managed="false"
+                                                   prefWidth="20" prefHeight="20"/>
+                            </HBox>
+                            <Label fx:id="afficheStatus" text=""
+                                   style="-fx-text-fill: #6c757d; -fx-font-size: 12px;" wrapText="true"/>
+                        </VBox>
+                    </VBox>
+
                 </VBox>
 
                 <!-- Footer -->
@@ -434,4 +407,3 @@
         </VBox>
     </ScrollPane>
 </VBox>
-
