@@ -1,24 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.ImageView?>
 
-<ScrollPane fitToWidth="true"
-            hbarPolicy="NEVER"
-            vbarPolicy="AS_NEEDED"
-            style="-fx-background-color: transparent; -fx-border-color: transparent;"
-            xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.pidev.controller.resource.ReservationFormController">
-<content>
-<VBox spacing="20.0" style="-fx-background-color: #f1f5f9; -fx-padding: 30;">
-    <HBox spacing="15" alignment="CENTER_LEFT">
-        <Button text="← Retour" onAction="#goBack" style="-fx-background-color: #64748b; -fx-text-fill: white;"/>
-        <Label text="Formulaire de Réservation" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+<VBox spacing="20.0" style="-fx-background-color: #f1f5f9; -fx-padding: 30;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.ReservationFormController">
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Button onAction="#goBack" style="-fx-background-color: #64748b; -fx-text-fill: white;" text="← Retour" />
+        <Label style="-fx-font-size: 20; -fx-font-weight: bold;" text="Formulaire de Réservation" />
 
-        <Region HBox.hgrow="ALWAYS" /> <Button fx:id="voiceBtn" onAction="#toggleVoiceControl"
-                                               style="-fx-background-radius: 50; -fx-min-width: 45; -fx-min-height: 45; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 18; -fx-cursor: hand;"
-                                               text="🎙️">
+        <Region HBox.hgrow="ALWAYS" /> <Button fx:id="voiceBtn" onAction="#toggleVoiceControl" style="-fx-background-radius: 50; -fx-min-width: 45; -fx-min-height: 45; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 18; -fx-cursor: hand;" text="🎙">
         <tooltip><Tooltip text="Cliquez pour donner un ordre vocal" /></tooltip>
     </Button>
     </HBox>
@@ -29,31 +20,35 @@
                 <columnConstraints>
                     <ColumnConstraints minWidth="150" /><ColumnConstraints minWidth="150" /><ColumnConstraints minWidth="80" />
                 </columnConstraints>
-                <Label text="Début :" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="0" maxWidth="Infinity"/>
-                <Label text="Fin :" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
-                <DatePicker fx:id="endDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" maxWidth="Infinity"/>
-                <Label text="Type :" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="typeCombo" GridPane.rowIndex="3" GridPane.columnIndex="0" maxWidth="Infinity"/>
-                <Label text="Ressource :" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="itemCombo" GridPane.rowIndex="3" GridPane.columnIndex="1" maxWidth="Infinity"/>
-                <Label text="Qté :" GridPane.rowIndex="2" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
-                <TextField fx:id="quantityField" text="1" GridPane.rowIndex="3" GridPane.columnIndex="2" prefWidth="60"/>
+                <Label style="-fx-font-weight: bold;" text="Début :" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <DatePicker fx:id="startDatePicker" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label style="-fx-font-weight: bold;" text="Fin :" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <DatePicker fx:id="endDatePicker" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label style="-fx-font-weight: bold;" text="Type :" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <ComboBox fx:id="typeCombo" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label style="-fx-font-weight: bold;" text="Ressource :" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <ComboBox fx:id="itemCombo" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label style="-fx-font-weight: bold;" text="Qté :" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <TextField fx:id="quantityField" prefWidth="60" text="1" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <rowConstraints>
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+            </rowConstraints>
             </GridPane>
 
-            <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button onAction="#goBack" text="Annuler" prefWidth="100"/>
-                <Button fx:id="btnValider" onAction="#validerAction" text="Réserver" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold;" prefWidth="120"/>
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button onAction="#goBack" prefHeight="25.0" prefWidth="100.0" text="Annuler" />
+                <Button fx:id="btnValider" onAction="#validerAction" prefWidth="120" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold;" text="Réserver" />
             </HBox>
         </VBox>
 
         <VBox alignment="CENTER" spacing="5" style="-fx-border-color: #cbd5e1; -fx-padding: 10; -fx-background-color: #f8fafc; -fx-background-radius: 8;">
-            <Label text="Aperçu" style="-fx-font-size: 11; -fx-text-fill: #64748b;"/>
+            <Label style="-fx-font-size: 11; -fx-text-fill: #64748b;" text="Aperçu" />
             <ImageView fx:id="imagePreview" fitHeight="120" fitWidth="120" preserveRatio="true" />
         </VBox>
     </HBox>
 
-    <Label fx:id="voiceStatusLabel" text="Micro désactivé" style="-fx-text-fill: #94a3b8; -fx-font-style: italic;" />
+    <Label fx:id="voiceStatusLabel" style="-fx-text-fill: #94a3b8; -fx-font-style: italic;" text="Micro désactivé" />
 </VBox>
-</content>
-</ScrollPane>
