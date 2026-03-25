@@ -558,7 +558,7 @@ public class EventFormController {
                 conn = (java.net.HttpURLConnection) urlObj.openConnection();
                 conn.setRequestMethod("POST");
                 String hfToken = System.getenv("HF_TOKEN");
-                conn.setRequestProperty("Authorization", "Bearer " + System.getenv("HF_TOKEN"));
+                conn.setRequestProperty("Authorization", "Bearer " + hfToken);
 
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "image/png");
