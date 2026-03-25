@@ -236,7 +236,7 @@ public class FeedbackViewController {
         return box;
     }
 
- private VBox buildFeedbackCard(Map<String, Object> fb) {
+    private VBox buildFeedbackCard(Map<String, Object> fb) {
         VBox card = new VBox(12);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; " +
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);");

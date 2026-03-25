@@ -7,7 +7,6 @@ import com.example.pidev.model.weather.WeatherData;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.event.EventCategoryService;
 import com.example.pidev.service.weather.WeatherService;
-import com.example.pidev.utils.UserSession;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -16,6 +15,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,18 +32,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import javafx.scene.image.WritableImage;
+import javafx.scene.SnapshotParameters;
 
 /**
  * Controller pour le formulaire d'ajout/modification d'événement
- * Structure identique à CategoryFormController
  *
  * @author Ons Abdesslem
- * @version 2.0 - Avec validation progressive
+ * @version 4.0 - Gouvernorat → Faculté directe (sans Ville)
  */
 public class EventFormController {
 
     // ==================== FXML ELEMENTS ====================
-
     @FXML private Label titleLabel;
     @FXML private TextField titleField;
     @FXML private TextArea descriptionArea;
@@ -48,7 +59,7 @@ public class EventFormController {
     @FXML private Spinner<Integer> endHourSpinner;
     @FXML private Spinner<Integer> endMinuteSpinner;
     @FXML private ComboBox<String> gouvernoratCombo;
-    @FXML private ComboBox<String> villeCombo;
+    // ✅ villeCombo supprimé du FXML — on garde le champ Java pour compatibilité setEvent()
     @FXML private ComboBox<String> locationCombo;
     @FXML private TextField capacityField;
     @FXML private TextField imageUrlField;
@@ -64,13 +75,18 @@ public class EventFormController {
     @FXML private Label descriptionCounter;
     @FXML private Label dateError;
     @FXML private Label gouvernoratError;
-    @FXML private Label villeError;
     @FXML private Label locationError;
     @FXML private Label capacityError;
     @FXML private Label categoryError;
     @FXML private Label priceError;
 
-    // ==================== MÉTÉO ELEMENTS ====================
+    // ==================== AFFICHE IA ====================
+    @FXML private StackPane affichePreview;
+    @FXML private Button btnGenererAffiche;
+    @FXML private ProgressIndicator loadingSpinner;
+    @FXML private Label afficheStatus;
+
+    // ==================== MÉTÉO ====================
     @FXML private VBox weatherContainer;
     @FXML private Label formWeatherEmoji;
     @FXML private Label formWeatherTemp;
@@ -80,18 +96,22 @@ public class EventFormController {
     @FXML private Label formWeatherAlert;
     @FXML private Label formWeatherError;
 
-    // ==================== NAVBAR ELEMENTS ====================
+    // ==================== NAVBAR ====================
     @FXML private Label dateLabel;
     @FXML private Label timeLabel;
 
     // ==================== SERVICES ====================
-
     private EventService eventService;
     private EventCategoryService categoryService;
     private WeatherService weatherService;
     private MainController helloController;
     private Event currentEvent;
     private List<EventCategory> allCategories;
+
+    // ==================== DONNÉES TUNISIENNES ====================
+    private Map<String, List<String>> villesParGouvernorat;
+    // Map : ville → liste facultés
+    private Map<String, List<String>> facultesParVille;
 
     // ==================== VALIDATION CONSTANTS ====================
     private static final int TITLE_MIN_LENGTH = 5;
@@ -115,7 +135,7 @@ public class EventFormController {
 
     @FXML
     public void initialize() {
-        System.out.println("✅ EventFormController initialisé");
+        System.out.println("✅ EventFormController v4.0 initialisé");
 
         eventService = new EventService();
         categoryService = new EventCategoryService();
@@ -124,19 +144,14 @@ public class EventFormController {
         loadTunisianData();
         loadGouvernorats();
         loadCategories();
-        setupSpinners();
         setupValidationListeners();
         setupLocationListeners();
         setDefaultValues();
         setupWeatherListeners();
 
-        // Initialiser l'état du bouton save
         saveBtn.setDisable(true);
 
-        // Initialiser la date et l'heure
         updateDateTime();
-
-        // Mettre à jour l'heure chaque seconde
         Timeline clock = new Timeline(
                 new KeyFrame(Duration.ZERO, e -> updateDateTime()),
                 new KeyFrame(Duration.seconds(1))
@@ -149,15 +164,11 @@ public class EventFormController {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy", Locale.FRENCH);
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-
         if (dateLabel != null) {
             String dateText = now.format(dateFormatter);
             dateLabel.setText(dateText.substring(0, 1).toUpperCase() + dateText.substring(1));
         }
-
-        if (timeLabel != null) {
-            timeLabel.setText(now.format(timeFormatter));
-        }
+        if (timeLabel != null) timeLabel.setText(now.format(timeFormatter));
     }
 
     public void setMainController(MainController helloController) {
@@ -168,7 +179,6 @@ public class EventFormController {
         this.currentEvent = event;
 
         if (event != null) {
-            // Mode modification
             titleLabel.setText("Modifier l'Événement");
             saveBtn.setText("💾 Mettre à jour");
 
@@ -180,30 +190,23 @@ public class EventFormController {
                 startHourSpinner.getValueFactory().setValue(event.getStartDate().getHour());
                 startMinuteSpinner.getValueFactory().setValue(event.getStartDate().getMinute());
             }
-
             if (event.getEndDate() != null) {
                 endDatePicker.setValue(event.getEndDate().toLocalDate());
                 endHourSpinner.getValueFactory().setValue(event.getEndDate().getHour());
                 endMinuteSpinner.getValueFactory().setValue(event.getEndDate().getMinute());
             }
 
-            // Charger gouvernorat, ville et location
+            // ✅ Gouvernorat → charge les facultés directement
             if (event.getGouvernorat() != null) {
                 gouvernoratCombo.setValue(event.getGouvernorat());
-                loadVillesForGouvernorat(event.getGouvernorat());
-
-                if (event.getVille() != null) {
-                    villeCombo.setValue(event.getVille());
-                    loadFacultesForVille(event.getVille());
-                }
+                loadFacultesForGouvernorat(event.getGouvernorat());
             }
 
+            // ✅ Restaurer le lieu sauvegardé
             if (event.getLocation() != null) {
-                // Essayer de sélectionner le location dans la liste
                 if (locationCombo.getItems().contains(event.getLocation())) {
                     locationCombo.setValue(event.getLocation());
                 } else {
-                    // Sinon le saisir manuellement dans l'editor
                     locationCombo.getEditor().setText(event.getLocation());
                 }
             }
@@ -212,27 +215,20 @@ public class EventFormController {
             imageUrlField.setText(event.getImageUrl());
 
             EventCategory cat = findCategoryById(event.getCategoryId());
-            if (cat != null) {
-                categoryCombo.setValue(cat.getName());
-            }
+            if (cat != null) categoryCombo.setValue(cat.getName());
 
             freeCheckbox.setSelected(event.isFree());
             priceField.setText(String.valueOf(event.getTicketPrice()));
             priceField.setDisable(event.isFree());
 
-            // Réinitialiser tous les flags pristine en mode édition
             resetPristineFlags();
-
             System.out.println("✏️ Mode modification: " + event.getTitle());
         } else {
-            // Mode création
             titleLabel.setText("Nouvel Événement");
             saveBtn.setText("💾 Enregistrer");
-
             System.out.println("➕ Mode création");
         }
 
-        // Valider le formulaire après le chargement
         validateForm();
     }
 
@@ -242,13 +238,9 @@ public class EventFormController {
         try {
             allCategories = categoryService.getAllCategories();
             categoryCombo.getItems().clear();
-
-            if (allCategories != null) {
-                for (EventCategory cat : allCategories) {
+            if (allCategories != null)
+                for (EventCategory cat : allCategories)
                     categoryCombo.getItems().add(cat.getName());
-                }
-            }
-
             configureCategoryComboCells();
             System.out.println("✅ " + (allCategories != null ? allCategories.size() : 0) + " catégories chargées");
         } catch (Exception e) {
@@ -256,869 +248,510 @@ public class EventFormController {
         }
     }
 
-    private void setupSpinners() {
-        // Les spinners sont déjà configurés dans le FXML avec valueFactory
-    }
-
     private void configureCategoryComboCells() {
         categoryCombo.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
-                }
-
+                if (empty || item == null) { setGraphic(null); setText(null); return; }
                 EventCategory cat = findCategoryByName(item);
                 if (cat != null) {
                     Label iconLabel = new Label(cat.getIcon() != null ? cat.getIcon() : "📌");
                     iconLabel.setStyle("-fx-font-size: 16px;");
-                    Label nameLabel = new Label(cat.getName());
-                    HBox box = new HBox(10, iconLabel, nameLabel);
+                    HBox box = new HBox(10, iconLabel, new Label(cat.getName()));
                     box.setAlignment(Pos.CENTER_LEFT);
-                    setGraphic(box);
-                    setText(null);
-                } else {
-                    setText(item);
-                }
+                    setGraphic(box); setText(null);
+                } else setText(item);
             }
         });
-
         categoryCombo.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    return;
-                }
-
+                if (empty || item == null) { setText(null); return; }
                 EventCategory cat = findCategoryByName(item);
-                if (cat != null) {
-                    setText(cat.getIcon() + " " + cat.getName());
-                } else {
-                    setText(item);
-                }
+                setText(cat != null ? cat.getIcon() + " " + cat.getName() : item);
             }
         });
     }
 
     private EventCategory findCategoryByName(String name) {
-        if (allCategories != null) {
-            for (EventCategory cat : allCategories) {
-                if (cat.getName().equals(name)) {
-                    return cat;
-                }
-            }
-        }
+        if (allCategories != null)
+            for (EventCategory cat : allCategories)
+                if (cat.getName().equals(name)) return cat;
         return null;
     }
 
     private EventCategory findCategoryById(int id) {
-        if (allCategories != null) {
-            for (EventCategory cat : allCategories) {
-                if (cat.getId() == id) {
-                    return cat;
-                }
-            }
-        }
+        if (allCategories != null)
+            for (EventCategory cat : allCategories)
+                if (cat.getId() == id) return cat;
         return null;
     }
 
-    /**
-     * Réinitialise tous les flags pristine (utilisé en mode édition)
-     */
     private void resetPristineFlags() {
-        titlePristine = true;
-        descriptionPristine = true;
-        startDatePristine = true;
-        endDatePristine = true;
-        locationPristine = true;
-        capacityPristine = true;
-        categoryPristine = true;
-        pricePristine = true;
+        titlePristine = true; descriptionPristine = true;
+        startDatePristine = true; endDatePristine = true;
+        locationPristine = true; capacityPristine = true;
+        categoryPristine = true; pricePristine = true;
     }
 
-    /**
-     * Configuration des validations en temps réel
-     */
     private void setupValidationListeners() {
-        // ==================== TITRE ====================
-        titleField.textProperty().addListener((obs, oldVal, newVal) -> {
-            titlePristine = false;
-            validateForm();
-        });
+        titleField.textProperty().addListener((obs, o, n) -> { titlePristine = false; validateForm(); });
+        titleField.focusedProperty().addListener((obs, o, n) -> { if (!n && titleField.getText().trim().isEmpty()) { titlePristine = false; validateForm(); } });
 
-        titleField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && titleField.getText().trim().isEmpty()) {
-                titlePristine = false;
-                validateForm();
-            }
-        });
+        descriptionArea.textProperty().addListener((obs, o, n) -> { descriptionPristine = false; updateDescriptionCounter(); validateForm(); });
+        descriptionArea.focusedProperty().addListener((obs, o, n) -> { if (!n && descriptionArea.getText().trim().isEmpty()) { descriptionPristine = false; validateForm(); } });
 
-        // ==================== DESCRIPTION ====================
-        descriptionArea.textProperty().addListener((obs, oldVal, newVal) -> {
-            descriptionPristine = false;
-            updateDescriptionCounter();
-            validateForm();
-        });
+        startDatePicker.valueProperty().addListener((obs, o, n) -> { startDatePristine = false; validateForm(); });
+        startDatePicker.focusedProperty().addListener((obs, o, n) -> { if (!n && startDatePicker.getValue() == null) { startDatePristine = false; validateForm(); } });
+        endDatePicker.valueProperty().addListener((obs, o, n) -> { endDatePristine = false; validateForm(); });
+        endDatePicker.focusedProperty().addListener((obs, o, n) -> { if (!n && endDatePicker.getValue() == null) { endDatePristine = false; validateForm(); } });
 
-        descriptionArea.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && descriptionArea.getText().trim().isEmpty()) {
-                descriptionPristine = false;
-                validateForm();
-            }
-        });
+        startHourSpinner.valueProperty().addListener((obs, o, n) -> { startDatePristine = false; validateForm(); });
+        startMinuteSpinner.valueProperty().addListener((obs, o, n) -> { startDatePristine = false; validateForm(); });
+        endHourSpinner.valueProperty().addListener((obs, o, n) -> { endDatePristine = false; validateForm(); });
+        endMinuteSpinner.valueProperty().addListener((obs, o, n) -> { endDatePristine = false; validateForm(); });
 
-        // ==================== DATES ====================
-        startDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            startDatePristine = false;
-            validateForm();
-        });
+        gouvernoratCombo.valueProperty().addListener((obs, o, n) -> { if (n != null) { locationPristine = false; validateForm(); } });
+        locationCombo.valueProperty().addListener((obs, o, n) -> { locationPristine = false; validateForm(); });
+        locationCombo.getEditor().textProperty().addListener((obs, o, n) -> { locationPristine = false; validateForm(); });
 
-        startDatePicker.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && startDatePicker.getValue() == null) {
-                startDatePristine = false;
-                validateForm();
-            }
-        });
-
-        endDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            endDatePristine = false;
-            validateForm();
-        });
-
-        endDatePicker.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && endDatePicker.getValue() == null) {
-                endDatePristine = false;
-                validateForm();
-            }
-        });
-
-        // Spinners heures/minutes
-        startHourSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-            startDatePristine = false;
-            validateForm();
-        });
-
-        startMinuteSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-            startDatePristine = false;
-            validateForm();
-        });
-
-        endHourSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-            endDatePristine = false;
-            validateForm();
-        });
-
-        endMinuteSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-            endDatePristine = false;
-            validateForm();
-        });
-
-        // ==================== LIEU (ComboBox) ====================
-        villeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            locationPristine = false;
-            validateForm();
-        });
-
-        locationCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            locationPristine = false;
-            validateForm();
-        });
-
-        // Gouvernorat et Ville
-        gouvernoratCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                locationPristine = false;
-                validateForm();
-            }
-        });
-
-        // ==================== CAPACITÉ ====================
-        capacityField.textProperty().addListener((obs, oldVal, newVal) -> {
+        capacityField.textProperty().addListener((obs, o, n) -> {
             capacityPristine = false;
-            // Limiter aux chiffres seulement
-            if (!newVal.matches("\\d*")) {
-                capacityField.setText(newVal.replaceAll("[^\\d]", ""));
-            }
+            if (!n.matches("\\d*")) capacityField.setText(n.replaceAll("[^\\d]", ""));
             validateForm();
         });
+        capacityField.focusedProperty().addListener((obs, o, n) -> { if (!n && capacityField.getText().trim().isEmpty()) { capacityPristine = false; validateForm(); } });
 
-        capacityField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && capacityField.getText().trim().isEmpty()) {
-                capacityPristine = false;
-                validateForm();
-            }
-        });
+        categoryCombo.valueProperty().addListener((obs, o, n) -> { categoryPristine = false; validateForm(); });
 
-        // ==================== CATÉGORIE ====================
-        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            categoryPristine = false;
-            validateForm();
-        });
-
-        // ==================== PRIX ====================
-        freeCheckbox.selectedProperty().addListener((obs, old, isFree) -> {
+        freeCheckbox.selectedProperty().addListener((obs, o, isFree) -> {
             priceField.setDisable(isFree);
-            if (isFree) {
-                priceField.setText("0");
-                priceError.setVisible(false);
-                clearFieldStyles(priceField);
-            } else {
-                pricePristine = false;
-            }
+            if (isFree) { priceField.setText("0"); priceError.setVisible(false); clearFieldStyles(priceField); }
+            else pricePristine = false;
             validateForm();
         });
 
-        priceField.textProperty().addListener((obs, oldVal, newVal) -> {
+        priceField.textProperty().addListener((obs, o, n) -> {
             pricePristine = false;
-            // Limiter au format décimal
-            if (!newVal.matches("\\d*\\.?\\d*")) {
-                priceField.setText(oldVal);
-            }
+            if (!n.matches("\\d*\\.?\\d*")) priceField.setText(o);
             validateForm();
         });
-
-        priceField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && !freeCheckbox.isSelected() && priceField.getText().trim().isEmpty()) {
-                pricePristine = false;
-                validateForm();
-            }
-        });
+        priceField.focusedProperty().addListener((obs, o, n) -> { if (!n && !freeCheckbox.isSelected() && priceField.getText().trim().isEmpty()) { pricePristine = false; validateForm(); } });
     }
 
-    /**
-     * Met à jour le compteur de caractères de la description
-     */
     private void updateDescriptionCounter() {
         if (descriptionCounter != null) {
             int length = descriptionArea.getText().length();
             descriptionCounter.setText(length + "/" + DESC_MAX_LENGTH);
-
-            // Changer la couleur si dépassement
-            if (length > DESC_MAX_LENGTH) {
-                descriptionCounter.setStyle("-fx-text-fill: #ef4444;");
-            } else if (length >= DESC_MAX_LENGTH - 100) {
-                descriptionCounter.setStyle("-fx-text-fill: #f59e0b;");
-            } else {
-                descriptionCounter.setStyle("-fx-text-fill: #6c757d;");
-            }
+            if (length > DESC_MAX_LENGTH) descriptionCounter.setStyle("-fx-text-fill: #ef4444;");
+            else if (length >= DESC_MAX_LENGTH - 100) descriptionCounter.setStyle("-fx-text-fill: #f59e0b;");
+            else descriptionCounter.setStyle("-fx-text-fill: #6c757d;");
         }
     }
 
     private void setDefaultValues() {
         startDatePicker.setValue(LocalDate.now());
         endDatePicker.setValue(LocalDate.now().plusDays(1));
-
         startHourSpinner.getValueFactory().setValue(9);
         startMinuteSpinner.getValueFactory().setValue(0);
         endHourSpinner.getValueFactory().setValue(17);
         endMinuteSpinner.getValueFactory().setValue(0);
-
         capacityField.setText("50");
         freeCheckbox.setSelected(true);
         priceField.setDisable(true);
         priceField.setText("0");
-
-        if (!categoryCombo.getItems().isEmpty()) {
-            categoryCombo.setValue(categoryCombo.getItems().get(0));
-        }
+        if (!categoryCombo.getItems().isEmpty()) categoryCombo.setValue(categoryCombo.getItems().get(0));
     }
 
-    /**
-     * Configure les listeners pour afficher la météo en temps réel
-     */
+    // ==================== MÉTÉO ====================
+
     private void setupWeatherListeners() {
-        // Listener sur la ville (utilisée pour la météo)
-        villeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            loadWeatherPreview();
-        });
-
-        // Listener sur la date de début
-        startDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            loadWeatherPreview();
-        });
+        // ✅ Météo basée sur le gouvernorat maintenant (plus de villeCombo)
+        gouvernoratCombo.valueProperty().addListener((obs, o, n) -> loadWeatherPreview());
+        startDatePicker.valueProperty().addListener((obs, o, n) -> loadWeatherPreview());
     }
 
-    /**
-     * Charge et affiche la météo prévue
-     */
     private void loadWeatherPreview() {
-        String ville = villeCombo.getValue();
+        String gouvernorat = gouvernoratCombo.getValue();
         LocalDate date = startDatePicker.getValue();
+        if (gouvernorat == null || gouvernorat.isEmpty() || date == null) { hideWeatherContainer(); return; }
 
-        // Vérifier que ville et date sont remplis
-        if (ville == null || ville.isEmpty() || date == null) {
-            hideWeatherContainer();
-            return;
-        }
-
-        // Appeler le service météo en arrière-plan
         Thread weatherThread = new Thread(() -> {
             try {
-                // Créer un événement temporaire avec la ville pour la météo
                 Event tempEvent = new Event();
-                tempEvent.setLocation(ville); // Utiliser ville pour Geocoding API
+                tempEvent.setLocation(gouvernorat);
                 tempEvent.setStartDate(LocalDateTime.of(date, LocalTime.of(9, 0)));
-
-                System.out.println("🌤️ Chargement météo pour " + ville + " le " + date);
                 WeatherData weather = weatherService.getWeatherForEvent(tempEvent);
-
-                // Afficher les résultats sur le thread JavaFX
-                javafx.application.Platform.runLater(() -> {
-                    if (weather != null && weather.isAvailable()) {
-                        displayWeatherPreview(weather);
-                    } else {
-                        showWeatherError(weather != null ? weather.getErrorMessage() : "Météo indisponible");
-                    }
+                Platform.runLater(() -> {
+                    if (weather != null && weather.isAvailable()) displayWeatherPreview(weather);
+                    else showWeatherError(weather != null ? weather.getErrorMessage() : "Météo indisponible");
                 });
-
             } catch (Exception e) {
-                System.err.println("❌ Erreur chargement météo: " + e.getMessage());
-                javafx.application.Platform.runLater(() -> {
-                    showWeatherError("Erreur lors du chargement de la météo");
-                });
+                Platform.runLater(() -> showWeatherError("Erreur lors du chargement de la météo"));
             }
         });
         weatherThread.setDaemon(true);
         weatherThread.start();
     }
 
-    /**
-     * Affiche les données météorologiques
-     */
     private void displayWeatherPreview(WeatherData weather) {
         if (weatherContainer == null) return;
-
         try {
-            // Rendre le container visible
-            weatherContainer.setVisible(true);
-            weatherContainer.setManaged(true);
-
-            // Remplir les données météo
+            weatherContainer.setVisible(true); weatherContainer.setManaged(true);
             formWeatherEmoji.setText(weather.getWeatherEmoji());
             formWeatherTemp.setText(String.format("%.1f°C", weather.getTemperature()));
             formWeatherDescription.setText(weather.getDescription());
             formWeatherRain.setText(weather.getRainChance() + "%");
             formWeatherHumidity.setText(String.format("%.0f%%", weather.getHumidity()));
-
-            // Masquer les erreurs
-            formWeatherError.setVisible(false);
-            formWeatherError.setManaged(false);
-
-            // Afficher une alerte si conditions défavorables
+            formWeatherError.setVisible(false); formWeatherError.setManaged(false);
             if (weather.getRainChance() > 60) {
-                formWeatherAlert.setText("⚠️ Risque de pluie élevé! Prévoyez une salle couverte ou un plan B");
-                formWeatherAlert.setVisible(true);
-                formWeatherAlert.setManaged(true);
-            } else {
-                formWeatherAlert.setVisible(false);
-                formWeatherAlert.setManaged(false);
-            }
-
-            System.out.println("✅ Météo affichée: " + weather.getWeatherEmoji() + " " +
-                    weather.getTemperature() + "°C");
-
-        } catch (Exception e) {
-            System.err.println("❌ Erreur affichage météo: " + e.getMessage());
-            showWeatherError("Erreur lors de l'affichage de la météo");
-        }
+                formWeatherAlert.setText("Risque de pluie eleve! Prevoyez une salle couverte ou un plan B");
+                formWeatherAlert.setVisible(true); formWeatherAlert.setManaged(true);
+            } else { formWeatherAlert.setVisible(false); formWeatherAlert.setManaged(false); }
+        } catch (Exception e) { showWeatherError("Erreur affichage météo"); }
     }
 
-    /**
-     * Affiche un message d'erreur
-     */
     private void showWeatherError(String errorMsg) {
         if (weatherContainer == null) return;
-
-        weatherContainer.setVisible(true);
-        weatherContainer.setManaged(true);
-
-        formWeatherError.setText("❌ " + errorMsg);
-        formWeatherError.setVisible(true);
-        formWeatherError.setManaged(true);
-
-        formWeatherAlert.setVisible(false);
-        formWeatherAlert.setManaged(false);
-
-        System.out.println("⚠️ Erreur météo: " + errorMsg);
+        weatherContainer.setVisible(true); weatherContainer.setManaged(true);
+        formWeatherError.setText("Erreur: " + errorMsg);
+        formWeatherError.setVisible(true); formWeatherError.setManaged(true);
+        formWeatherAlert.setVisible(false); formWeatherAlert.setManaged(false);
     }
 
-    /**
-     * Masque le container météo
-     */
     private void hideWeatherContainer() {
-        if (weatherContainer != null) {
-            weatherContainer.setVisible(false);
-            weatherContainer.setManaged(false);
-        }
+        if (weatherContainer != null) { weatherContainer.setVisible(false); weatherContainer.setManaged(false); }
     }
 
     // ==================== VALIDATION ====================
 
     private boolean validateForm() {
         boolean isValid = true;
-
-        // Réinitialiser tous les erreurs
         resetValidationUI();
 
-        // ==================== 1. VALIDATION DU TITRE ====================
         if (!titlePristine) {
             String title = titleField.getText().trim();
-            if (title.isEmpty()) {
-                titleError.setText("❌ Le titre est requis");
-                titleError.setVisible(true);
-                applyErrorStyle(titleField);
-                isValid = false;
-            } else if (title.length() < TITLE_MIN_LENGTH) {
-                titleError.setText("❌ Min " + TITLE_MIN_LENGTH + " caractères");
-                titleError.setVisible(true);
-                applyErrorStyle(titleField);
-                isValid = false;
-            } else if (title.length() > TITLE_MAX_LENGTH) {
-                titleError.setText("❌ Max " + TITLE_MAX_LENGTH + " caractères");
-                titleError.setVisible(true);
-                applyErrorStyle(titleField);
-                isValid = false;
-            } else {
-                applySuccessStyle(titleField);
-            }
+            if (title.isEmpty()) { titleError.setText("Le titre est requis"); titleError.setVisible(true); applyErrorStyle(titleField); isValid = false; }
+            else if (title.length() < TITLE_MIN_LENGTH) { titleError.setText("Min " + TITLE_MIN_LENGTH + " caracteres"); titleError.setVisible(true); applyErrorStyle(titleField); isValid = false; }
+            else if (title.length() > TITLE_MAX_LENGTH) { titleError.setText("Max " + TITLE_MAX_LENGTH + " caracteres"); titleError.setVisible(true); applyErrorStyle(titleField); isValid = false; }
+            else applySuccessStyle(titleField);
         }
 
-        // ==================== 2. VALIDATION DE LA DESCRIPTION ====================
         if (!descriptionPristine) {
-            String description = descriptionArea.getText().trim();
-            if (description.isEmpty()) {
-                descriptionError.setText("❌ La description est requise");
-                descriptionError.setVisible(true);
-                applyErrorStyle(descriptionArea);
-                isValid = false;
-            } else if (description.length() < DESC_MIN_LENGTH) {
-                descriptionError.setText("❌ Min " + DESC_MIN_LENGTH + " caractères");
-                descriptionError.setVisible(true);
-                applyErrorStyle(descriptionArea);
-                isValid = false;
-            } else if (description.length() > DESC_MAX_LENGTH) {
-                descriptionError.setText("❌ Max " + DESC_MAX_LENGTH + " caractères");
-                descriptionError.setVisible(true);
-                applyErrorStyle(descriptionArea);
-                isValid = false;
-            } else {
-                applySuccessStyle(descriptionArea);
-            }
+            String desc = descriptionArea.getText().trim();
+            if (desc.isEmpty()) { descriptionError.setText("La description est requise"); descriptionError.setVisible(true); applyErrorStyle(descriptionArea); isValid = false; }
+            else if (desc.length() < DESC_MIN_LENGTH) { descriptionError.setText("Min " + DESC_MIN_LENGTH + " caracteres"); descriptionError.setVisible(true); applyErrorStyle(descriptionArea); isValid = false; }
+            else if (desc.length() > DESC_MAX_LENGTH) { descriptionError.setText("Max " + DESC_MAX_LENGTH + " caracteres"); descriptionError.setVisible(true); applyErrorStyle(descriptionArea); isValid = false; }
+            else applySuccessStyle(descriptionArea);
         }
 
-        // ==================== 3. VALIDATION DES DATES ====================
         if (!startDatePristine || !endDatePristine) {
-            if (startDatePicker.getValue() == null) {
-                dateError.setText("❌ La date de début est requise");
-                dateError.setVisible(true);
-                applyErrorStyle(startDatePicker);
-                isValid = false;
-            } else if (endDatePicker.getValue() == null) {
-                dateError.setText("❌ La date de fin est requise");
-                dateError.setVisible(true);
-                applyErrorStyle(endDatePicker);
-                isValid = false;
-            } else {
+            if (startDatePicker.getValue() == null) { dateError.setText("La date de debut est requise"); dateError.setVisible(true); applyErrorStyle(startDatePicker); isValid = false; }
+            else if (endDatePicker.getValue() == null) { dateError.setText("La date de fin est requise"); dateError.setVisible(true); applyErrorStyle(endDatePicker); isValid = false; }
+            else {
                 LocalDateTime now = LocalDateTime.now();
-                LocalDateTime startDateTime = LocalDateTime.of(
-                        startDatePicker.getValue(),
-                        LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue())
-                );
-                LocalDateTime endDateTime = LocalDateTime.of(
-                        endDatePicker.getValue(),
-                        LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue())
-                );
-
-                // Vérifier que la date de début n'est pas dans le passé (pour les nouveaux événements)
-                if (currentEvent == null && startDateTime.isBefore(now)) {
-                    dateError.setText("❌ La date ne peut pas être dans le passé");
-                    dateError.setVisible(true);
-                    applyErrorStyle(startDatePicker);
-                    isValid = false;
-                }
-                // Vérifier que la date de fin est après la date de début
-                else if (endDateTime.isBefore(startDateTime) || endDateTime.isEqual(startDateTime)) {
-                    dateError.setText("❌ La fin doit être après le début");
-                    dateError.setVisible(true);
-                    applyErrorStyle(endDatePicker);
-                    isValid = false;
-                } else {
-                    applySuccessStyle(startDatePicker);
-                    applySuccessStyle(endDatePicker);
-                }
+                LocalDateTime startDT = LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue()));
+                LocalDateTime endDT = LocalDateTime.of(endDatePicker.getValue(), LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue()));
+                if (currentEvent == null && startDT.isBefore(now)) { dateError.setText("La date ne peut pas etre dans le passe"); dateError.setVisible(true); applyErrorStyle(startDatePicker); isValid = false; }
+                else if (endDT.isBefore(startDT) || endDT.isEqual(startDT)) { dateError.setText("La fin doit etre apres le debut"); dateError.setVisible(true); applyErrorStyle(endDatePicker); isValid = false; }
+                else { applySuccessStyle(startDatePicker); applySuccessStyle(endDatePicker); }
             }
         }
 
-        // ==================== 4. VALIDATION DU LIEU ====================
         if (!locationPristine) {
             String location = locationCombo.getValue();
-            if (location == null || location.isEmpty() || location.equals("Autre (saisir manuellement)")) {
-                location = locationCombo.getEditor().getText().trim();
-            }
-
-            if (location.isEmpty()) {
-                locationError.setText("❌ Le lieu est requis");
-                locationError.setVisible(true);
-                applyErrorStyle(locationCombo);
-                isValid = false;
-            } else if (location.length() < LOCATION_MIN_LENGTH) {
-                locationError.setText("❌ Min " + LOCATION_MIN_LENGTH + " caractères");
-                locationError.setVisible(true);
-                applyErrorStyle(locationCombo);
-                isValid = false;
-            } else if (location.length() > LOCATION_MAX_LENGTH) {
-                locationError.setText("❌ Max " + LOCATION_MAX_LENGTH + " caractères");
-                locationError.setVisible(true);
-                applyErrorStyle(locationCombo);
-                isValid = false;
-            } else {
-                applySuccessStyle(locationCombo);
-            }
+            if (location == null || location.isEmpty()) location = locationCombo.getEditor().getText().trim();
+            if (location.isEmpty()) { locationError.setText("Le lieu est requis"); locationError.setVisible(true); applyErrorStyle(locationCombo); isValid = false; }
+            else if (location.length() < LOCATION_MIN_LENGTH) { locationError.setText("Min " + LOCATION_MIN_LENGTH + " caracteres"); locationError.setVisible(true); applyErrorStyle(locationCombo); isValid = false; }
+            else if (location.length() > LOCATION_MAX_LENGTH) { locationError.setText("Max " + LOCATION_MAX_LENGTH + " caracteres"); locationError.setVisible(true); applyErrorStyle(locationCombo); isValid = false; }
+            else applySuccessStyle(locationCombo);
         }
 
-        // ==================== 5. VALIDATION DE LA CAPACITÉ ====================
         if (!capacityPristine) {
             String capacity = capacityField.getText().trim();
-            if (capacity.isEmpty()) {
-                capacityError.setText("❌ La capacité est requise");
-                capacityError.setVisible(true);
-                applyErrorStyle(capacityField);
-                isValid = false;
-            } else {
+            if (capacity.isEmpty()) { capacityError.setText("La capacite est requise"); capacityError.setVisible(true); applyErrorStyle(capacityField); isValid = false; }
+            else {
                 try {
                     int cap = Integer.parseInt(capacity);
-                    if (cap < 1) {
-                        capacityError.setText("❌ Minimum 1 place");
-                        capacityError.setVisible(true);
-                        applyErrorStyle(capacityField);
-                        isValid = false;
-                    } else {
-                        applySuccessStyle(capacityField);
-                    }
-                } catch (NumberFormatException e) {
-                    capacityError.setText("❌ Doit être un nombre entier");
-                    capacityError.setVisible(true);
-                    applyErrorStyle(capacityField);
-                    isValid = false;
-                }
+                    if (cap < 1) { capacityError.setText("Minimum 1 place"); capacityError.setVisible(true); applyErrorStyle(capacityField); isValid = false; }
+                    else applySuccessStyle(capacityField);
+                } catch (NumberFormatException e) { capacityError.setText("Doit etre un nombre entier"); capacityError.setVisible(true); applyErrorStyle(capacityField); isValid = false; }
             }
         }
 
-        // ==================== 6. VALIDATION DE LA CATÉGORIE ====================
         if (!categoryPristine) {
-            if (categoryCombo.getValue() == null || categoryCombo.getValue().isEmpty()) {
-                categoryError.setText("❌ La catégorie est requise");
-                categoryError.setVisible(true);
-                applyErrorStyle(categoryCombo);
-                isValid = false;
-            } else {
-                applySuccessStyle(categoryCombo);
-            }
+            if (categoryCombo.getValue() == null || categoryCombo.getValue().isEmpty()) { categoryError.setText("La categorie est requise"); categoryError.setVisible(true); applyErrorStyle(categoryCombo); isValid = false; }
+            else applySuccessStyle(categoryCombo);
         }
 
-        // ==================== 7. VALIDATION DU PRIX ====================
         if (!pricePristine && !freeCheckbox.isSelected()) {
             String price = priceField.getText().trim();
-            if (price.isEmpty()) {
-                priceError.setText("❌ Le prix est requis si non gratuit");
-                priceError.setVisible(true);
-                applyErrorStyle(priceField);
-                isValid = false;
-            } else {
+            if (price.isEmpty()) { priceError.setText("Le prix est requis si non gratuit"); priceError.setVisible(true); applyErrorStyle(priceField); isValid = false; }
+            else {
                 try {
-                    double priceValue = Double.parseDouble(price);
-                    if (priceValue < 0) {
-                        priceError.setText("❌ Le prix ne peut pas être négatif");
-                        priceError.setVisible(true);
-                        applyErrorStyle(priceField);
-                        isValid = false;
-                    } else {
-                        applySuccessStyle(priceField);
-                    }
-                } catch (NumberFormatException e) {
-                    priceError.setText("❌ Format invalide (ex: 25.50)");
-                    priceError.setVisible(true);
-                    applyErrorStyle(priceField);
-                    isValid = false;
-                }
+                    double pv = Double.parseDouble(price);
+                    if (pv < 0) { priceError.setText("Le prix ne peut pas etre negatif"); priceError.setVisible(true); applyErrorStyle(priceField); isValid = false; }
+                    else applySuccessStyle(priceField);
+                } catch (NumberFormatException e) { priceError.setText("Format invalide (ex: 25.50)"); priceError.setVisible(true); applyErrorStyle(priceField); isValid = false; }
             }
         }
 
-        // Activer/désactiver le bouton save
         saveBtn.setDisable(!isValid);
-
         return isValid;
     }
 
-    /**
-     * Réinitialise tous les messages d'erreur et styles
-     */
     private void resetValidationUI() {
-        titleError.setVisible(false);
-        descriptionError.setVisible(false);
-        dateError.setVisible(false);
-        locationError.setVisible(false);
-        capacityError.setVisible(false);
-        categoryError.setVisible(false);
-        priceError.setVisible(false);
-
-        clearFieldStyles(titleField);
-        clearFieldStyles(descriptionArea);
-        clearFieldStyles(startDatePicker);
-        clearFieldStyles(endDatePicker);
-        clearFieldStyles(locationCombo);
-        clearFieldStyles(capacityField);
-        clearFieldStyles(categoryCombo);
-        clearFieldStyles(priceField);
+        titleError.setVisible(false); descriptionError.setVisible(false); dateError.setVisible(false);
+        locationError.setVisible(false); capacityError.setVisible(false); categoryError.setVisible(false); priceError.setVisible(false);
+        clearFieldStyles(titleField); clearFieldStyles(descriptionArea); clearFieldStyles(startDatePicker);
+        clearFieldStyles(endDatePicker); clearFieldStyles(locationCombo); clearFieldStyles(capacityField);
+        clearFieldStyles(categoryCombo); clearFieldStyles(priceField);
     }
 
-    /**
-     * Applique le style d'erreur (bordure rouge)
-     */
-    private void applyErrorStyle(Control field) {
-        if (field instanceof TextArea) {
-            field.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;");
-        } else {
-            field.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;");
-        }
-    }
-
-    /**
-     * Applique le style de succès (bordure verte)
-     */
-    private void applySuccessStyle(Control field) {
-        if (field instanceof TextArea) {
-            field.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;");
-        } else {
-            field.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;");
-        }
-    }
-
-    /**
-     * Efface les styles personnalisés d'un champ
-     */
-    private void clearFieldStyles(Control field) {
-        field.setStyle("-fx-border-color: #ced4da; -fx-background-color: #f8f9fa;");
-    }
-
-    private String safeTrim(TextInputControl field) {
-        if (field == null) {
-            return "";
-        }
-        String text = field.getText();
-        return text == null ? "" : text.trim();
-    }
+    private void applyErrorStyle(Control f) { f.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2; -fx-background-color: #fff5f5;"); }
+    private void applySuccessStyle(Control f) { f.setStyle("-fx-border-color: #10b981; -fx-border-width: 2; -fx-background-color: #f0fdf4;"); }
+    private void clearFieldStyles(Control f) { f.setStyle("-fx-border-color: #ced4da; -fx-background-color: #f8f9fa;"); }
 
     // ==================== ACTIONS ====================
 
-    @FXML
-    private void handleBack() {
-        if (helloController != null) {
-            helloController.showEventsList();
-        }
-    }
+    @FXML private void handleBack() { if (helloController != null) helloController.showEventsList(); }
 
     @FXML
     private void handleCancel() {
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Confirmation");
-        confirmation.setHeaderText("Annuler les modifications?");
-        confirmation.setContentText("Les modifications non enregistrées seront perdues.");
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+        a.setTitle("Confirmation"); a.setHeaderText("Annuler les modifications?");
+        a.setContentText("Les modifications non enregistrees seront perdues.");
+        a.showAndWait().ifPresent(r -> { if (r == ButtonType.OK) handleBack(); });
+    }
 
-        confirmation.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                handleBack();
+    // ==================== GÉNÉRATION AFFICHE IA ====================
+
+    @FXML
+    private void handleGenererAffiche() {
+        final String titre = titleField != null ? titleField.getText().trim() : "";
+        final String gouvernorat = gouvernoratCombo != null && gouvernoratCombo.getValue() != null ? gouvernoratCombo.getValue().trim() : "";
+        final String categorie = categoryCombo != null && categoryCombo.getValue() != null ? categoryCombo.getValue().trim() : "";
+
+        if (titre.isEmpty() || gouvernorat.isEmpty() || categorie.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Champs requis"); alert.setHeaderText(null);
+            alert.setContentText("Merci de renseigner le titre, le gouvernorat et la categorie avant de generer l'affiche.");
+            alert.showAndWait();
+            return;
+        }
+
+        btnGenererAffiche.setDisable(true);
+        loadingSpinner.setManaged(true); loadingSpinner.setVisible(true);
+        afficheStatus.setText("Generation en cours...");
+
+        Thread worker = new Thread(() -> {
+            java.net.HttpURLConnection conn = null;
+            java.io.InputStream inputStream = null;
+            try {
+                String prompt = String.format(
+                        "professional university event poster, title: %s, category: %s, location: %s, modern design, vibrant colors, no text overlay",
+                        titre, categorie, gouvernorat);
+
+                java.net.URL urlObj = new java.net.URL("https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell");
+                conn = (java.net.HttpURLConnection) urlObj.openConnection();
+                conn.setRequestMethod("POST");
+                String hfToken = System.getenv("HF_TOKEN");
+                conn.setRequestProperty("Authorization", "Bearer " + System.getenv("HF_TOKEN"));
+
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "image/png");
+                conn.setDoOutput(true);
+                conn.setConnectTimeout(60000); conn.setReadTimeout(60000);
+
+                String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"");
+                String body = String.format("{\"inputs\":\"%s\",\"parameters\":{\"num_inference_steps\":4}}", safePrompt);
+                try (java.io.OutputStream os = conn.getOutputStream()) { os.write(body.getBytes(StandardCharsets.UTF_8)); os.flush(); }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode != 200) {
+                    String errorMsg = "Erreur inconnue";
+                    java.io.InputStream errorStream = conn.getErrorStream();
+                    if (errorStream != null) {
+                        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+                            StringBuilder sb = new StringBuilder(); String line;
+                            while ((line = reader.readLine()) != null) sb.append(line);
+                            errorMsg = sb.toString();
+                        }
+                    }
+                    throw new Exception("Erreur API Hugging Face " + responseCode + ": " + errorMsg);
+                }
+
+                inputStream = conn.getInputStream();
+                final Image image = new Image(inputStream);
+                if (image.isError()) throw new Exception("Impossible de décoder l'image reçue");
+
+                Platform.runLater(() -> {
+                    try {
+                        affichePreview.getChildren().clear();
+                        ImageView bg = new ImageView(image);
+                        bg.setFitWidth(300); bg.setFitHeight(450);
+                        bg.setPreserveRatio(false); bg.setSmooth(true);
+
+                        final String dateStr = startDatePicker != null && startDatePicker.getValue() != null
+                                ? startDatePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+                        final boolean gratuit = freeCheckbox != null && freeCheckbox.isSelected();
+                        final String prixStr = gratuit ? "Gratuit" : (priceField != null ? priceField.getText().trim() + " DT" : "");
+
+                        Label titreLbl = new Label(titre);
+                        titreLbl.setWrapText(true);
+                        titreLbl.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
+                        Label categorieLbl = new Label(categorie);
+                        categorieLbl.setStyle("-fx-text-fill: #90CDF4; -fx-font-size: 12px;");
+                        Label lieuLbl = new Label("📍 " + gouvernorat);
+                        lieuLbl.setWrapText(true);
+                        lieuLbl.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+                        Label dateLbl = new Label("📅 " + dateStr);
+                        dateLbl.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+                        Label prixLbl = new Label("💰 " + prixStr);
+                        prixLbl.setStyle(gratuit ? "-fx-text-fill: #68D391; -fx-font-size: 12px; -fx-font-weight: bold;" : "-fx-text-fill: #FBD38D; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+                        Region spacer = new Region();
+                        VBox.setVgrow(spacer, Priority.ALWAYS);
+                        VBox overlay = new VBox(6, spacer, titreLbl, categorieLbl, lieuLbl, dateLbl, prixLbl);
+                        overlay.setAlignment(Pos.BOTTOM_LEFT);
+                        overlay.setPadding(new Insets(16));
+                        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.6);");
+                        overlay.setPrefSize(300, 450); overlay.setMaxSize(300, 450);
+
+                        affichePreview.getChildren().addAll(bg, overlay);
+                        afficheStatus.setText("Affiche generee avec succes!");
+                    } finally {
+                        btnGenererAffiche.setDisable(false);
+                        loadingSpinner.setVisible(false); loadingSpinner.setManaged(false);
+                    }
+                });
+
+            } catch (Exception ex) {
+                Platform.runLater(() -> {
+                    btnGenererAffiche.setDisable(false);
+                    loadingSpinner.setVisible(false); loadingSpinner.setManaged(false);
+                    afficheStatus.setText("Erreur: " + ex.getMessage());
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Generation echouee"); alert.setHeaderText(null);
+                    alert.setContentText("Impossible de generer l'affiche: " + ex.getMessage());
+                    alert.showAndWait();
+                });
+            } finally {
+                try { if (inputStream != null) inputStream.close(); if (conn != null) conn.disconnect(); } catch (Exception e) { e.printStackTrace(); }
             }
         });
+        worker.setDaemon(true);
+        worker.start();
     }
+
+    // ==================== SNAPSHOT AFFICHE ====================
+
+    private String saveAfficheToFile() {
+        try {
+            if (affichePreview == null || affichePreview.getChildren().isEmpty()) return null;
+            File postersDir = new File("src/main/resources/assets/posters");
+            if (!postersDir.exists()) postersDir.mkdirs();
+            String fileName = "poster_" + System.currentTimeMillis() + ".png";
+            File outputFile = new File(postersDir, fileName);
+            WritableImage snapshot = affichePreview.snapshot(new SnapshotParameters(), null);
+            if (snapshot == null) return null;
+            int w = (int) snapshot.getWidth(), h = (int) snapshot.getHeight();
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) img.setRGB(x, y, snapshot.getPixelReader().getArgb(x, y));
+            if (!ImageIO.write(img, "png", outputFile)) return null;
+            String path = "assets/posters/" + fileName;
+            System.out.println("✅ Affiche sauvegardée: " + path);
+            return path;
+        } catch (IOException e) {
+            System.err.println("❌ Erreur sauvegarde affiche: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // ==================== SAVE ====================
 
     @FXML
     private void handleSave() {
-        // Marquer tous les champs comme non-pristine pour forcer la validation complète
-        titlePristine = false;
-        descriptionPristine = false;
-        startDatePristine = false;
-        endDatePristine = false;
-        locationPristine = false;
-        capacityPristine = false;
-        categoryPristine = false;
-        pricePristine = false;
+        titlePristine = false; descriptionPristine = false;
+        startDatePristine = false; endDatePristine = false;
+        locationPristine = false; capacityPristine = false;
+        categoryPristine = false; pricePristine = false;
 
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
-        String title = safeTrim(titleField);
-        String description = safeTrim(descriptionArea);
+        String title = titleField.getText().trim();
+        String description = descriptionArea.getText().trim();
         String gouvernorat = gouvernoratCombo.getValue();
-        String ville = villeCombo.getValue();
+
+        // ✅ ville = gouvernorat (on garde la compatibilité avec le modèle)
+        String ville = gouvernorat;
+
         String location = locationCombo.getValue();
-
-        // Si l'utilisateur a choisi "Autre (saisir manuellement)" ou qu'il n'y a pas de sélection
-        if (location == null || location.isEmpty() || location.equals("Autre (saisir manuellement)")) {
-            // Laisser l'utilisateur saisir manuellement
-            location = safeTrim(locationCombo.getEditor());
-            if (location.isEmpty()) {
-                showError("Erreur", "Veuillez sélectionner ou saisir un lieu");
-                return;
-            }
+        if (location == null || location.isEmpty()) {
+            location = locationCombo.getEditor().getText().trim();
+            if (location.isEmpty()) { showError("Erreur", "Veuillez selectionner ou saisir un lieu"); return; }
         }
 
-        String capacityText = safeTrim(capacityField);
-        if (capacityText.isEmpty()) {
-            showError("Erreur", "Veuillez saisir une capacité valide");
-            return;
-        }
+        int capacity = Integer.parseInt(capacityField.getText());
+        String imageUrl = imageUrlField.getText().trim();
 
-        int capacity;
-        try {
-            capacity = Integer.parseInt(capacityText);
-        } catch (NumberFormatException e) {
-            showError("Erreur", "La capacité doit être un nombre entier");
-            return;
-        }
+        String afficheUrl = saveAfficheToFile();
+        if (afficheUrl != null) { imageUrl = afficheUrl; System.out.println("✅ Affiche utilisée comme image"); }
 
-        String imageUrl = safeTrim(imageUrlField);
-
-        String categoryName = categoryCombo.getValue();
-        int categoryId = 1;
-        EventCategory selectedCat = findCategoryByName(categoryName);
-        if (selectedCat != null) {
-            categoryId = selectedCat.getId();
-        }
+        EventCategory selectedCat = findCategoryByName(categoryCombo.getValue());
+        int categoryId = selectedCat != null ? selectedCat.getId() : 1;
 
         boolean isFree = freeCheckbox.isSelected();
-        double price = 0;
-        if (!isFree) {
-            String priceText = safeTrim(priceField);
-            if (priceText.isEmpty()) {
-                showError("Erreur", "Veuillez saisir un prix valide");
-                return;
-            }
-            try {
-                price = Double.parseDouble(priceText);
-            } catch (NumberFormatException e) {
-                showError("Erreur", "Le prix doit être un nombre valide");
-                return;
-            }
-        }
+        double price = isFree ? 0 : Double.parseDouble(priceField.getText());
 
-        int creatorId = UserSession.getInstance().getUserId();
-        if (creatorId <= 0) {
-            showError("Erreur", "Utilisateur non connecté. Veuillez vous reconnecter.");
-            return;
-        }
-
-        LocalDateTime startDate = LocalDateTime.of(
-                startDatePicker.getValue(),
-                LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue())
-        );
-
-        LocalDateTime endDate = LocalDateTime.of(
-                endDatePicker.getValue(),
-                LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue())
-        );
+        LocalDateTime startDate = LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue()));
+        LocalDateTime endDate = LocalDateTime.of(endDatePicker.getValue(), LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue()));
 
         try {
             boolean success;
-
             if (currentEvent == null) {
-                // Création
-                Event newEvent = new Event(title, description, startDate, endDate,
-                        location, capacity, imageUrl, categoryId, creatorId,
-                        isFree, price);
+                Event newEvent = new Event(title, description, startDate, endDate, location, capacity, imageUrl, categoryId, 1, isFree, price);
                 newEvent.setGouvernorat(gouvernorat);
                 newEvent.setVille(ville);
                 success = eventService.addEvent(newEvent);
-
                 if (success) {
-                    showSuccess("Succès", "Événement créé avec succès!");
-
-                    // Rafraîchir les KPI après création
-                    if (helloController != null) {
-                        helloController.refreshKPIs();
-                    }
-
+                    showSuccess("Succes", "Evenement cree avec succes!");
+                    if (helloController != null) helloController.refreshKPIs();
                     handleBack();
-                } else {
-                    showError("Erreur", "Impossible de créer l'événement");
-                }
-
+                } else showError("Erreur", "Impossible de creer l'evenement");
             } else {
-                // Modification
-                currentEvent.setTitle(title);
-                currentEvent.setDescription(description);
-                currentEvent.setStartDate(startDate);
-                currentEvent.setEndDate(endDate);
-                currentEvent.setLocation(location);
-                currentEvent.setGouvernorat(gouvernorat);
-                currentEvent.setVille(ville);
-                currentEvent.setCapacity(capacity);
-                currentEvent.setImageUrl(imageUrl);
-                currentEvent.setCategoryId(categoryId);
-                currentEvent.setCreatedBy(creatorId);
-                currentEvent.setFree(isFree);
-                currentEvent.setTicketPrice(price);
-
+                currentEvent.setTitle(title); currentEvent.setDescription(description);
+                currentEvent.setStartDate(startDate); currentEvent.setEndDate(endDate);
+                currentEvent.setLocation(location); currentEvent.setGouvernorat(gouvernorat);
+                currentEvent.setVille(ville); currentEvent.setCapacity(capacity);
+                currentEvent.setImageUrl(imageUrl); currentEvent.setCategoryId(categoryId);
+                currentEvent.setFree(isFree); currentEvent.setTicketPrice(price);
                 success = eventService.updateEvent(currentEvent);
-
                 if (success) {
-                    showSuccess("Succès", "Événement mis à jour avec succès!");
-
-                    // Rafraîchir les KPI après modification
-                    if (helloController != null) {
-                        helloController.refreshKPIs();
-                    }
-
+                    showSuccess("Succes", "Evenement mis a jour avec succes!");
+                    if (helloController != null) { helloController.refreshKPIs(); helloController.refreshEventsFrontPage(); }
                     handleBack();
-                } else {
-                    showError("Erreur", "Impossible de mettre à jour l'événement");
-                }
+                } else showError("Erreur", "Impossible de mettre a jour l'evenement");
             }
-
         } catch (Exception e) {
-            System.err.println("❌ Erreur lors de la sauvegarde: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Erreur sauvegarde: " + e.getMessage());
             showError("Erreur", "Une erreur est survenue: " + e.getMessage());
         }
     }
 
     // ==================== DIALOGS ====================
-
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private void showSuccess(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+    private void showError(String title, String msg) { Alert a = new Alert(Alert.AlertType.ERROR); a.setTitle(title); a.setHeaderText(null); a.setContentText(msg); a.showAndWait(); }
+    private void showSuccess(String title, String msg) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setTitle(title); a.setHeaderText(null); a.setContentText(msg); a.showAndWait(); }
 
     // ==================== DONNÉES TUNISIENNES ====================
 
-    private Map<String, List<String>> villesParGouvernorat;
-    private Map<String, List<String>> facultesParVille;
-
-    /**
-     * Charge les données tunisiennes (gouvernorats, villes, facultés)
-     */
     private void loadTunisianData() {
         villesParGouvernorat = new LinkedHashMap<>();
         facultesParVille = new LinkedHashMap<>();
 
-        // 24 Gouvernorats tunisiens
+        // Villes par gouvernorat (gardées pour compatibilité setEvent)
         villesParGouvernorat.put("Tunis", Arrays.asList("Tunis", "La Marsa", "Carthage", "Le Bardo"));
         villesParGouvernorat.put("Ariana", Arrays.asList("Ariana", "Ettadhamen", "Raoued"));
         villesParGouvernorat.put("Ben Arous", Arrays.asList("Ben Arous", "Hammam Lif", "Rades"));
@@ -1144,66 +777,59 @@ public class EventFormController {
         villesParGouvernorat.put("Medenine", Arrays.asList("Medenine", "Zarzis", "Djerba"));
         villesParGouvernorat.put("Tataouine", Arrays.asList("Tataouine", "Ghomrassen", "Remada"));
 
-        // Facultés par ville
-        facultesParVille.put("Tunis", Arrays.asList("FST", "FSEG", "FD", "FLSH", "ENIT", "ESSEC", "IHEC"));
-        facultesParVille.put("Sousse", Arrays.asList("FSM", "ESSTHS", "ISITCom", "ISSAT"));
-        facultesParVille.put("Sfax", Arrays.asList("FSS", "ENIS", "ISIMS"));
-        facultesParVille.put("Nabeul", Arrays.asList("ISSAT", "ISET"));
-        facultesParVille.put("Monastir", Arrays.asList("FM", "FSM", "ISIM"));
+        // ✅ Facultés par ville (pour lookup interne)
+        facultesParVille.put("Tunis", Arrays.asList("FST Tunis", "FSEG Tunis", "FD Tunis", "FLSH Tunis", "ENIT", "ESSEC", "IHEC", "ISG Tunis"));
+        facultesParVille.put("Ariana", Arrays.asList("ESPRIT", "ESB", "ENSI", "SUP'COM", "ISI", "SESAME University"));
+        facultesParVille.put("Manouba", Arrays.asList("ISAMM", "ISBST", "FSHS Manouba", "ISBAM", "ISCAE Manouba"));
+        facultesParVille.put("Sousse", Arrays.asList("FSM Sousse", "ESSTHS", "ISITCom", "ISSAT Sousse", "IHEC Sousse"));
+        facultesParVille.put("Sfax", Arrays.asList("FSS Sfax", "ENIS Sfax", "ISIMS", "FSEGS Sfax", "ISET Sfax"));
+        facultesParVille.put("Monastir", Arrays.asList("FM Monastir", "FSM Monastir", "ISIM", "ISET Monastir"));
+        facultesParVille.put("Bizerte", Arrays.asList("INSAT", "FSB Bizerte", "ISSAT Bizerte"));
+        facultesParVille.put("Nabeul", Arrays.asList("ISSAT Nabeul", "ISET Nabeul"));
+        facultesParVille.put("Kairouan", Arrays.asList("FSHS Kairouan", "ISET Kairouan"));
+        facultesParVille.put("Gafsa", Arrays.asList("FSL Gafsa", "ISET Gafsa"));
+        facultesParVille.put("Gabès", Arrays.asList("FSS Gabès", "ISSAT Gabès", "ISET Gabès"));
 
         System.out.println("✅ Données tunisiennes chargées");
     }
 
-    /**
-     * Charge les gouvernorats dans le ComboBox
-     */
     private void loadGouvernorats() {
         gouvernoratCombo.getItems().clear();
-        gouvernoratCombo.getItems().addAll(villesParGouvernorat.keySet());
-    }
-
-    /**
-     * Configure les listeners pour le filtrage automatique
-     */
-    private void setupLocationListeners() {
-        gouvernoratCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                loadVillesForGouvernorat(newVal);
-                villeCombo.setValue(null);
-                locationCombo.setValue(null);
-                locationCombo.getItems().clear();
-            }
-        });
-
-        villeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                loadFacultesForVille(newVal);
-                locationCombo.setValue(null);
-            }
-        });
-    }
-
-    /**
-     * Charge les villes pour un gouvernorat donné
-     */
-    private void loadVillesForGouvernorat(String gouvernorat) {
-        villeCombo.getItems().clear();
-        List<String> villes = villesParGouvernorat.get(gouvernorat);
-        if (villes != null) {
-            villeCombo.getItems().addAll(villes);
+        // ✅ Afficher seulement les gouvernorats qui ont au moins une ville avec des facultés
+        for (String gouvernorat : villesParGouvernorat.keySet()) {
+            List<String> villes = villesParGouvernorat.get(gouvernorat);
+            boolean hasFaculte = villes.stream().anyMatch(v -> facultesParVille.containsKey(v));
+            if (hasFaculte) gouvernoratCombo.getItems().add(gouvernorat);
         }
     }
 
+    private void setupLocationListeners() {
+        gouvernoratCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                locationCombo.setValue(null);
+                locationCombo.getEditor().clear();
+                loadFacultesForGouvernorat(newVal);
+            }
+        });
+    }
+
     /**
-     * Charge les facultés pour une ville donnée
+     * ✅ NOUVELLE MÉTHODE : charge toutes les facultés du gouvernorat
+     * (toutes ses villes confondues) directement dans locationCombo
      */
-    private void loadFacultesForVille(String ville) {
+    private void loadFacultesForGouvernorat(String gouvernorat) {
         locationCombo.getItems().clear();
-        List<String> facultes = facultesParVille.get(ville);
-        if (facultes != null && !facultes.isEmpty()) {
-            locationCombo.getItems().addAll(facultes);
+        List<String> villes = villesParGouvernorat.get(gouvernorat);
+        if (villes != null) {
+            for (String ville : villes) {
+                List<String> facultes = facultesParVille.get(ville);
+                if (facultes != null) locationCombo.getItems().addAll(facultes);
+            }
+        }
+        if (locationCombo.getItems().isEmpty()) {
+            locationCombo.setPromptText("Saisir le lieu manuellement");
         } else {
-            locationCombo.getItems().addAll("Autre (saisir manuellement)");
+            locationCombo.setPromptText("Sélectionner une faculté");
         }
     }
 }

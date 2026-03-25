@@ -463,6 +463,8 @@ public class EventListController {
         long upcoming = allEvents.stream()
                 .filter(e -> e.getStartDate() != null && e.getStartDate().isAfter(LocalDateTime.now()))
                 .count();
+
+        // Protection null-check
         if (totalLabel != null) {
             totalLabel.setText(String.valueOf(total));
         }
@@ -941,3 +943,4 @@ public class EventListController {
         }
     }
 }
+

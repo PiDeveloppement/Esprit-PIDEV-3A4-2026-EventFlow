@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -9,39 +9,36 @@
       spacing="0"
       style="-fx-background-color: #f8fafc;">
 
+    <!-- Barre de filtres (FIXE) -->
     <HBox style="-fx-background-color: #f1f5f9; -fx-padding: 15 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
           spacing="15" alignment="CENTER_LEFT" prefHeight="70">
 
         <TextField fx:id="searchField"
-                   promptText="Recherche ticket..."
+                   promptText="🔍 Rechercher un ticket par code..."
                    style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15; -fx-pref-width: 300;
                           -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 8;"/>
 
         <ComboBox fx:id="eventFilter"
-                  promptText="Evenement"
+                  promptText="📅 Événement"
                   prefWidth="200"
                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15;
                          -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 8;"/>
 
         <ComboBox fx:id="statusFilter"
-                  promptText="Statut"
+                  promptText="📊 Statut"
                   prefWidth="150"
                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15;
                          -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 8;"/>
 
         <Region HBox.hgrow="ALWAYS"/>
 
-        <Button fx:id="scanBtn" text="Scanner QR" onAction="#handleScan"
+        <Button fx:id="scanBtn" text="📱 Scanner QR" onAction="#handleScan"
                 style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-padding: 8 20;
                        -fx-background-radius: 8; -fx-cursor: hand;"
                 minWidth="140"/>
-
-        <Button fx:id="addBtn" text="Creer un ticket" onAction="#handleAdd"
-                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 20;
-                       -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;"
-                minWidth="140"/>
     </HBox>
 
+    <!-- SCROLLPANE GLOBAL -->
     <ScrollPane fitToWidth="true"
                 vbarPolicy="AS_NEEDED"
                 hbarPolicy="NEVER"
@@ -50,6 +47,7 @@
 
         <VBox spacing="20" style="-fx-padding: 20 30;">
 
+            <!-- Barre info résultats -->
             <HBox spacing="15" alignment="CENTER_LEFT">
                 <Button onAction="#handleRefresh"
                         style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 15;
@@ -57,33 +55,23 @@
                                -fx-border-radius: 8; -fx-cursor: hand;">
                     <graphic>
                         <HBox spacing="8" alignment="CENTER">
-                            <Label text="Rafraichir" style="-fx-font-size: 13px;"/>
+                            <Label text="🔄" style="-fx-font-size: 16px;"/>
+                            <Label text="Actualiser" style="-fx-text-fill: #475569; -fx-font-size: 13px;"/>
                         </HBox>
                     </graphic>
                 </Button>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Label text="Total:"
-                       style="-fx-text-fill: #475569; -fx-font-size: 13px;"/>
-                <Label fx:id="totalLabel"
-                       text="0"
-                       style="-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-font-weight: bold;"/>
-
-                <Label text="Utilises:"
-                       style="-fx-text-fill: #475569; -fx-font-size: 13px;"/>
-                <Label fx:id="usedLabel"
-                       text="0"
-                       style="-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-font-weight: bold;"/>
-
                 <Label fx:id="resultLabel"
-                       text="0 resultat(s) trouve(s)"
+                       text="0 résultat(s) trouvé(s)"
                        style="-fx-text-fill: #64748b; -fx-font-size: 13px;
                               -fx-background-color: white; -fx-padding: 5 15;
                               -fx-background-radius: 20; -fx-border-color: #e2e8f0;
                               -fx-border-radius: 20; -fx-border-width: 1;"/>
             </HBox>
 
+            <!-- TABLEAU -->
             <TableView fx:id="ticketTable"
                        VBox.vgrow="NEVER"
                        prefHeight="400"
@@ -97,7 +85,7 @@
                                  minWidth="150"/>
 
                     <TableColumn fx:id="eventCol"
-                                 text="Evenement"
+                                 text="Événement"
                                  prefWidth="150"
                                  minWidth="120"/>
 
@@ -112,7 +100,7 @@
                                  minWidth="100"/>
 
                     <TableColumn fx:id="createdAtCol"
-                                 text="Date creation"
+                                 text="Date création"
                                  prefWidth="150"
                                  minWidth="120"/>
 
@@ -128,14 +116,19 @@
                 </columnResizePolicy>
             </TableView>
 
+            <!-- PAGINATION CORRIGÉE (sans bouton Suivant en double) -->
             <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10 0 20 0;">
                 <HBox spacing="8" alignment="CENTER">
-                    <Button fx:id="prevBtn" text="Precedent" onAction="#handlePrevPage"
+                    <!-- UNIQUEMENT le bouton Précédent est dans le FXML -->
+                    <Button fx:id="prevBtn" text="« Précédent" onAction="#handlePrevPage"
                             style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 16;
                                    -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8;
                                    -fx-background-radius: 8; -fx-cursor: hand;"/>
 
-                    <HBox fx:id="paginationContainer" spacing="8" alignment="CENTER"/>
+                    <!-- Le conteneur qui recevra TOUS les boutons (pages + Suivant) -->
+                    <HBox fx:id="paginationContainer" spacing="8" alignment="CENTER">
+                        <!-- Les boutons seront générés dynamiquement par le controller -->
+                    </HBox>
                 </HBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
@@ -146,8 +139,9 @@
                               -fx-background-radius: 20;"/>
             </HBox>
 
+            <!-- Footer -->
             <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
-                <Label text="2026 EventFlow - Gestion des tickets"
+                <Label text="© 2026 EventFlow - Gestion des tickets"
                        style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
             </HBox>
 

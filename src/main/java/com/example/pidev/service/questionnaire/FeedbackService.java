@@ -208,7 +208,7 @@ public class FeedbackService {
         // Si on ne trouve rien en BDD, on retourne une valeur par défaut pour ne pas avoir un PDF vide
         return nomComplet.isEmpty() ? "Participant #" + idUser : nomComplet;
     }
-  public String analyzeSentiment(String text) {
+    public String analyzeSentiment(String text) {
         if (text == null || text.isBlank()) return "NEUTRAL";
 
         try {

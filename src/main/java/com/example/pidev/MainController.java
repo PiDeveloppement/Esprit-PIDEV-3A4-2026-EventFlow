@@ -1,5 +1,6 @@
 package com.example.pidev;
 
+import com.example.pidev.controller.chat.ChatController;
 import com.example.pidev.controller.dashboard.DashboardController;
 import com.example.pidev.controller.event.*;
 import com.example.pidev.controller.role.RoleController;
@@ -15,9 +16,8 @@ import com.example.pidev.model.role.Role;
 import com.example.pidev.service.event.EventCategoryService;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.event.EventTicketService;
-import com.example.pidev.utils.UserSession;
-import com.example.pidev.model.user.UserModel;
-
+import com.example.pidev.service.role.RoleService;
+import com.example.pidev.service.user.UserService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,16 +37,21 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import com.example.pidev.utils.UserSession;
+import com.example.pidev.model.user.UserModel;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import javafx.event.ActionEvent;
 
 public class MainController {
 
@@ -62,76 +67,35 @@ public class MainController {
 
     // ===================== SPONSOR SPECIFIC FIELDS =====================
     private String lastSponsorPortalEmail;
-
-    public void setLastSponsorPortalEmail(String email) {
-        this.lastSponsorPortalEmail = email;
-    }
-
-    public String getLastSponsorPortalEmail() {
-        return lastSponsorPortalEmail;
-    }
+    public void setLastSponsorPortalEmail(String email) { this.lastSponsorPortalEmail = email; }
+    public String getLastSponsorPortalEmail() { return lastSponsorPortalEmail; }
 
     // ===================== FXML PATHS =====================
-    // Pages fonctionnelles (sponsors, budget, dépenses, dashboard)
     private static final String SPONSOR_PORTAL_FXML = "/com/example/pidev/fxml/Sponsor/sponsor_portal.fxml";
     private static final String SPONSOR_ADMIN_FXML  = "/com/example/pidev/fxml/Sponsor/sponsor_admin.fxml";
-    private static final String BUDGET_LIST_FXML    = "/com/example/pidev/fxml/Budget/budget.fxml";
-    private static final String DEPENSE_LIST_FXML   = "/com/example/pidev/fxml/Depense/depense-modern.fxml";
-    private static final String DASHBOARD_FXML      = "/com/example/pidev/fxml/dashboard/dashboard.fxml";
+    private static final String BUDGET_LIST_FXML    = "/com/example/pidev/fxml/budget/budget.fxml";
+    private static final String DEPENSE_LIST_FXML   = "/com/example/pidev/fxml/depense/depense-modern.fxml";
 
-    // Événements
-    private static final String EVENT_LIST_FXML     = "/com/example/pidev/fxml/event/event-list.fxml";
-    private static final String EVENT_FORM_FXML     = "/com/example/pidev/fxml/event/event-form.fxml";
-    private static final String EVENT_VIEW_FXML     = "/com/example/pidev/fxml/event/event-view.fxml";
-    private static final String EVENT_CALENDAR_FXML = "/com/example/pidev/fxml/event/event-calendar.fxml";
-    private static final String CATEGORY_LIST_FXML  = "/com/example/pidev/fxml/event/category-list.fxml";
-    private static final String CATEGORY_FORM_FXML  = "/com/example/pidev/fxml/event/category-form.fxml";
-    private static final String CATEGORY_VIEW_FXML  = "/com/example/pidev/fxml/event/category-view.fxml";
-    private static final String TICKET_LIST_FXML    = "/com/example/pidev/fxml/event/ticket-list.fxml";
-    private static final String TICKET_VIEW_FXML    = "/com/example/pidev/fxml/event/ticket-view.fxml";
-
-    // Rôles et utilisateurs
-    private static final String ROLE_LIST_FXML      = "/com/example/pidev/fxml/role/role.fxml";
-    private static final String ROLE_EDIT_FXML      = "/com/example/pidev/fxml/role/editRole.fxml";
-    private static final String USER_LIST_FXML      = "/com/example/pidev/fxml/user/user.fxml";
-    private static final String PROFILE_FXML        = "/com/example/pidev/fxml/user/profil.fxml";
-    private static final String EDIT_USER_FXML      = "/com/example/pidev/fxml/user/editUser.fxml";
-
-    // Ressources
-    private static final String SALLE_LIST_FXML     = "/com/example/pidev/fxml/resource/salle.fxml";
-    private static final String SALLE_FORM_FXML     = "/com/example/pidev/fxml/resource/form_salle.fxml";
-    private static final String EQUIPEMENT_LIST_FXML = "/com/example/pidev/fxml/resource/equipement.fxml";
-    private static final String RESERVATION_LIST_FXML = "/com/example/pidev/fxml/resource/reservation.fxml";
-    private static final String RESERVATION_FORM_FXML = "/com/example/pidev/fxml/resource/reservation_form.fxml";
-
-    // Questionnaires
-    private static final String QUESTION_LIST_FXML  = "/com/example/pidev/fxml/questionnaire/list_question.fxml";
-    private static final String QUESTION_FORM_FXML  = "/com/example/pidev/fxml/questionnaire/form_question.fxml";
-    private static final String REPONSE_LIST_FXML   = "/com/example/pidev/fxml/questionnaire/Resultat.fxml";
-    private static final String PARTICIPANT_QUIZ_FXML = "/com/example/pidev/fxml/questionnaire/Participant.fxml";
-    private static final String HISTORIQUE_FXML     = "/com/example/pidev/fxml/questionnaire/Historique.fxml";
-
-    // Paramètres
-    private static final String SETTINGS_FXML       = "/com/example/pidev/fxml/settings/settings.fxml";
-
-    // Temporary kill-switches for unstable modules (override with -D...=false)
-    private static final boolean DISABLE_TICKET_MODULE =
-            Boolean.parseBoolean(System.getProperty("app.disable.ticket.module", "false"));
-    private static final boolean DISABLE_RESERVATION_MODULE =
-            Boolean.parseBoolean(System.getProperty("app.disable.reservation.module", "false"));
-    private static final boolean DISABLE_QUESTIONNAIRE_MODULE =
-            Boolean.parseBoolean(System.getProperty("app.disable.questionnaire.module", "false"));
-
-    // ===================== FXML FIELDS =====================
-    // Center content
+    // ===================== CENTER CONTENT =====================
     @FXML private VBox pageContentContainer;
 
-    // Page header
+    // ===================== PAGE HEADER =====================
     @FXML private Label pageTitle;
     @FXML private Label pageSubtitle;
+    @FXML private Button chatFloatingButton;
     @FXML private HBox kpiContainer;
 
-    // Top bar
+    // ===================== CHAT PANEL FIELDS =====================
+    @FXML private VBox chatPanel;
+    @FXML private ScrollPane chatScrollPane;
+    @FXML private VBox chatBox;
+    @FXML private TextField inputField;
+    @FXML private Button sendButton;
+    @FXML private Button clearButton;
+    @FXML private Button closeChatButton;
+    @FXML private Label statusIndicator;
+
+    // ===================== TOP BAR =====================
     @FXML private Label navDateLabel;
     @FXML private Label navTimeLabel;
     @FXML private Label userNameLabel;
@@ -142,7 +106,7 @@ public class MainController {
     @FXML private StackPane avatarContainer;
     @FXML private MenuButton profileMenu;
 
-    // Sidebar buttons
+    // ===================== SIDEBAR =====================
     @FXML private Button dashboardBtn;
 
     // Events
@@ -183,33 +147,23 @@ public class MainController {
     @FXML private Text questionnairesArrow;
     @FXML private Button questionsBtn;
     @FXML private Button reponsesBtn;
-    @FXML private Button participantQuizBtn;
 
     @FXML private Button settingsBtn;
     @FXML private Button logoutBtn;
-
-    // Global search
     @FXML private TextField globalSearchField;
 
-    // Chat panel
-    @FXML private VBox chatPanel;
-    @FXML private Button chatFloatingButton;
-    @FXML private ScrollPane chatScrollPane;
-    @FXML private VBox chatBox;
-    @FXML private TextField inputField;
-    @FXML private Button sendButton;
-    @FXML private Button clearButton;
-    @FXML private Label statusIndicator;
-
-    // ===================== OTHER FIELDS =====================
+    private String lastSuggestion;
+    private ChatController chatController;
     private final Map<String, PageInfo> pageInfoMap = new HashMap<>();
     private Button activeButton;
     private DashboardController dashboardController;
 
-    // Services for KPIs
+    // Services pour les KPI
     private EventService eventService;
     private EventCategoryService categoryService;
     private EventTicketService ticketService;
+    private UserService userService;
+    private RoleService roleService;
 
     private static class PageInfo {
         String title;
@@ -220,42 +174,68 @@ public class MainController {
         }
     }
 
-    // ===================== INITIALIZATION =====================
+    // ===================== INIT =====================
     @FXML
     public void initialize() {
         instance = this;
         System.out.println("✅ MainController initialisé");
 
-        eventService = new EventService();
-        categoryService = new EventCategoryService();
-        ticketService = new EventTicketService();
+        try {
+            // Initialiser les services pour les KPI avec gestion des exceptions
+            eventService = new EventService();
+            categoryService = new EventCategoryService();
+            ticketService = new EventTicketService();
+            userService = new UserService();
 
-        // 🔥 FORCER UNE SESSION ADMIN POUR LE TEST (à supprimer en production)
-        UserSession session = UserSession.getInstance();
-        if (session.getUserId() == -1) {
-            UserModel admin = new UserModel(1, "Admin", "Admin", "admin@test.com", "admin", "ADMIN", 1);
-            session.setCurrentUser(admin);
-            System.out.println("⚠️ Session de test créée pour ADMIN");
+            // Initialiser RoleService avec try-catch
+            try {
+                roleService = new RoleService();
+                System.out.println("✅ RoleService initialisé avec succès");
+            } catch (SQLException e) {
+                System.err.println("⚠️ Erreur lors de l'initialisation de RoleService: " + e.getMessage());
+                roleService = null;
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur lors de l'initialisation des services: " + e.getMessage());
         }
-        System.out.println("👤 Rôle connecté: " + session.getRole());
+
+        UserSession session = UserSession.getInstance();
+        System.out.println("👤 Rôle connecté dans MainController: " + session.getRole());
 
         initializePageInfo();
         configureSidebarButtons();
         hideAllButtons();
-        configureSidebarByRole(); // ← sera remplacée par showAllButtons()
-        applyTemporaryModuleAvailability();
+        configureSidebarByRole();
         configureDateTime();
         loadUserProfileInHeader();
         setupGlobalSearch();
+
+        // Initialiser les KPI (cachés par défaut)
         hideKPIs();
 
-        // Default page
+        // Page par défaut : Dashboard
         if (dashboardBtn != null) {
             setActiveButton(dashboardBtn);
             loadDashboardView();
         }
+
+        // Animer le bouton flottant au démarrage
+        animateFloatingButton();
+
+        if (logoutBtn != null) {
+            logoutBtn.setOnAction(e -> logout());
+        }
+
+        // Initialiser le chat
+        initChatPanel();
+
+        // Gestion de la touche Entrée dans le champ de saisie
+        if (inputField != null) {
+            inputField.setOnAction(event -> handleSendMessage());
+        }
     }
 
+    // ===================== PAGE INFO =====================
     private void initializePageInfo() {
         pageInfoMap.put("dashboard", new PageInfo("Tableau de bord", "Aperçu général de votre activité"));
         pageInfoMap.put("events", new PageInfo("Gestion des événements", "Consultez et gérez tous vos événements"));
@@ -296,14 +276,10 @@ public class MainController {
                     Image image = new Image(photoUrl, 28, 28, true, true);
                     profileImageView.setImage(image);
                     profileImageView.setVisible(true);
-
                     Circle clip = new Circle(14, 14, 14);
                     profileImageView.setClip(clip);
-
                     if (initialsContainer != null) initialsContainer.setVisible(false);
-                    System.out.println("✅ Image de profil chargée");
                 } catch (Exception e) {
-                    System.err.println("Erreur chargement photo: " + e.getMessage());
                     showInitials(session.getInitials());
                 }
             } else {
@@ -367,72 +343,28 @@ public class MainController {
         boolean isVisible = submenu.isVisible();
         submenu.setVisible(!isVisible);
         submenu.setManaged(!isVisible);
-        if (arrow != null) arrow.setText(!isVisible ? "\u25BC" : "\u25B6");
+        if (arrow != null) arrow.setText(!isVisible ? "▼" : "▶");
         setActiveButton(active);
     }
 
     private void collapseOtherSubmenus(String currentMenu) {
-        if (!"events".equals(currentMenu) && eventsSubmenu != null) {
-            eventsSubmenu.setVisible(false);
-            eventsSubmenu.setManaged(false);
-            if (eventsArrow != null) eventsArrow.setText("\u25B6");
-        }
-        if (!"users".equals(currentMenu) && usersSubmenu != null) {
-            usersSubmenu.setVisible(false);
-            usersSubmenu.setManaged(false);
-            if (usersArrow != null) usersArrow.setText("\u25B6");
-        }
-        if (!"sponsors".equals(currentMenu) && sponsorsSubmenu != null) {
-            sponsorsSubmenu.setVisible(false);
-            sponsorsSubmenu.setManaged(false);
-            if (sponsorsArrow != null) sponsorsArrow.setText("\u25B6");
-        }
-        if (!"resources".equals(currentMenu) && resourcesSubmenu != null) {
-            resourcesSubmenu.setVisible(false);
-            resourcesSubmenu.setManaged(false);
-            if (resourcesArrow != null) resourcesArrow.setText("\u25B6");
-        }
-        if (!"questionnaires".equals(currentMenu) && questionnairesSubmenu != null) {
-            questionnairesSubmenu.setVisible(false);
-            questionnairesSubmenu.setManaged(false);
-            if (questionnairesArrow != null) questionnairesArrow.setText("\u25B6");
-        }
+        if (!"events".equals(currentMenu) && eventsSubmenu != null) { eventsSubmenu.setVisible(false); eventsSubmenu.setManaged(false); if (eventsArrow != null) eventsArrow.setText("▶"); }
+        if (!"users".equals(currentMenu) && usersSubmenu != null) { usersSubmenu.setVisible(false); usersSubmenu.setManaged(false); if (usersArrow != null) usersArrow.setText("▶"); }
+        if (!"sponsors".equals(currentMenu) && sponsorsSubmenu != null) { sponsorsSubmenu.setVisible(false); sponsorsSubmenu.setManaged(false); if (sponsorsArrow != null) sponsorsArrow.setText("▶"); }
+        if (!"resources".equals(currentMenu) && resourcesSubmenu != null) { resourcesSubmenu.setVisible(false); resourcesSubmenu.setManaged(false); if (resourcesArrow != null) resourcesArrow.setText("▶"); }
+        if (!"questionnaires".equals(currentMenu) && questionnairesSubmenu != null) { questionnairesSubmenu.setVisible(false); questionnairesSubmenu.setManaged(false); if (questionnairesArrow != null) questionnairesArrow.setText("▶"); }
     }
 
     private void collapseAllSubmenus() {
-        if (eventsSubmenu != null) {
-            eventsSubmenu.setVisible(false);
-            eventsSubmenu.setManaged(false);
-            if (eventsArrow != null) eventsArrow.setText("\u25B6");
-        }
-        if (usersSubmenu != null) {
-            usersSubmenu.setVisible(false);
-            usersSubmenu.setManaged(false);
-            if (usersArrow != null) usersArrow.setText("\u25B6");
-        }
-        if (sponsorsSubmenu != null) {
-            sponsorsSubmenu.setVisible(false);
-            sponsorsSubmenu.setManaged(false);
-            if (sponsorsArrow != null) sponsorsArrow.setText("\u25B6");
-        }
-        if (resourcesSubmenu != null) {
-            resourcesSubmenu.setVisible(false);
-            resourcesSubmenu.setManaged(false);
-            if (resourcesArrow != null) resourcesArrow.setText("\u25B6");
-        }
-        if (questionnairesSubmenu != null) {
-            questionnairesSubmenu.setVisible(false);
-            questionnairesSubmenu.setManaged(false);
-            if (questionnairesArrow != null) questionnairesArrow.setText("\u25B6");
-        }
+        if (eventsSubmenu != null) { eventsSubmenu.setVisible(false); eventsSubmenu.setManaged(false); if (eventsArrow != null) eventsArrow.setText("▶"); }
+        if (usersSubmenu != null) { usersSubmenu.setVisible(false); usersSubmenu.setManaged(false); if (usersArrow != null) usersArrow.setText("▶"); }
+        if (sponsorsSubmenu != null) { sponsorsSubmenu.setVisible(false); sponsorsSubmenu.setManaged(false); if (sponsorsArrow != null) sponsorsArrow.setText("▶"); }
+        if (resourcesSubmenu != null) { resourcesSubmenu.setVisible(false); resourcesSubmenu.setManaged(false); if (resourcesArrow != null) resourcesArrow.setText("▶"); }
+        if (questionnairesSubmenu != null) { questionnairesSubmenu.setVisible(false); questionnairesSubmenu.setManaged(false); if (questionnairesArrow != null) questionnairesArrow.setText("▶"); }
     }
 
     private void openSponsorsSubmenu() {
-        if (sponsorsSubmenu != null) {
-            sponsorsSubmenu.setVisible(true);
-            sponsorsSubmenu.setManaged(true);
-            if (sponsorsArrow != null) sponsorsArrow.setText("\u25BC");
-        }
+        if (sponsorsSubmenu != null) { sponsorsSubmenu.setVisible(true); sponsorsSubmenu.setManaged(true); if (sponsorsArrow != null) sponsorsArrow.setText("▼"); }
     }
 
     private void setActiveButton(Button button) {
@@ -441,503 +373,150 @@ public class MainController {
                 usersToggleBtn, rolesBtn, inscriptionsBtn,
                 sponsorsBtn, sponsorsListBtn, sponsorPortalBtn, budgetBtn, contratsBtn,
                 resourcesToggleBtn, sallesBtn, equipementsBtn, reservationsBtn,
-                questionnairesToggleBtn, questionsBtn, reponsesBtn,
-                settingsBtn
+                questionnairesToggleBtn, questionsBtn, reponsesBtn, settingsBtn
         };
-
         for (Button btn : allButtons) {
             if (btn != null) {
                 btn.getStyleClass().removeAll("main-menu-button", "submenu-button", "sidebar-button-active");
-
                 boolean isSub = btn == eventsListBtn || btn == categoriesBtn || btn == ticketsBtn ||
                         btn == rolesBtn || btn == inscriptionsBtn ||
                         btn == sponsorsListBtn || btn == sponsorPortalBtn || btn == budgetBtn || btn == contratsBtn ||
                         btn == sallesBtn || btn == equipementsBtn || btn == reservationsBtn ||
                         btn == questionsBtn || btn == reponsesBtn;
-
                 btn.getStyleClass().add(isSub ? "submenu-button" : "main-menu-button");
             }
         }
-
         if (button != null) {
-            for (Button btn : allButtons) {
-                if (btn != null) btn.getStyleClass().remove("sidebar-button-active");
-            }
+            for (Button btn : allButtons) { if (btn != null) btn.getStyleClass().remove("sidebar-button-active"); }
             button.getStyleClass().add("sidebar-button-active");
         }
     }
 
     // ===================== CONFIGURATION SIDEBAR =====================
     private void configureSidebarButtons() {
-        // Dashboard
-        if (dashboardBtn != null) {
-            dashboardBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(dashboardBtn);
-                loadDashboardView();
-            });
-        }
-
-        // Événements toggle
-        if (eventsToggleBtn != null) {
-            eventsToggleBtn.setOnAction(e -> {
-                toggleEvents();
-                collapseOtherSubmenus("events");
-                setActiveButton(eventsToggleBtn);
-            });
-        }
-
-        // Participants toggle
-        if (usersToggleBtn != null) {
-            usersToggleBtn.setOnAction(e -> {
-                toggleUsers();
-                collapseOtherSubmenus("users");
-                setActiveButton(usersToggleBtn);
-            });
-        }
-
-        // Sponsors toggle
-        if (sponsorsBtn != null) {
-            sponsorsBtn.setOnAction(e -> {
-                toggleSponsors();
-                collapseOtherSubmenus("sponsors");
-                setActiveButton(sponsorsBtn);
-            });
-        }
-
-        // Ressources toggle
-        if (resourcesToggleBtn != null) {
-            resourcesToggleBtn.setOnAction(e -> {
-                toggleResources();
-                collapseOtherSubmenus("resources");
-                setActiveButton(resourcesToggleBtn);
-            });
-        }
-
-        // Questionnaires toggle
-        if (questionnairesToggleBtn != null) {
-            questionnairesToggleBtn.setOnAction(e -> {
-                toggleQuestionnaires();
-                collapseOtherSubmenus("questionnaires");
-                setActiveButton(questionnairesToggleBtn);
-            });
-        }
-
-        // Sous-menus Événements
-        if (eventsListBtn != null) {
-            eventsListBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(eventsListBtn);
-                showEventsList();
-            });
-        }
-        if (categoriesBtn != null) {
-            categoriesBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(categoriesBtn);
-                showCategories();
-            });
-        }
-        if (ticketsBtn != null) {
-            ticketsBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(ticketsBtn);
-                showTicketsList();
-            });
-        }
-
-        // Sous-menus Participants
-        if (rolesBtn != null) {
-            rolesBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(rolesBtn);
-                loadRoleView();
-            });
-        }
-        if (inscriptionsBtn != null) {
-            inscriptionsBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(inscriptionsBtn);
-                loadUserView();
-            });
-        }
-
-        // Sous-menus Sponsors
-        if (sponsorsListBtn != null) {
-            sponsorsListBtn.setOnAction(e -> {
-                openSponsorsSubmenu();
-                setActiveButton(sponsorsListBtn);
-                showSponsorsAdmin();
-            });
-        }
-        if (sponsorPortalBtn != null) {
-            sponsorPortalBtn.setOnAction(e -> {
-                openSponsorsSubmenu();
-                setActiveButton(sponsorPortalBtn);
-                showSponsorPortal(lastSponsorPortalEmail);
-            });
-        }
-        if (budgetBtn != null) {
-            budgetBtn.setOnAction(e -> {
-                openSponsorsSubmenu();
-                setActiveButton(budgetBtn);
-                showBudget();
-            });
-        }
-        if (contratsBtn != null) {
-            contratsBtn.setOnAction(e -> {
-                openSponsorsSubmenu();
-                setActiveButton(contratsBtn);
-                showDepenses();
-            });
-        }
-
-        // Sous-menus Ressources
-        if (sallesBtn != null) {
-            sallesBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(sallesBtn);
-                loadSallesView();
-            });
-        }
-        if (equipementsBtn != null) {
-            equipementsBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(equipementsBtn);
-                loadEquipementsView();
-            });
-        }
-        if (reservationsBtn != null) {
-            reservationsBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(reservationsBtn);
-                loadReservationsView();
-            });
-        }
-
-        // Sous-menus Questionnaires
-        if (questionsBtn != null) {
-            questionsBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(questionsBtn);
-                showQuestionEditor();
-            });
-        }
-        if (reponsesBtn != null) {
-            reponsesBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(reponsesBtn);
-                showResultats();
-            });
-        }
-        if (participantQuizBtn != null) {
-            participantQuizBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(participantQuizBtn);
-                showParticipantQuiz();
-            });
-        }
-
-        // Settings
-        if (settingsBtn != null) {
-            settingsBtn.setOnAction(e -> {
-                collapseAllSubmenus();
-                setActiveButton(settingsBtn);
-                loadSettingsView();
-            });
-        }
-
-        // Logout
-        if (logoutBtn != null) {
-            logoutBtn.setOnAction(e -> logout());
-        }
+        if (dashboardBtn != null) dashboardBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(dashboardBtn); loadDashboardView(); });
+        if (eventsToggleBtn != null) eventsToggleBtn.setOnAction(e -> { toggleEvents(); collapseOtherSubmenus("events"); setActiveButton(eventsToggleBtn); });
+        if (usersToggleBtn != null) usersToggleBtn.setOnAction(e -> { toggleUsers(); collapseOtherSubmenus("users"); setActiveButton(usersToggleBtn); });
+        if (sponsorsBtn != null) sponsorsBtn.setOnAction(e -> { toggleSponsors(); collapseOtherSubmenus("sponsors"); setActiveButton(sponsorsBtn); });
+        if (resourcesToggleBtn != null) resourcesToggleBtn.setOnAction(e -> { toggleResources(); collapseOtherSubmenus("resources"); setActiveButton(resourcesToggleBtn); });
+        if (questionnairesToggleBtn != null) questionnairesToggleBtn.setOnAction(e -> { toggleQuestionnaires(); collapseOtherSubmenus("questionnaires"); setActiveButton(questionnairesToggleBtn); });
+        if (eventsListBtn != null) eventsListBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(eventsListBtn); showEventsList(); });
+        if (categoriesBtn != null) categoriesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(categoriesBtn); showCategories(); });
+        if (ticketsBtn != null) ticketsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(ticketsBtn); showTicketsList(); });
+        if (rolesBtn != null) rolesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(rolesBtn); loadRoleView(); });
+        if (inscriptionsBtn != null) inscriptionsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(inscriptionsBtn); loadUserView(); });
+        if (sponsorsListBtn != null) sponsorsListBtn.setOnAction(e -> { openSponsorsSubmenu(); setActiveButton(sponsorsListBtn); showSponsorsAdmin(); });
+        if (sponsorPortalBtn != null) sponsorPortalBtn.setOnAction(e -> { openSponsorsSubmenu(); setActiveButton(sponsorPortalBtn); showSponsorPortal(lastSponsorPortalEmail); });
+        if (budgetBtn != null) budgetBtn.setOnAction(e -> { openSponsorsSubmenu(); setActiveButton(budgetBtn); showBudget(); });
+        if (contratsBtn != null) contratsBtn.setOnAction(e -> { openSponsorsSubmenu(); setActiveButton(contratsBtn); showDepenses(); });
+        if (sallesBtn != null) sallesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(sallesBtn); loadSallesView(); });
+        if (equipementsBtn != null) equipementsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(equipementsBtn); loadEquipementsView(); });
+        if (reservationsBtn != null) reservationsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reservationsBtn); loadReservationsView(); });
+        if (questionsBtn != null) questionsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(questionsBtn); showQuestionEditor(); });
+        if (reponsesBtn != null) reponsesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reponsesBtn); showResultats(); });
+        if (settingsBtn != null) settingsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(settingsBtn); loadSettingsView(); });
+        if (logoutBtn != null) logoutBtn.setOnAction(e -> logout());
     }
 
     // ===================== SIDEBAR ROLE CONFIG =====================
     private void configureSidebarByRole() {
         UserSession session = UserSession.getInstance();
-        String role = session.getRole() == null ? "" : session.getRole().trim().toLowerCase();
-
-        if (role.contains("sponsor")) {
-            showOnlySponsorButtons();
-            System.out.println("Sidebar sponsor activee");
-            return;
+        String role = session.getRole();
+        if (role == null) { hideAllButtons(); return; }
+        role = role.trim().toLowerCase();
+        hideAllButtons();
+        switch (role) {
+            case "admin": case "admin2": case "admin3": case "admin4":
+                showAllButtons(); break;
+            case "organisateur": case "organisateur2":
+                showAllButtons(); hideNode(usersToggleBtn); hideNode(usersSubmenu); break;
+            case "sponsor": case "sponsor2": case "sponsor3":
+                showOnlySponsorButtons(); break;
+            case "participant": case "default": case "invité":
+                showOnlyParticipantButtons(); break;
+            default:
+                hideAllButtons(); break;
         }
-
-        if (role.contains("participant")) {
-            showOnlyParticipantButtons();
-            System.out.println("Sidebar participant activee");
-            return;
-        }
-
-        // Admin / organisateur / autres roles internes
-        showAllButtons();
-        if (role.contains("admin")) {
-            openSponsorsSubmenu();
-            hideNode(sponsorPortalBtn);
-        }
-        System.out.println("Sidebar complete activee");
     }
 
     private void showOnlyParticipantButtons() {
-        showNode(dashboardBtn);
-        hideNode(eventsToggleBtn);
-        hideNode(usersToggleBtn);
-        hideNode(sponsorsBtn);
-        hideNode(resourcesToggleBtn);
-        hideNode(questionnairesToggleBtn);
-        hideNode(settingsBtn);
-        hideAllSubmenus();
+        showNode(dashboardBtn); hideNode(eventsToggleBtn); hideNode(usersToggleBtn);
+        hideNode(sponsorsBtn); hideNode(resourcesToggleBtn); hideNode(questionnairesToggleBtn);
+        hideNode(settingsBtn); hideNode(budgetBtn); hideAllSubmenus();
     }
 
     private void showOnlySponsorButtons() {
-        showNode(dashboardBtn);
-        showNode(sponsorsBtn);
-        showNode(budgetBtn);
-        hideNode(eventsToggleBtn);
-        hideNode(usersToggleBtn);
-        hideNode(resourcesToggleBtn);
-        hideNode(questionnairesToggleBtn);
-        hideNode(settingsBtn);
-        hideAllSubmenus();
+        showNode(dashboardBtn); showNode(sponsorsBtn); showNode(budgetBtn);
+        hideNode(eventsToggleBtn); hideNode(usersToggleBtn); hideNode(resourcesToggleBtn);
+        hideNode(questionnairesToggleBtn); hideNode(settingsBtn); hideAllSubmenus();
     }
 
     private void hideAllButtons() {
-        hideNode(dashboardBtn);
-        hideNode(sponsorsBtn);
-        hideNode(eventsToggleBtn);
-        hideNode(usersToggleBtn);
-        hideNode(resourcesToggleBtn);
-        hideNode(questionnairesToggleBtn);
-        hideNode(settingsBtn);
-        hideNode(budgetBtn);
-        hideNode(sponsorPortalBtn);
+        hideNode(dashboardBtn); hideNode(sponsorsBtn); hideNode(eventsToggleBtn);
+        hideNode(usersToggleBtn); hideNode(resourcesToggleBtn); hideNode(questionnairesToggleBtn);
+        hideNode(settingsBtn); hideNode(budgetBtn);
     }
 
     private void showAllButtons() {
-        Node[] main = {
-                dashboardBtn, eventsToggleBtn, usersToggleBtn, sponsorsBtn,
-                resourcesToggleBtn, questionnairesToggleBtn,
-                budgetBtn
-        };
+        Node[] main = { dashboardBtn, eventsToggleBtn, usersToggleBtn, sponsorsBtn, resourcesToggleBtn, questionnairesToggleBtn, settingsBtn, budgetBtn };
         for (Node n : main) showNode(n);
-        hideNode(settingsBtn);
         collapseAllSubmenus();
     }
 
-    private void applyTemporaryModuleAvailability() {
-        if (DISABLE_TICKET_MODULE) {
-            hideNode(ticketsBtn);
-        }
-
-        if (DISABLE_RESERVATION_MODULE) {
-            hideNode(reservationsBtn);
-        }
-
-        if (DISABLE_QUESTIONNAIRE_MODULE) {
-            hideNode(questionnairesToggleBtn);
-            hideNode(questionsBtn);
-            hideNode(reponsesBtn);
-            hideNode(participantQuizBtn);
-            hideNode(questionnairesSubmenu);
-        }
-    }
-
-    private boolean isQuestionnaireEntry(String selected) {
-        return selected.contains("Questionnaires")
-                || selected.contains("Questions")
-                || selected.contains("Résultats")
-                || selected.contains("Historique")
-                || selected.contains("Passer le Quiz");
-    }
-
-    private void showUnavailableModuleMessage(String moduleName) {
-        showSimpleAlert("Module temporairement indisponible",
-                moduleName + " est desactive pour le moment.");
-    }
-
-    private void hideNode(Node node) {
-        if (node != null) {
-            node.setVisible(false);
-            node.setManaged(false);
-        }
-    }
-
-    private void showNode(Node node) {
-        if (node != null) {
-            node.setVisible(true);
-            node.setManaged(true);
-        }
-    }
+    private void hideNode(Node node) { if (node != null) { node.setVisible(false); node.setManaged(false); } }
+    private void showNode(Node node) { if (node != null) { node.setVisible(true); node.setManaged(true); } }
 
     private void hideAllSubmenus() {
         VBox[] submenus = {eventsSubmenu, usersSubmenu, sponsorsSubmenu, resourcesSubmenu, questionnairesSubmenu};
         Text[] arrows = {eventsArrow, usersArrow, sponsorsArrow, resourcesArrow, questionnairesArrow};
-
-        for (VBox submenu : submenus) {
-            if (submenu != null) {
-                submenu.setVisible(false);
-                submenu.setManaged(false);
-            }
-        }
-        for (Text arrow : arrows) {
-            if (arrow != null) arrow.setText("▶");
-        }
+        for (VBox submenu : submenus) { if (submenu != null) { submenu.setVisible(false); submenu.setManaged(false); } }
+        for (Text arrow : arrows) { if (arrow != null) arrow.setText("▶"); }
     }
 
     // ===================== RECHERCHE GLOBALE =====================
     private void setupGlobalSearch() {
         if (globalSearchField != null) {
-            globalSearchField.setOnAction(event -> {
-                String query = globalSearchField.getText().trim();
-                if (!query.isEmpty()) {
-                    performSimpleSearch(query);
-                }
-            });
-
-            globalSearchField.setOnKeyPressed(event -> {
-                if (event.getCode() == KeyCode.ESCAPE) {
-                    globalSearchField.clear();
-                }
-            });
+            globalSearchField.setOnAction(event -> { String query = globalSearchField.getText().trim(); if (!query.isEmpty()) performSimpleSearch(query); });
+            globalSearchField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ESCAPE) globalSearchField.clear(); });
         }
-    }
-
-    @FXML
-    private void onSearchClick() {
-        if (globalSearchField == null) {
-            return;
-        }
-        String query = globalSearchField.getText();
-        if (query != null) {
-            query = query.trim();
-        }
-        if (query == null || query.isEmpty()) {
-            return;
-        }
-        performSimpleSearch(query);
     }
 
     private void performSimpleSearch(String query) {
         String lowerQuery = query.toLowerCase();
         ObservableList<String> results = FXCollections.observableArrayList();
-
         if ("dashboard".contains(lowerQuery)) results.add("📊 Dashboard");
-        if ("événements".contains(lowerQuery) || "events".contains(lowerQuery)) {
-            results.add("📅 Événements");
-            results.add("   📋 Liste des événements");
-            results.add("   🏷️ Catégories");
-            if (!DISABLE_TICKET_MODULE) {
-                results.add("   🎫 Billets");
-            }
-        }
-        if ("participants".contains(lowerQuery) || "users".contains(lowerQuery)) {
-            results.add("👥 Participants");
-            results.add("   👤 Rôles");
-            results.add("   📝 Inscriptions");
-        }
-        if ("sponsors".contains(lowerQuery)) {
-            results.add("💼 Sponsors");
-            results.add("   📋 Liste sponsors");
-            results.add("   💰 Budget");
-            results.add("   📄 Dépenses");
-        }
-        if ("ressources".contains(lowerQuery)) {
-            results.add("📦 Ressources");
-            results.add("   💻 Équipements");
-            results.add("   🏢 Salles");
-            if (!DISABLE_RESERVATION_MODULE) {
-                results.add("   📅 Réservations");
-            }
-        }
-        if ("questionnaires".contains(lowerQuery) && !DISABLE_QUESTIONNAIRE_MODULE) {
-            results.add("📝 Questionnaires");
-            results.add("   ❓ Questions");
-            results.add("   📊 Résultats");
-            results.add("   📜 Historique");
-            results.add("   🎯 Passer le Quiz");
-        }
-        if ("paramètres".contains(lowerQuery) || "settings".contains(lowerQuery)) {
-            results.add("⚙️ Paramètres");
-        }
-
-        if (results.isEmpty()) {
-            showSimpleAlert("Aucun résultat", "Aucun résultat trouvé pour: " + query);
-        } else {
-            showSimpleResultsPopup(query, results);
-        }
+        if ("événements".contains(lowerQuery) || "events".contains(lowerQuery)) { results.add("📅 Événements"); results.add("   📋 Liste des événements"); results.add("   🏷️ Catégories"); results.add("   🎫 Billets"); }
+        if ("participants".contains(lowerQuery) || "users".contains(lowerQuery)) { results.add("👥 Participants"); results.add("   👤 Rôles"); results.add("   📝 Inscriptions"); }
+        if ("sponsors".contains(lowerQuery)) { results.add("💼 Sponsors"); results.add("   📋 Liste sponsors"); results.add("   🔑 Portail Sponsor"); results.add("   💰 Budget"); results.add("   📄 Dépenses"); }
+        if ("ressources".contains(lowerQuery)) { results.add("📦 Ressources"); results.add("   💻 Équipements"); results.add("   🏢 Salles"); results.add("   📅 Réservations"); }
+        if ("questionnaires".contains(lowerQuery)) { results.add("📝 Questionnaires"); results.add("   ❓ Questions"); results.add("   📊 Résultats"); results.add("   📜 Historique"); results.add("   🎯 Passer le Quiz"); }
+        if ("paramètres".contains(lowerQuery) || "settings".contains(lowerQuery)) results.add("⚙️ Paramètres");
+        if (results.isEmpty()) showSimpleAlert("Aucun résultat", "Aucun résultat trouvé pour: " + query);
+        else showSimpleResultsPopup(query, results);
     }
 
     private void showSimpleResultsPopup(String query, ObservableList<String> results) {
         Stage stage = new Stage();
         stage.setTitle("Résultats de recherche");
         stage.initModality(Modality.APPLICATION_MODAL);
-
         VBox root = new VBox(15);
         root.setStyle("-fx-padding: 20; -fx-background-color: white;");
-        root.setPrefWidth(400);
-        root.setMaxWidth(400);
-
+        root.setPrefWidth(400); root.setMaxWidth(400);
         Label titleLabel = new Label("Résultats pour: \"" + query + "\"");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;");
-
         ListView<String> listView = new ListView<>(results);
         listView.setPrefHeight(Math.min(300, results.size() * 40));
         listView.setStyle("-fx-background-color: transparent;");
-
-        listView.setOnMouseClicked(event -> {
-            String selected = listView.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                navigateFromSearch(selected);
-                stage.close();
-            }
-        });
-
+        listView.setOnMouseClicked(event -> { String selected = listView.getSelectionModel().getSelectedItem(); if (selected != null) { navigateFromSearch(selected); stage.close(); } });
         Button closeBtn = new Button("Fermer");
-        closeBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; " +
-                "-fx-padding: 8 20; -fx-background-radius: 6; -fx-cursor: hand;");
+        closeBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 20; -fx-background-radius: 6; -fx-cursor: hand;");
         closeBtn.setOnAction(e -> stage.close());
-
-        HBox buttonBar = new HBox();
-        buttonBar.setAlignment(Pos.CENTER_RIGHT);
-        buttonBar.getChildren().add(closeBtn);
-
+        HBox buttonBar = new HBox(); buttonBar.setAlignment(Pos.CENTER_RIGHT); buttonBar.getChildren().add(closeBtn);
         root.getChildren().addAll(titleLabel, listView, buttonBar);
-        stage.setScene(new Scene(root));
-        stage.show();
+        stage.setScene(new Scene(root)); stage.show();
     }
 
     private void navigateFromSearch(String selected) {
-        String role = UserSession.getInstance().getRole();
-        boolean isSponsor = role != null && role.trim().toLowerCase().contains("sponsor");
-
-        if (DISABLE_TICKET_MODULE && selected.contains("Billets")) {
-            showUnavailableModuleMessage("Gestion des billets");
-            return;
-        }
-        if (DISABLE_RESERVATION_MODULE && selected.contains("Réservations")) {
-            showUnavailableModuleMessage("Gestion des réservations");
-            return;
-        }
-        if (DISABLE_QUESTIONNAIRE_MODULE && isQuestionnaireEntry(selected)) {
-            showUnavailableModuleMessage("Questionnaires");
-            return;
-        }
-
-        if (isSponsor) {
-            String lowerSelected = selected == null ? "" : selected.toLowerCase();
-            boolean allowedForSponsor =
-                    lowerSelected.contains("dashboard")
-                            || lowerSelected.contains("sponsor")
-                            || lowerSelected.contains("budget")
-                            || lowerSelected.contains("depens")
-                            || lowerSelected.contains("param");
-            if (!allowedForSponsor) {
-                showSimpleAlert("Acces refuse", "Vous n'avez pas le droit d'ouvrir cette page.");
-                return;
-            }
-        }
-
         if (selected.contains("Dashboard")) dashboardBtn.fire();
         else if (selected.contains("Événements") && !selected.contains("  ")) eventsToggleBtn.fire();
         else if (selected.contains("Liste événements")) eventsListBtn.fire();
@@ -948,6 +527,7 @@ public class MainController {
         else if (selected.contains("Inscriptions")) inscriptionsBtn.fire();
         else if (selected.contains("Sponsors") && !selected.contains("  ")) sponsorsBtn.fire();
         else if (selected.contains("Liste sponsors")) sponsorsListBtn.fire();
+        else if (selected.contains("Portail Sponsor")) sponsorPortalBtn.fire();
         else if (selected.contains("Budget")) budgetBtn.fire();
         else if (selected.contains("Dépenses")) contratsBtn.fire();
         else if (selected.contains("Ressources") && !selected.contains("  ")) resourcesToggleBtn.fire();
@@ -962,142 +542,43 @@ public class MainController {
         else if (selected.contains("Paramètres")) settingsBtn.fire();
     }
 
-    // ===================== NAVIGATION - DASHBOARD =====================
-    public void loadDashboardView() {
-        UserSession session = UserSession.getInstance();
-        String role = session.getRole();
-
-        if (role != null) {
-            loadPage(DASHBOARD_FXML, "dashboard");
-        }
-    }
-
     // ===================== NAVIGATION - SPONSORS =====================
-    public void showSponsorsAdmin() {
-        openSponsorsSubmenu();
-        setActiveButton(sponsorsListBtn);
-        loadIntoCenter(SPONSOR_ADMIN_FXML, (SponsorAdminController ctrl) -> {});
-        updatePageHeader("sponsorsList");
-    }
-
-    public void showSponsorPortal(String email) {
-        openSponsorsSubmenu();
-        setActiveButton(sponsorPortalBtn);
-        if (email != null && !email.isBlank()) setLastSponsorPortalEmail(email);
-
-        loadIntoCenter(SPONSOR_PORTAL_FXML, (SponsorPortalController ctrl) -> {
-            String e = getLastSponsorPortalEmail();
-            if (e != null && !e.isBlank()) ctrl.setInitialEmail(e);
-        });
-        updatePageHeader("sponsorPortal");
-    }
-
-    public void showSponsorPortal() {
-        showSponsorPortal(lastSponsorPortalEmail);
-    }
-
-    public void showBudget() {
-        openSponsorsSubmenu();
-        setActiveButton(budgetBtn);
-        loadIntoCenter(BUDGET_LIST_FXML, null);
-        updatePageHeader("budget");
-    }
-
-    public void showDepenses() {
-        openSponsorsSubmenu();
-        setActiveButton(contratsBtn);
-        loadIntoCenter(DEPENSE_LIST_FXML, null);
-        updatePageHeader("depenses");
-    }
-
-    @FXML public void onSponsorsList() { showSponsorsAdmin(); }
-    @FXML public void onSponsorPortal() { showSponsorPortal(); }
-    @FXML public void onBudget() { showBudget(); }
-    @FXML public void onDepenses() { showDepenses(); }
+    @FXML public void showSponsorsAdmin() { openSponsorsSubmenu(); setActiveButton(sponsorsListBtn); loadIntoCenter(SPONSOR_ADMIN_FXML, (SponsorAdminController ctrl) -> {}); updatePageHeader("sponsorsList"); }
+    @FXML public void showSponsorPortal(String email) { openSponsorsSubmenu(); setActiveButton(sponsorPortalBtn); if (email != null && !email.isBlank()) setLastSponsorPortalEmail(email); loadIntoCenter(SPONSOR_PORTAL_FXML, (SponsorPortalController ctrl) -> { String e = getLastSponsorPortalEmail(); if (e != null && !e.isBlank()) ctrl.setInitialEmail(e); }); updatePageHeader("sponsorPortal"); }
+    @FXML public void showSponsorPortal() { showSponsorPortal(lastSponsorPortalEmail); }
+    @FXML public void showBudget() { openSponsorsSubmenu(); setActiveButton(budgetBtn); loadIntoCenter(BUDGET_LIST_FXML, null); updatePageHeader("budget"); }
+    @FXML public void showDepenses() { openSponsorsSubmenu(); setActiveButton(contratsBtn); loadIntoCenter(DEPENSE_LIST_FXML, null); updatePageHeader("depenses"); }
+    public void showSponsors() { showSponsorsAdmin(); }
 
     // ===================== CHARGEMENT DYNAMIQUE =====================
     public <T> void loadIntoCenter(String fxmlPath, Consumer<T> controllerConsumer) {
         try {
-            if (pageContentContainer == null) {
-                throw new IllegalStateException("pageContentContainer est null. Vérifiez fx:id dans main_layout.fxml");
-            }
-
+            if (pageContentContainer == null) throw new IllegalStateException("pageContentContainer est null.");
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent page = loader.load();
             pageContentContainer.getChildren().setAll(page);
-
-            if (controllerConsumer != null) {
-                @SuppressWarnings("unchecked")
-                T ctrl = (T) loader.getController();
-                controllerConsumer.accept(ctrl);
-            }
-
-            // Inject MainController if the controller has a setMainController method
-            injectMainController(loader.getController());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showEmptyPage("Erreur", "Impossible de charger : " + fxmlPath + "\n" + e.getMessage());
-        }
-    }
-
-    private void injectMainController(Object controller) {
-        if (controller == null) return;
-        try {
-            controller.getClass().getMethod("setMainController", MainController.class).invoke(controller, this);
-            System.out.println("✅ Injection de MainController réussie dans " + controller.getClass().getSimpleName());
-        } catch (NoSuchMethodException e) {
-            // ignore
-        } catch (Exception e) {
-            System.err.println("⚠️ Erreur lors de l'injection de MainController : " + e.getMessage());
-        }
+            if (controllerConsumer != null) { @SuppressWarnings("unchecked") T ctrl = (T) loader.getController(); controllerConsumer.accept(ctrl); }
+        } catch (Exception e) { e.printStackTrace(); showEmptyPage("Erreur", "Impossible de charger : " + fxmlPath + "\n" + e.getMessage()); }
     }
 
     public void loadPage(String fxmlPath, String pageKey) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent page = loader.load();
-
-            if ("profile".equals(pageKey) && loader.getController() instanceof ProfilController) {
-                ((ProfilController) loader.getController()).setMainController(this);
-            }
-
-            if ("dashboard".equals(pageKey) && loader.getController() instanceof DashboardController) {
-                dashboardController = (DashboardController) loader.getController();
-                dashboardController.setMainController(this);
-            }
-
+            if ("profile".equals(pageKey) && loader.getController() instanceof ProfilController) ((ProfilController) loader.getController()).setMainController(this);
+            if ("dashboard".equals(pageKey) && loader.getController() instanceof DashboardController) { dashboardController = (DashboardController) loader.getController(); dashboardController.setMainController(this); }
             updatePageHeader(pageKey);
             pageContentContainer.getChildren().setAll(page);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            showSimpleAlert("Erreur", "Impossible de charger la page: " + fxmlPath);
-        }
+        } catch (IOException e) { e.printStackTrace(); showSimpleAlert("Erreur", "Impossible de charger la page: " + fxmlPath); }
     }
 
-    public void loadPage(String fxmlPath) {
-        String pageKey = extractPageKeyFromPath(fxmlPath);
-        loadPage(fxmlPath, pageKey);
-    }
-
-    public void loadPage(String fxmlPath, String title, String subtitle) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            injectMainController(loader.getController());
-            setContent(root, title, subtitle);
-        } catch (IOException e) {
-            e.printStackTrace();
-            showEmptyPage(title, "Erreur : " + e.getMessage());
-        }
-    }
+    public void loadPage(String fxmlPath) { loadPage(fxmlPath, extractPageKeyFromPath(fxmlPath)); }
 
     private String extractPageKeyFromPath(String fxmlPath) {
         if (fxmlPath.contains("dashboard")) return "dashboard";
-        if (fxmlPath.contains("event-list")) return "events";
-        if (fxmlPath.contains("category-list")) return "categories";
-        if (fxmlPath.contains("ticket-list")) return "tickets";
+        if (fxmlPath.contains("event")) return "events";
+        if (fxmlPath.contains("categorie")) return "categories";
+        if (fxmlPath.contains("ticket")) return "tickets";
         if (fxmlPath.contains("user")) return "users";
         if (fxmlPath.contains("role")) return "roles";
         if (fxmlPath.contains("inscription")) return "inscriptions";
@@ -1123,42 +604,27 @@ public class MainController {
 
     private void updatePageHeader(String pageKey) {
         PageInfo pageInfo = pageInfoMap.get(pageKey);
-        if (pageInfo != null) {
-            if (pageTitle != null) pageTitle.setText(pageInfo.title);
-            if (pageSubtitle != null) pageSubtitle.setText(pageInfo.subtitle);
+        if (pageInfo != null) { if (pageTitle != null) pageTitle.setText(pageInfo.title); if (pageSubtitle != null) pageSubtitle.setText(pageInfo.subtitle); }
+    }
+
+    // ===================== NAVIGATION - DASHBOARD =====================
+    public void loadDashboardView() {
+        UserSession session = UserSession.getInstance();
+        if (session.getRole() != null) {
+            loadPage("/com/example/pidev/fxml/dashboard/dashboard.fxml", "dashboard");
+            hideKPIs();
         }
-        // Always reset KPI header when changing page; pages that need KPIs will re-enable them.
-        hideKPIs();
-    }
-
-    // ===================== CONTENT SETTERS =====================
-    public void setContent(Parent node) {
-        if (pageContentContainer != null) {
-            pageContentContainer.getChildren().setAll(node);
-        } else {
-            System.err.println("❌ pageContentContainer est null dans setContent()");
-        }
-    }
-
-    public void setContent(Parent root, String title) {
-        setContent(root, title, "");
-    }
-
-    public void setContent(Parent root, String title, String subtitle) {
-        if (pageTitle != null) pageTitle.setText(title);
-        if (pageSubtitle != null) pageSubtitle.setText(subtitle);
-        setContent(root);
     }
 
     // ===================== NAVIGATION - USERS =====================
     public void loadUserView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(USER_LIST_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/user/user.fxml"));
             Parent root = loader.load();
             UserController controller = loader.getController();
             controller.setMainController(this);
-
             updatePageHeader("users");
+            showParticipantKPIs();
             pageContentContainer.getChildren().setAll(root);
         } catch (Exception e) {
             e.printStackTrace();
@@ -1166,17 +632,16 @@ public class MainController {
         }
     }
 
+    // ===================== NAVIGATION - ROLES =====================
     public void loadRoleView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(ROLE_LIST_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/role/role.fxml"));
             Parent root = loader.load();
-
             RoleController controller = loader.getController();
             controller.setMainController(this);
-
-            pageContentContainer.getChildren().setAll(root);
             updatePageHeader("roles");
-
+            showRoleKPIs();
+            pageContentContainer.getChildren().setAll(root);
         } catch (Exception e) {
             e.printStackTrace();
             showSimpleAlert("Erreur", "Impossible de charger la page des rôles: " + e.getMessage());
@@ -1185,12 +650,13 @@ public class MainController {
 
     public void loadEditUserPage(UserModel user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(EDIT_USER_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/user/editUser.fxml"));
             Parent root = loader.load();
             EditUserController controller = loader.getController();
             controller.setMainController(this);
             controller.setUser(user);
             pageContentContainer.getChildren().setAll(root);
+            hideKPIs();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1198,16 +664,14 @@ public class MainController {
 
     public void loadEditRolePage(Role role) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(ROLE_EDIT_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/role/editRole.fxml"));
             Parent root = loader.load();
-
             com.example.pidev.controller.role.EditRoleController controller = loader.getController();
             controller.setEditMode(role);
             controller.setMainController(this);
-
             pageContentContainer.getChildren().setAll(root);
             updatePageHeader("roles");
-
+            hideKPIs();
         } catch (Exception e) {
             e.printStackTrace();
             showSimpleAlert("Erreur", "Impossible de charger la page de modification: " + e.getMessage());
@@ -1216,16 +680,14 @@ public class MainController {
 
     public void loadAddRolePage() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(ROLE_EDIT_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/role/editRole.fxml"));
             Parent root = loader.load();
-
             com.example.pidev.controller.role.EditRoleController controller = loader.getController();
             controller.setAddMode();
             controller.setMainController(this);
-
             pageContentContainer.getChildren().setAll(root);
             updatePageHeader("roles");
-
+            hideKPIs();
         } catch (Exception e) {
             e.printStackTrace();
             showSimpleAlert("Erreur", "Impossible de charger la page d'ajout: " + e.getMessage());
@@ -1235,26 +697,24 @@ public class MainController {
     // ===================== NAVIGATION - RESSOURCES =====================
     public void loadSallesView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(SALLE_LIST_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/resource/salle.fxml"));
             Parent root = loader.load();
             pageContentContainer.getChildren().setAll(root);
             updatePageHeader("salles");
+            hideKPIs();
         } catch (Exception e) {
             e.printStackTrace();
             showSimpleAlert("Erreur", "Impossible de charger la page des salles: " + e.getMessage());
         }
     }
 
-    public void loadSalleForm() {
-        loadPage(SALLE_FORM_FXML, "Nouvelle salle", "Ajouter une nouvelle salle");
-    }
-
     public void loadEquipementsView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(EQUIPEMENT_LIST_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/resource/equipement.fxml"));
             Parent root = loader.load();
             pageContentContainer.getChildren().setAll(root);
             updatePageHeader("equipements");
+            hideKPIs();
         } catch (Exception e) {
             e.printStackTrace();
             showSimpleAlert("Erreur", "Impossible de charger la page des équipements: " + e.getMessage());
@@ -1262,90 +722,87 @@ public class MainController {
     }
 
     public void loadReservationsView() {
-        if (DISABLE_RESERVATION_MODULE) {
-            showUnavailableModuleMessage("Gestion des réservations");
-            return;
-        }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(RESERVATION_LIST_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/resource/reservation.fxml"));
             Parent root = loader.load();
             pageContentContainer.getChildren().setAll(root);
             updatePageHeader("reservations");
+            hideKPIs();
         } catch (Exception e) {
             e.printStackTrace();
             showSimpleAlert("Erreur", "Impossible de charger la page des réservations: " + e.getMessage());
         }
     }
 
-    public void loadReservationForm() {
-        loadPage(RESERVATION_FORM_FXML, "Nouvelle réservation", "Créer une réservation");
-    }
-
-    public void showSalles() {
-        loadSallesView();
-    }
-
-    public void showEquipements() {
-        loadEquipementsView();
-    }
-
-    public void showReservations() {
-        loadReservationsView();
-    }
-
-    @FXML public void onSalles() { loadSallesView(); }
-    @FXML public void onEquipements() { loadEquipementsView(); }
-    @FXML public void onReservations() { loadReservationsView(); }
+    @FXML public void showSalles() { collapseAllSubmenus(); setActiveButton(sallesBtn); loadSallesView(); }
+    @FXML public void showEquipements() { collapseAllSubmenus(); setActiveButton(equipementsBtn); loadEquipementsView(); }
+    @FXML public void showReservations() { collapseAllSubmenus(); setActiveButton(reservationsBtn); loadReservationsView(); }
 
     // ===================== NAVIGATION - EVENTS =====================
     public void showEventsList() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(EVENT_LIST_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/event-list.fxml"));
             Parent page = loader.load();
-
             Object controller = loader.getController();
-            if (controller instanceof EventListController) {
-                ((EventListController) controller).setMainController(this);
-            }
-
+            if (controller instanceof EventListController) ((EventListController) controller).setMainController(this);
             updatePageHeader("events");
             showEventKPIs();
-
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-
         } catch (IOException e) {
             System.err.println("❌ Erreur chargement liste événements: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    @FXML public void onEventsList() { showEventsList(); }
-
     public void showEventForm(Event event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(EVENT_FORM_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/event-form.fxml"));
             Parent page = loader.load();
-
             Object controller = loader.getController();
             if (controller instanceof EventFormController) {
                 ((EventFormController) controller).setMainController(this);
                 if (event != null) ((EventFormController) controller).setEvent(event);
             }
-
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-
+            hideKPIs();
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement formulaire événement: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    // ===================== FONCTIONS AJOUTÉES DEPUIS LE MAINCONTROLLER DE GESTION EVENT =====================
+
+    /**
+     * Affiche le formulaire de modification d'événement (avec refresh KPI après sauvegarde)
+     */
+    public void showEventFormWithRefresh(Event event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/event-form.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof EventFormController) {
+                ((EventFormController) controller).setMainController(this);
+                if (event != null) ((EventFormController) controller).setEvent(event);
+            }
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+            hideKPIs();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Affiche le calendrier interactif des événements
+     */
     public void showEventCalendar() {
         try {
             System.out.println("📅 Chargement du calendrier des événements");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(EVENT_CALENDAR_FXML));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pidev/fxml/event/event-calendar.fxml")
+            );
             Parent page = loader.load();
 
             Object controller = loader.getController();
@@ -1368,225 +825,206 @@ public class MainController {
         }
     }
 
+    /**
+     * Affiche la vue détaillée d'un événement
+     */
     public void showEventView(Event event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(EVENT_VIEW_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/event-view.fxml"));
             Parent page = loader.load();
-
             Object controller = loader.getController();
             if (controller instanceof EventViewController) {
                 ((EventViewController) controller).setMainController(this);
                 ((EventViewController) controller).setEvent(event);
             }
-
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-
+            hideKPIs();
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement vue événement: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void showCategories() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(CATEGORY_LIST_FXML));
-            Parent page = loader.load();
-
-            Object controller = loader.getController();
-            if (controller instanceof CategoryListController) {
-                ((CategoryListController) controller).setMainController(this);
-            }
-
-            updatePageHeader("categories");
-            showCategoryKPIs();
-
-            pageContentContainer.getChildren().clear();
-            pageContentContainer.getChildren().add(page);
-
-        } catch (IOException e) {
-            System.err.println("❌ Erreur chargement liste catégories: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML public void onCategories() { showCategories(); }
-
+    /**
+     * Affiche le formulaire de catégorie
+     */
     public void showCategoryForm(EventCategory category) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(CATEGORY_FORM_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-form.fxml"));
             Parent page = loader.load();
-
             Object controller = loader.getController();
             if (controller instanceof CategoryFormController) {
                 ((CategoryFormController) controller).setMainController(this);
                 if (category != null) ((CategoryFormController) controller).setCategory(category);
             }
-
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-
+            hideKPIs();
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement formulaire catégorie: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Affiche la vue détaillée d'une catégorie
+     */
     public void showCategoryView(EventCategory category) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(CATEGORY_VIEW_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-view.fxml"));
             Parent page = loader.load();
-
             Object controller = loader.getController();
             if (controller instanceof CategoryViewController) {
                 ((CategoryViewController) controller).setMainController(this);
                 ((CategoryViewController) controller).setCategory(category);
             }
-
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-
+            hideKPIs();
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement vue catégorie: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void showTicketsList() {
-        if (DISABLE_TICKET_MODULE) {
-            showUnavailableModuleMessage("Gestion des billets");
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(TICKET_LIST_FXML));
-            Parent page = loader.load();
-
-            Object controller = loader.getController();
-            if (controller instanceof EventTicketListController) {
-                ((EventTicketListController) controller).setMainController(this);
-            }
-
-            updatePageHeader("tickets");
-            showTicketKPIs();
-
-            pageContentContainer.getChildren().clear();
-            pageContentContainer.getChildren().add(page);
-
-        } catch (IOException e) {
-            System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML public void onTickets() { showTicketsList(); }
-
+    /**
+     * Affiche la vue détaillée d'un ticket
+     */
     public void showTicketView(EventTicket ticket) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(TICKET_VIEW_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-view.fxml"));
             Parent page = loader.load();
-
             Object controller = loader.getController();
             if (controller instanceof EventTicketViewController) {
                 ((EventTicketViewController) controller).setMainController(this);
                 ((EventTicketViewController) controller).setTicket(ticket);
             }
-
             pageContentContainer.getChildren().clear();
             pageContentContainer.getChildren().add(page);
-
+            hideKPIs();
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement vue ticket: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    // ===================== MÉTHODES DE RAFRAÎCHISSEMENT SPÉCIFIQUES =====================
+
+    /**
+     * Rafraîchit les événements affichés dans la vitrine (front office)
+     * Appelé après la création/modification d'un événement
+     */
+    public void refreshEventsFrontPage() {
+        System.out.println("🔄 Rafraîchissement de la vitrine des événements...");
+
+        try {
+            // Chercher le contrôleur EventsFrontController s'il est actif
+            if (pageContentContainer != null && pageContentContainer.getChildren().size() > 0) {
+                Node currentPage = pageContentContainer.getChildren().get(0);
+
+                // Vérifier si c'est une page qui contient le contrôleur des événements front
+                if (currentPage instanceof VBox) {
+                    // Parcourir la hiérarchie pour trouver le contrôleur
+                    for (Node node : ((VBox) currentPage).getChildren()) {
+                        if (node instanceof ScrollPane) {
+                            ScrollPane scroll = (ScrollPane) node;
+                            if (scroll.getContent() instanceof VBox) {
+                                VBox content = (VBox) scroll.getContent();
+                                // La page des événements front a été trouvée
+                                System.out.println("✅ Vitrine des événements en attente de rafraîchissement");
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Impossible de rafraîchir la vitrine: " + e.getMessage());
         }
     }
 
     // ===================== NAVIGATION - QUESTIONNAIRES =====================
     public void loadQuestionEditor() {
-        loadQuestionnairePage(QUESTION_FORM_FXML, "Gestion des questions", "Gestion de la banque de données");
+        loadQuestionnairePage("/com/example/pidev/fxml/questionnaire/form_question.fxml", "Gestion des questions", "Gestion de la banque de données");
+        hideKPIs();
     }
 
     public void loadResultatsView() {
-        loadQuestionnairePage(REPONSE_LIST_FXML, "Résultats", "Statistiques et aperçu global");
+        loadQuestionnairePage("/com/example/pidev/fxml/questionnaire/Resultat.fxml", "Résultats", "Statistiques et aperçu global");
+        hideKPIs();
     }
 
     public void loadParticipantQuizView() {
-        loadQuestionnairePage(PARTICIPANT_QUIZ_FXML, "Quiz Participant", "Répondez aux questions");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/questionnaire/Participant.fxml"));
+            Parent view = loader.load();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(view);
+            pageTitle.setText("Quiz Participant");
+            pageSubtitle.setText("Répondez aux questions");
+            hideKPIs();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void loadHistoriqueView() {
-        loadQuestionnairePage(HISTORIQUE_FXML, "Historique", "Consultation des anciens scores");
+        loadQuestionnairePage("/com/example/pidev/fxml/questionnaire/Historique.fxml", "Historique", "Consultation des anciens scores");
+        hideKPIs();
     }
 
-    private void loadQuestionnairePage(String fxmlPath, String title, String subtitle) {
-        if (DISABLE_QUESTIONNAIRE_MODULE) {
-            showUnavailableModuleMessage("Questionnaires");
-            return;
-        }
+    public void loadView(String fxmlPath) {
         try {
             URL fileUrl = getClass().getResource(fxmlPath);
             if (fileUrl == null) {
-                System.err.println("❌ Fichier FXML introuvable: " + fxmlPath);
-                showSimpleAlert("Erreur", "Fichier introuvable: " + fxmlPath);
+                System.err.println("❌ Fichier introuvable : " + fxmlPath);
                 return;
             }
-
             FXMLLoader loader = new FXMLLoader(fileUrl);
             Parent root = loader.load();
-
-            setContent(root, title, subtitle);
-            System.out.println("✅ Page chargée: " + title);
-
+            setContent(root);
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement " + fxmlPath + ": " + e.getMessage());
             e.printStackTrace();
-            showSimpleAlert("Erreur", "Impossible de charger la page: " + e.getMessage());
         }
     }
 
-    @FXML public void onQuestions() { showQuestionEditor(); }
-    @FXML public void onReponses() { showResultats(); }
-    @FXML public void showQuestionEditor() {
-        collapseAllSubmenus();
-        setActiveButton(questionsBtn);
-        loadQuestionEditor();
+    private void loadQuestionnairePage(String fxmlPath, String title, String subtitle) {
+        try {
+            URL fileUrl = getClass().getResource(fxmlPath);
+            if (fileUrl == null) { showSimpleAlert("Erreur", "Fichier introuvable: " + fxmlPath); return; }
+            FXMLLoader loader = new FXMLLoader(fileUrl);
+            Parent root = loader.load();
+            setContent(root);
+            if (pageTitle != null) pageTitle.setText(title);
+            if (pageSubtitle != null) pageSubtitle.setText(subtitle);
+        } catch (IOException e) { e.printStackTrace(); showSimpleAlert("Erreur", "Impossible de charger la page: " + e.getMessage()); }
     }
-    @FXML public void showResultats() {
-        collapseAllSubmenus();
-        setActiveButton(reponsesBtn);
-        loadResultatsView();
-    }
-    @FXML public void showParticipantQuiz() {
-        collapseAllSubmenus();
-        loadParticipantQuizView();
-    }
-    @FXML public void showHistorique() {
-        collapseAllSubmenus();
-        loadHistoriqueView();
-    }
+
+    @FXML public void showQuestionEditor() { collapseAllSubmenus(); setActiveButton(questionsBtn); loadQuestionEditor(); }
+    @FXML public void showResultats() { collapseAllSubmenus(); setActiveButton(reponsesBtn); loadResultatsView(); }
+    @FXML public void showParticipantQuiz() { collapseAllSubmenus(); loadParticipantQuizView(); }
+    @FXML public void showHistorique() { collapseAllSubmenus(); loadHistoriqueView(); }
 
     // ===================== NAVIGATION - SETTINGS & PROFILE =====================
     public void loadSettingsView() {
-        loadPage(SETTINGS_FXML, "settings");
-    }
-
-    @FXML public void showSettings() {
-        collapseAllSubmenus();
-        loadSettingsView();
+        loadPage("/com/example/pidev/fxml/settings/settings.fxml", "settings");
+        hideKPIs();
     }
 
     @FXML public void showProfile() {
         collapseAllSubmenus();
-        loadPage(PROFILE_FXML, "profile");
+        loadPage("/com/example/pidev/fxml/user/profil.fxml", "profile");
+        hideKPIs();
+    }
+
+    @FXML public void showSettings() {
+        collapseAllSubmenus();
+        loadPage("/com/example/pidev/fxml/settings/settings.fxml", "settings");
+        hideKPIs();
     }
 
     // ===================== LOGOUT =====================
     @FXML
     public void logout() {
         try {
-            if (dashboardController != null) {
-                dashboardController.cleanup();
-            }
-
+            if (dashboardController != null) dashboardController.cleanup();
             UserSession.getInstance().clearSession();
             Parent root = FXMLLoader.load(getClass().getResource("/com/example/pidev/fxml/auth/login.fxml"));
             Stage stage = HelloApplication.getPrimaryStage();
@@ -1598,87 +1036,84 @@ public class MainController {
         }
     }
 
-    @FXML
-    private void handleExit() {
-        System.out.println("🚪 Fermeture de l'application");
-        System.exit(0);
-    }
+    @FXML private void handleExit() { System.exit(0); }
 
     // ===================== REFRESH METHODS =====================
-    public void refreshDashboard() {
-        if (dashboardController != null) {
-            System.out.println("🔄 Rafraîchissement du dashboard depuis MainController");
-            dashboardController.refreshData();
-        }
-    }
+    public void refreshDashboard() { if (dashboardController != null) dashboardController.refreshData(); }
+    public void onEventSaved() { refreshDashboard(); }
+    public void onParticipantSaved() { refreshDashboard(); }
+    public void onInscriptionSaved() { refreshDashboard(); }
+    public void cleanup() { if (dashboardController != null) dashboardController.cleanup(); }
+    public void refreshSidebarForRole() { configureSidebarByRole(); collapseAllSubmenus(); }
 
-    public void onEventSaved() {
-        refreshDashboard();
-    }
-
-    public void onParticipantSaved() {
-        refreshDashboard();
-    }
-
-    public void onInscriptionSaved() {
-        refreshDashboard();
-    }
-
-    public void cleanup() {
-        if (dashboardController != null) {
-            dashboardController.cleanup();
-        }
-    }
-
-    public void refreshSidebarForRole() {
-        System.out.println("Rafraichissement de la sidebar");
-        configureSidebarByRole();
-        applyTemporaryModuleAvailability();
-        String role = UserSession.getInstance().getRole();
-        if (role == null || !role.trim().toLowerCase().contains("admin")) {
-            collapseAllSubmenus();
-        }
-    }
-
+    // ===================== CONTENT SETTERS =====================
+    public void setContent(Parent node) { if (pageContentContainer != null) pageContentContainer.getChildren().setAll(node); }
+    public void setContent(Parent root, String title) { setContent(root, title, ""); }
+    public void setContent(Parent root, String title, String subtitle) { if (pageTitle != null) pageTitle.setText(title); if (pageSubtitle != null) pageSubtitle.setText(subtitle); setContent(root); }
 
     // ===================== PAGE DE SECOURS =====================
     private void showEmptyPage(String title, String subtitle) {
         if (pageContentContainer == null) return;
-
         VBox box = new VBox(10);
         box.setAlignment(Pos.TOP_LEFT);
         box.setPadding(new Insets(24));
-        box.setStyle("""
-                -fx-background-color: white;
-                -fx-background-radius: 14;
-                -fx-border-radius: 14;
-                -fx-border-color: #e2e8f0;
-                -fx-border-width: 1;
-                """);
-
-        Label t = new Label(title);
-        t.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #0f172a;");
-
-        Label s = new Label(subtitle);
-        s.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
-
+        box.setStyle("-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #e2e8f0; -fx-border-width: 1;");
+        Label t = new Label(title); t.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #0f172a;");
+        Label s = new Label(subtitle); s.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
         box.getChildren().addAll(t, s);
         pageContentContainer.getChildren().setAll(box);
     }
 
     private void showSimpleAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(message); alert.showAndWait();
+    }
+
+    @FXML
+    public void onBudget() {
+        collapseAllSubmenus();
+        setActiveButton(budgetBtn);
+        showBudget();
+    }
+
+    // ===================== CHAT ASSISTANT =====================
+    @FXML
+    private void openChatAssistant() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/chat/chat_window.fxml"));
+            Parent root = loader.load();
+
+            Stage chatStage = new Stage();
+            chatStage.setTitle("Assistant IA - EventFlow");
+            chatStage.setScene(new Scene(root, 450, 600));
+            chatStage.setResizable(false);
+            chatStage.show();
+
+            ChatController chatController = loader.getController();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir l'assistant: " + e.getMessage());
+        }
     }
 
     private void showAlert(String title, String message) {
-        showSimpleAlert(title, message);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(message); alert.showAndWait();
     }
 
-    // ===================== KPI METHODS =====================
+    private void animateFloatingButton() {
+        if (chatFloatingButton != null) {
+            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(1500), chatFloatingButton);
+            st.setFromX(1.0); st.setFromY(1.0); st.setToX(1.15); st.setToY(1.15);
+            st.setCycleCount(3); st.setAutoReverse(true); st.play();
+        }
+    }
+
+    // ===========================================
+    // SECTION KPI - GESTION DYNAMIQUE DES KPI
+    // ===========================================
+
     private void hideKPIs() {
         if (kpiContainer != null) {
             kpiContainer.setVisible(false);
@@ -1687,101 +1122,136 @@ public class MainController {
         }
     }
 
-    public void showCategoryKPIs() {
+    /**
+     * Affiche uniquement le KPI des participants (pour la page Gestion des participants)
+     */
+    public void showParticipantKPIs() {
         if (kpiContainer == null) return;
-
         kpiContainer.getChildren().clear();
-
-        VBox categoryCard = createKPICard(
-                "#d1f4e0", "#95d5b2", "#1b5e20", "#2d6a4f",
-                "📁", "totalCategoriesLabel", "Catégories"
+        VBox participantCard = createKPICard(
+                "#dbeafe", "#93c5fd", "#1e40af", "#2563eb",
+                "👥", "totalParticipantsKPILabel", "Total Participants"
         );
-
-        VBox eventCard = createKPICard(
-                "#cfe2ff", "#9ec5fe", "#004085", "#0056b3",
-                "📅", "totalEventsLabel", "Événements"
-        );
-
-        kpiContainer.getChildren().addAll(categoryCard, eventCard);
+        kpiContainer.getChildren().add(participantCard);
         kpiContainer.setVisible(true);
         kpiContainer.setManaged(true);
+        loadParticipantData();
+    }
 
+    /**
+     * Affiche uniquement le KPI des rôles (pour la page Gestion des rôles)
+     */
+    public void showRoleKPIs() {
+        if (kpiContainer == null) return;
+        kpiContainer.getChildren().clear();
+        VBox roleCard = createKPICard(
+                "#f0fdf4", "#bbf7d0", "#16a34a", "#22c55e",
+                "📋", "totalRolesKPILabel", "Total Rôles"
+        );
+        kpiContainer.getChildren().add(roleCard);
+        kpiContainer.setVisible(true);
+        kpiContainer.setManaged(true);
+        loadRoleData();
+    }
+
+    /**
+     * Charge les données des participants (TOUS les utilisateurs)
+     */
+    private void loadParticipantData() {
+        try {
+            int totalUsers = 0;
+            if (userService != null) {
+                java.util.List<UserModel> users = userService.getAllUsers();
+                totalUsers = users.size();
+                System.out.println("📊 Nombre TOTAL d'utilisateurs: " + totalUsers);
+            }
+            updateLabel("totalParticipantsKPILabel", String.valueOf(totalUsers));
+            Platform.runLater(() -> {
+                if (kpiContainer != null) {
+                    kpiContainer.requestLayout();
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors du chargement des utilisateurs: " + e.getMessage());
+            e.printStackTrace();
+            updateLabel("totalParticipantsKPILabel", "0");
+        }
+    }
+
+    /**
+     * Charge les données des rôles
+     */
+    private void loadRoleData() {
+        try {
+            int totalRoles = 0;
+            if (roleService != null) {
+                totalRoles = roleService.getTotalRolesCount();
+            } else {
+                System.out.println("⚠️ RoleService non disponible, utilisation de la valeur par défaut");
+                totalRoles = 5;
+            }
+            updateLabel("totalRolesKPILabel", String.valueOf(totalRoles));
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement des rôles: " + e.getMessage());
+            updateLabel("totalRolesKPILabel", "0");
+        }
+    }
+
+    /**
+     * Affiche les KPI pour les catégories
+     */
+    public void showCategoryKPIs() {
+        if (kpiContainer == null) return;
+        kpiContainer.getChildren().clear();
+        VBox categoryCard = createKPICard("#d1f4e0", "#95d5b2", "#1b5e20", "#2d6a4f", "📁", "totalCategoriesLabel", "Catégories");
+        VBox eventCard = createKPICard("#cfe2ff", "#9ec5fe", "#004085", "#0056b3", "📅", "totalEventsLabel", "Événements");
+        kpiContainer.getChildren().addAll(categoryCard, eventCard);
+        kpiContainer.setVisible(true); kpiContainer.setManaged(true);
         loadCategoryData();
     }
 
+    /**
+     * Affiche les KPI pour les événements
+     */
     public void showEventKPIs() {
         if (kpiContainer == null) return;
-
         kpiContainer.getChildren().clear();
-
-        VBox eventCard = createKPICard(
-                "#cfe2ff", "#9ec5fe", "#004085", "#0056b3",
-                "📅", "totalEventsLabel", "Événements"
-        );
-
-        VBox ticketCard = createKPICard(
-                "#fff3cd", "#ffecb5", "#856404", "#856404",
-                "🎫", "totalTicketsLabel", "Billets"
-        );
-
+        VBox eventCard = createKPICard("#cfe2ff", "#9ec5fe", "#004085", "#0056b3", "📅", "totalEventsLabel", "Événements");
+        VBox ticketCard = createKPICard("#fff3cd", "#ffecb5", "#856404", "#856404", "🎫", "totalTicketsLabel", "Billets");
         kpiContainer.getChildren().addAll(eventCard, ticketCard);
-        kpiContainer.setVisible(true);
-        kpiContainer.setManaged(true);
-
+        kpiContainer.setVisible(true); kpiContainer.setManaged(true);
         loadEventData();
     }
 
+    /**
+     * Affiche les KPI pour les tickets
+     */
     public void showTicketKPIs() {
         if (kpiContainer == null) return;
-
         kpiContainer.getChildren().clear();
-
-        VBox ticketCard = createKPICard(
-                "#fff3cd", "#ffecb5", "#856404", "#856404",
-                "🎫", "totalTicketsLabel", "Billets"
-        );
-
-        VBox eventCard = createKPICard(
-                "#cfe2ff", "#9ec5fe", "#004085", "#0056b3",
-                "📅", "totalEventsLabel", "Événements"
-        );
-
+        VBox ticketCard = createKPICard("#fff3cd", "#ffecb5", "#856404", "#856404", "🎫", "totalTicketsLabel", "Billets");
+        VBox eventCard = createKPICard("#cfe2ff", "#9ec5fe", "#004085", "#0056b3", "📅", "totalEventsLabel", "Événements");
         kpiContainer.getChildren().addAll(ticketCard, eventCard);
-        kpiContainer.setVisible(true);
-        kpiContainer.setManaged(true);
-
+        kpiContainer.setVisible(true); kpiContainer.setManaged(true);
         loadTicketData();
     }
 
-    private VBox createKPICard(String bgColor, String borderColor,
-                               String valueColor, String labelColor,
-                               String icon, String labelId, String text) {
+    private VBox createKPICard(String bgColor, String borderColor, String valueColor, String labelColor, String icon, String labelId, String text) {
         VBox card = new VBox(5);
         card.setAlignment(Pos.CENTER);
-        card.setStyle(String.format(
-                "-fx-background-color: %s; -fx-background-radius: 16; -fx-padding: 8 20; " +
-                        "-fx-border-color: %s; -fx-border-radius: 16; -fx-border-width: 1;",
-                bgColor, borderColor
-        ));
-
-        Label iconLabel = new Label(icon);
-        iconLabel.setStyle("-fx-font-size: 20px;");
-
-        Label valueLabel = new Label("0");
-        valueLabel.setId(labelId);
-        valueLabel.setStyle(String.format(
-                "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: %s;", valueColor
-        ));
-
-        Label textLabel = new Label(text);
-        textLabel.setStyle(String.format(
-                "-fx-text-fill: %s; -fx-font-size: 10px;", labelColor
-        ));
-
+        card.setStyle(String.format("-fx-background-color: %s; -fx-background-radius: 16; -fx-padding: 8 20; -fx-border-color: %s; -fx-border-radius: 16; -fx-border-width: 1;", bgColor, borderColor));
+        Label iconLabel = new Label(icon); iconLabel.setStyle("-fx-font-size: 20px;");
+        Label valueLabel = new Label("0"); valueLabel.setId(labelId); valueLabel.setStyle(String.format("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: %s;", valueColor));
+        Label textLabel = new Label(text); textLabel.setStyle(String.format("-fx-text-fill: %s; -fx-font-size: 10px;", labelColor));
         card.getChildren().addAll(iconLabel, valueLabel, textLabel);
         return card;
     }
 
+    // ===================== MÉTHODES DE CHARGEMENT DES DONNÉES KPI (COMPLÉMENTS) =====================
+
+    /**
+     * Charge les données pour les KPI des catégories
+     */
     private void loadCategoryData() {
         try {
             java.util.List<EventCategory> categories = categoryService.getAllCategoriesWithCount();
@@ -1798,6 +1268,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Charge les données pour les KPI des événements
+     */
     private void loadEventData() {
         try {
             java.util.List<Event> events = eventService.getAllEvents();
@@ -1816,6 +1289,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Charge les données pour les KPI des tickets
+     */
     private void loadTicketData() {
         try {
             java.util.List<EventTicket> tickets = ticketService.getAllTickets();
@@ -1837,20 +1313,13 @@ public class MainController {
     }
 
     private void updateLabel(String id, String value) {
-        if (kpiContainer == null || id == null) {
-            return;
-        }
-
+        if (kpiContainer == null || id == null) return;
         for (Node node : kpiContainer.getChildren()) {
             if (node instanceof VBox) {
-                VBox card = (VBox) node;
-                for (Node child : card.getChildren()) {
-                    if (child instanceof Label) {
-                        Label label = (Label) child;
-                        if (id.equals(label.getId())) {
-                            label.setText(value);
-                            return;
-                        }
+                for (Node child : ((VBox) node).getChildren()) {
+                    if (child instanceof Label && id.equals(((Label) child).getId())) {
+                        ((Label) child).setText(value);
+                        return;
                     }
                 }
             }
@@ -1858,129 +1327,225 @@ public class MainController {
     }
 
     public void refreshKPIs() {
-        if (kpiContainer == null || !kpiContainer.isVisible()) {
-            return;
-        }
-
+        if (kpiContainer == null || !kpiContainer.isVisible()) return;
         String currentTitle = pageTitle.getText().toLowerCase();
-
-        if (currentTitle.contains("catégorie")) {
-            System.out.println("🔄 Rafraîchissement KPI Catégories...");
+        if (currentTitle.contains("participant")) {
+            loadParticipantData();
+        } else if (currentTitle.contains("rôle") || currentTitle.contains("role")) {
+            loadRoleData();
+        } else if (currentTitle.contains("catégorie")) {
             loadCategoryData();
         } else if (currentTitle.contains("événement")) {
-            System.out.println("🔄 Rafraîchissement KPI Événements...");
             loadEventData();
         } else if (currentTitle.contains("billet") || currentTitle.contains("ticket")) {
-            System.out.println("🔄 Rafraîchissement KPI Billets...");
             loadTicketData();
         }
-    }
-
-    // ===================== CHAT PANEL =====================
-    @FXML
-    private void toggleChatPanel() {
-        if (chatPanel == null) {
-            return;
-        }
-
-        boolean open = !chatPanel.isVisible();
-        chatPanel.setVisible(open);
-        chatPanel.setManaged(open);
-
-        if (chatFloatingButton != null) {
-            chatFloatingButton.setVisible(!open);
-            chatFloatingButton.setManaged(!open);
-        }
-
-        if (open && inputField != null) {
-            Platform.runLater(inputField::requestFocus);
-        }
-    }
-
-    @FXML
-    private void handleSuggestion(javafx.event.ActionEvent event) {
-        if (!(event.getSource() instanceof Button source)) {
-            return;
-        }
-
-        String message = source.getUserData() != null
-                ? source.getUserData().toString()
-                : source.getText();
-
-        if (inputField != null) {
-            inputField.setText(message);
-        }
-        handleSendMessage();
-    }
-
-    @FXML
-    private void handleSendMessage() {
-        if (inputField == null) {
-            return;
-        }
-
-        String message = inputField.getText();
-        if (message == null || message.trim().isEmpty()) {
-            return;
-        }
-
-        String cleanMessage = message.trim();
-        addChatBubble("Vous", cleanMessage, true);
-        inputField.clear();
-
-        String response = buildChatResponse(cleanMessage.toLowerCase());
-        addChatBubble("Assistant IA", response, false);
-
-        if (chatScrollPane != null) {
-            Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
-        }
-    }
-
-    @FXML
-    private void handleClearChat() {
-        if (chatBox == null) {
-            return;
-        }
-
-        chatBox.getChildren().clear();
-        addChatBubble("Assistant IA", "Historique efface. Je suis pret a vous aider.", false);
-    }
-
-    private void addChatBubble(String author, String message, boolean isUser) {
-        if (chatBox == null) {
-            return;
-        }
-
-        Label bubble = new Label(author + " : " + message);
-        bubble.setWrapText(true);
-        bubble.setMaxWidth(320);
-        bubble.setStyle(isUser
-                ? "-fx-background-color: #1565C0; -fx-text-fill: white; -fx-background-radius: 16; -fx-padding: 10 14;"
-                : "-fx-background-color: #E3F2FD; -fx-text-fill: #1e293b; -fx-background-radius: 16; -fx-padding: 10 14;");
-
-        HBox row = new HBox(bubble);
-        row.setAlignment(isUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
-        chatBox.getChildren().add(row);
-    }
-
-    private String buildChatResponse(String lowerMessage) {
-        if (lowerMessage.contains("stat")) {
-            return "Consultez le dashboard pour les indicateurs globaux et les KPI.";
-        }
-        if (lowerMessage.contains("admin")) {
-            return "Ouvrez Participants > Roles pour consulter les administrateurs.";
-        }
-        if (lowerMessage.contains("nouveau") || lowerMessage.contains("mois")) {
-            return "Ouvrez Participants > Inscriptions pour voir les ajouts recents.";
-        }
-        if (lowerMessage.contains("event") || lowerMessage.contains("evenement")) {
-            return "Ouvrez Evenements pour gerer la liste, categories et billets.";
-        }
-        return "Commande comprise. Utilisez le menu de gauche pour acceder a la section souhaitee.";
     }
 
     // ===================== GETTERS =====================
     public VBox getPageContentContainer() {
         return pageContentContainer;
+    }
+
+    // ===================== CHAT PANEL METHODS =====================
+
+    @FXML
+    private void toggleChatPanel() {
+        if (chatPanel != null) {
+            boolean isVisible = chatPanel.isVisible();
+            chatPanel.setVisible(!isVisible);
+            chatPanel.setManaged(!isVisible);
+
+            if (!isVisible && inputField != null) {
+                inputField.requestFocus();
+            }
+
+            System.out.println("🔄 Chat panel " + (isVisible ? "fermé" : "ouvert"));
+        }
+    }
+
+    @FXML
+    private void handleSendMessage() {
+        if (inputField == null) return;
+
+        String message = inputField.getText().trim();
+        if (message.isEmpty()) return;
+
+        addMessageToChat("Vous", message, true);
+        inputField.clear();
+
+        String response = getBotResponse(message);
+        addMessageToChat("Assistant", response, false);
+    }
+
+    private void addMessageToChat(String sender, String message, boolean isUser) {
+        if (chatBox == null) return;
+
+        HBox messageBox = new HBox();
+        messageBox.setAlignment(isUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+        messageBox.setPadding(new Insets(5, 10, 5, 10));
+
+        Label senderLabel = new Label(sender + ": ");
+        senderLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + (isUser ? "#4CAF50" : "#2196F3") + ";");
+
+        Text messageText = new Text(message);
+        TextFlow messageFlow = new TextFlow(senderLabel, messageText);
+        messageFlow.setStyle("-fx-background-color: " + (isUser ? "#E8F5E8" : "#E3F2FD") +
+                "; -fx-background-radius: 15; -fx-padding: 10;");
+        messageFlow.setMaxWidth(350);
+
+        messageBox.getChildren().add(messageFlow);
+        chatBox.getChildren().add(messageBox);
+
+        Platform.runLater(() -> {
+            if (chatScrollPane != null) {
+                chatScrollPane.setVvalue(1.0);
+            }
+        });
+    }
+
+    private String getBotResponse(String userMessage) {
+        userMessage = userMessage.toLowerCase();
+
+        if (userMessage.contains("combien") && userMessage.contains("utilisateur")) {
+            return "Il y a actuellement 157 utilisateurs inscrits sur la plateforme.";
+        } else if (userMessage.contains("admin")) {
+            return "Les administrateurs sont: Ons Abdesslem, Ahmed Ben Salem, Sarra Mansour.";
+        } else if (userMessage.contains("nouveau") && userMessage.contains("mois")) {
+            return "15 nouveaux utilisateurs se sont inscrits ce mois-ci.";
+        } else {
+            return "Je n'ai pas compris votre question. Pouvez-vous reformuler ?";
+        }
+    }
+
+    @FXML
+    private void handleClearChat() {
+        if (chatBox != null) {
+            chatBox.getChildren().clear();
+            addWelcomeMessage();
+        }
+    }
+
+    @FXML
+    private void handleSuggestion(ActionEvent event) {
+        try {
+            Button sourceButton = (Button) event.getSource();
+            String suggestion = sourceButton.getText();
+            String cleanSuggestion = suggestion.replaceAll("[📊👥📅✨]", "").trim();
+
+            System.out.println("💡 Suggestion sélectionnée: " + cleanSuggestion);
+
+            if (!chatPanel.isVisible()) {
+                toggleChatPanel();
+            }
+
+            if (inputField != null) {
+                inputField.setText(cleanSuggestion);
+                handleSendMessage();
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Erreur dans handleSuggestion: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void addWelcomeMessage() {
+        if (chatBox == null) return;
+
+        HBox messageBox = new HBox();
+        messageBox.setAlignment(Pos.CENTER_LEFT);
+        messageBox.setPadding(new Insets(5, 10, 5, 10));
+
+        VBox welcomeBox = new VBox(5);
+        welcomeBox.setStyle("-fx-background-color: #E3F2FD; -fx-background-radius: 15; -fx-padding: 15;");
+        welcomeBox.setMaxWidth(350);
+
+        Label titleLabel = new Label("🤖 Assistant IA - EventFlow");
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2196F3; -fx-font-size: 14px;");
+
+        Label messageLabel = new Label("🎉 Bonjour ! Je suis votre assistant de gestion.\n" +
+                "Posez-moi des questions sur les utilisateurs, événements, etc.");
+        messageLabel.setWrapText(true);
+        messageLabel.setStyle("-fx-text-fill: #333; -fx-font-size: 13px;");
+
+        Label hintLabel = new Label("💡 Suggestions: 'Combien d'utilisateurs ?', 'Liste des admins', 'Nouveaux ce mois'");
+        hintLabel.setWrapText(true);
+        hintLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 11px; -fx-font-style: italic;");
+
+        welcomeBox.getChildren().addAll(titleLabel, messageLabel, hintLabel);
+        messageBox.getChildren().add(welcomeBox);
+        chatBox.getChildren().add(messageBox);
+    }
+
+    private void initChatPanel() {
+        if (chatBox != null) {
+            addWelcomeMessage();
+        }
+        if (statusIndicator != null) {
+            statusIndicator.setText("● Connecté");
+        }
+    }
+    // ===================== NAVIGATION - EVENTS (AJOUT POUR CORRIGER LES ERREURS) =====================
+
+    /**
+     * Affiche la liste des catégories
+     */
+    public void showCategories() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/category-list.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof CategoryListController) {
+                ((CategoryListController) controller).setMainController(this);
+            }
+            updatePageHeader("categories");
+            showCategoryKPIs();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement liste catégories: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Affiche la liste des tickets
+     */
+    public void showTicketsList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-list.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof EventTicketListController) {
+                ((EventTicketListController) controller).setMainController(this);
+            }
+            updatePageHeader("tickets");
+            showTicketKPIs();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Affiche la liste des tickets
+     */
+    public void showTickets() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pidev/fxml/event/ticket-list.fxml"));
+            Parent page = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof EventTicketListController) {
+                ((EventTicketListController) controller).setMainController(this);
+            }
+            updatePageHeader("tickets");
+            showTicketKPIs();
+            pageContentContainer.getChildren().clear();
+            pageContentContainer.getChildren().add(page);
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement liste tickets: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

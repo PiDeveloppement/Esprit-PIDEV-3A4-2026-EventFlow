@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
@@ -10,8 +11,6 @@
       styleClass="page-background"
       stylesheets="@../../css/atlantafx-custom.css"
       VBox.vgrow="ALWAYS">
-
-    <!-- ===================== NAVBAR DYNAMIQUE ===================== -->
 
     <!-- ===================== SCROLLPANE ===================== -->
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
@@ -27,8 +26,8 @@
 
                 <Button fx:id="backBtn" text="← Retour à la liste" onAction="#handleBack"
                         style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px;
-                               -fx-background-radius: 8; -fx-padding: 8 15; -fx-border-color: #cbd5e1;
-                               -fx-border-width: 1; -fx-cursor: hand;"/>
+                              -fx-background-radius: 8; -fx-padding: 8 15; -fx-border-color: #cbd5e1;
+                              -fx-border-width: 1; -fx-cursor: hand;"/>
 
                 <VBox spacing="5">
                     <Label text="Détails de l'Événement"
@@ -38,118 +37,133 @@
                 </VBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
+
             </HBox>
 
-            <!-- ===================== CONTENU ===================== -->
-            <VBox style="-fx-padding: 30; -fx-spacing: 25;">
 
-                <!-- CARD PRINCIPALE -->
-                <VBox spacing="25" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 16;
-                                          -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 16;
-                                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 10, 0, 0, 2);">
 
-                    <!-- EN-TÊTE ÉVÉNEMENT (sans ID) -->
-                    <HBox spacing="15" alignment="CENTER_LEFT">
-                        <Label text="📅" style="-fx-font-size: 48px; -fx-background-color: #f8f9fa; -fx-padding: 15;
-                                                -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1;
-                                                -fx-border-radius: 12;"/>
-                        <VBox spacing="5">
-                            <Label fx:id="titleHeaderLabel" text=""
-                                   style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
-                            <HBox spacing="8" alignment="CENTER_LEFT">
-                                <Label fx:id="statusBadge" text=""
-                                       style="-fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 13px; -fx-font-weight: 600;"/>
-                            </HBox>
-                        </VBox>
-                    </HBox>
+            <!-- ===================== CONTENU 2 COLONNES ===================== -->
+            <HBox spacing="30" style="-fx-padding: 30 40;">
 
-                    <!-- SÉPARATEUR -->
-                    <Separator style="-fx-background-color: #e9ecef;"/>
-
-                    <!-- GRILLE D'INFORMATIONS (2 COLONNES) -->
-                    <GridPane hgap="30" vgap="20">
-                        <columnConstraints>
-                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
-                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
-                        </columnConstraints>
-
-                        <!-- Colonne gauche -->
-                        <VBox spacing="15" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                            <VBox spacing="8">
-                                <Label text="TITRE" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="detailTitleLabel" text=""
-                                       style="-fx-font-size: 18px; -fx-font-weight: 600; -fx-text-fill: #1e293b;"/>
-                            </VBox>
-
-                            <VBox spacing="8">
-                                <Label text="DATE DE DÉBUT" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="startDateLabel" text=""
-                                       style="-fx-font-size: 16px; -fx-text-fill: #334155;"/>
-                            </VBox>
-
-                            <VBox spacing="8">
-                                <Label text="DATE DE FIN" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="endDateLabel" text=""
-                                       style="-fx-font-size: 16px; -fx-text-fill: #334155;"/>
-                            </VBox>
-
-                            <VBox spacing="8">
-                                <Label text="LIEU" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="locationLabel" text=""
-                                       style="-fx-font-size: 16px; -fx-text-fill: #334155;"/>
-                            </VBox>
-                        </VBox>
-
-                        <!-- Colonne droite -->
-                        <VBox spacing="15" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                            <VBox spacing="8">
-                                <Label text="CAPACITÉ" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="capacityLabel" text=""
-                                       style="-fx-font-size: 16px; -fx-text-fill: #334155;"/>
-                            </VBox>
-
-                            <VBox spacing="8">
-                                <Label text="CATÉGORIE" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="categoryLabel" text=""
-                                       style="-fx-font-size: 16px; -fx-text-fill: #334155;"/>
-                            </VBox>
-
-                            <VBox spacing="8">
-                                <Label text="PRIX" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="priceLabel" text=""
-                                       style="-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #0d47a1;"/>
-                            </VBox>
-                        </VBox>
-                    </GridPane>
-
-                    <!-- SÉPARATEUR -->
-                    <Separator style="-fx-background-color: #e9ecef;"/>
-
-                    <!-- DESCRIPTION -->
-                    <VBox spacing="12">
-                        <Label text="DESCRIPTION" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
-                        <Label fx:id="descriptionLabel" wrapText="true"
-                               style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 12;
-                                      -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 12;
-                                      -fx-text-fill: #334155; -fx-line-spacing: 5;"/>
-                    </VBox>
-
-                    <!-- MÉTADONNÉES -->
-                    <HBox spacing="30" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
-                        <Label fx:id="createdByLabel" text=""
-                               style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
-                        <Label fx:id="updatedByLabel" text=""
-                               style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
-                    </HBox>
+                <!-- COLONNE GAUCHE : AFFICHE (40%) -->
+                <VBox spacing="15" prefWidth="400" HBox.hgrow="ALWAYS">
+                    <Label text="AFFICHE" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                    <StackPane fx:id="posterContainer"
+                               style="-fx-background-color: #f0f0f0; -fx-background-radius: 16;
+                                      -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 16;
+                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);"
+                               prefHeight="480" minHeight="480">
+                        <ImageView fx:id="posterImageView"
+                                   fitHeight="480" fitWidth="400" preserveRatio="true"/>
+                    </StackPane>
                 </VBox>
 
-                <!-- Footer -->
-                <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
-                    <Label text="© 2026 EventFlow - Gestion des événements"
+                <!-- COLONNE DROITE : DÉTAILS (60%) -->
+                <VBox spacing="20" HBox.hgrow="ALWAYS" style="-fx-min-width: 500;">
+
+                    <!-- EN-TÊTE ÉVÉNEMENT -->
+                    <VBox spacing="12">
+                        <Label fx:id="titleHeaderLabel" text=""
+                               style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: #1e293b; -fx-wrap-text: true;"
+                               wrapText="true"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Label fx:id="statusBadge" text=""
+                                   style="-fx-padding: 6 14; -fx-background-radius: 20; -fx-font-size: 12px; -fx-font-weight: 600;"/>
+                            <Label fx:id="categoryBadge" text=""
+                                   style="-fx-padding: 6 14; -fx-background-radius: 20; -fx-font-size: 12px; -fx-font-weight: 600;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- SÉPARATEUR -->
+                    <Separator style="-fx-background-color: transparent;"/>
+
+                    <!-- BLOC 1 : DATES ET HEURE -->
+                    <VBox spacing="12" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <Label text="📅 DATES ET HORAIRES" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                            </columnConstraints>
+                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="Début" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: 600;"/>
+                                <Label fx:id="startDateLabel" text=""
+                                       style="-fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-font-weight: 600;"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="Fin" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: 600;"/>
+                                <Label fx:id="endDateLabel" text=""
+                                       style="-fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-font-weight: 600;"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+
+                    <!-- BLOC 2 : LIEU ET CAPACITÉ -->
+                    <VBox spacing="12" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <Label text="📍 LIEU ET CAPACITÉ" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                        <VBox spacing="8">
+                            <Label text="Localisation" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: 600;"/>
+                            <Label fx:id="locationLabel" text=""
+                                   style="-fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-wrap-text: true;"
+                                   wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="8">
+                            <Label text="Capacité maximale" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: 600;"/>
+                            <Label fx:id="capacityLabel" text=""
+                                   style="-fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-font-weight: 600;"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- BLOC 3 : CATÉGORIE ET PRIX -->
+                    <VBox spacing="12" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <Label text="💰 CATÉGORIE ET TARIF" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                            </columnConstraints>
+                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="Catégorie" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: 600;"/>
+                                <Label fx:id="categoryLabel" text=""
+                                       style="-fx-font-size: 15px; -fx-text-fill: #1e293b; -fx-font-weight: 600;"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="Prix d'entrée" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: 600;"/>
+                                <Label fx:id="priceLabel" text=""
+                                       style="-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #0d47a1;"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <!-- ===================== DESCRIPTION ===================== -->
+            <VBox spacing="15" style="-fx-padding: 0 40 30 40;">
+                <Separator style="-fx-background-color: #e9ecef;"/>
+                <VBox spacing="12" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                          -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 12;">
+                    <Label text="📋 DESCRIPTION" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                    <Label fx:id="descriptionLabel" wrapText="true"
+                           style="-fx-text-fill: #334155; -fx-line-spacing: 5; -fx-font-size: 14px;"/>
+                </VBox>
+
+                <!-- MÉTADONNÉES -->
+                <HBox spacing="30" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
+                    <Label fx:id="createdByLabel" text=""
+                           style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+                    <Label fx:id="updatedByLabel" text=""
                            style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
                 </HBox>
-
             </VBox>
+
+            <!-- FOOTER -->
+            <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0; -fx-background-color: #f8fafc; -fx-border-color: #e9ecef; -fx-border-width: 1 0 0 0;">
+                <Label text="© 2026 EventFlow - Gestion des événements"
+                       style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+            </HBox>
         </VBox>
     </ScrollPane>
 </VBox>
