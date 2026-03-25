@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<VBox spacing="25" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.resource.SalleFormController">
+
+    <padding>
+        <Insets top="30" right="50" bottom="30" left="50"/>
+    </padding>
+
+    <HBox spacing="15" alignment="CENTER_LEFT" maxWidth="450">
+        <StackPane style="-fx-background-color: #3b82f6; -fx-background-radius: 12; -fx-padding: 12;">
+            <Text text="🏠" style="-fx-fill: white; -fx-font-size: 22;" />
+        </StackPane>
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label fx:id="titleLabel" text="Ajouter une Salle"
+                   style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            <Label text="Gestion des espaces de l'établissement"
+                   style="-fx-font-size: 12; -fx-text-fill: #64748b;"/>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="5">
+            <Button fx:id="voiceBtn" onAction="#toggleVoiceControl" prefHeight="45" prefWidth="45"
+                    style="-fx-background-color: #ef4444; -fx-background-radius: 50; -fx-cursor: hand; -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);"
+                    text="🎙️" textFill="WHITE">
+                <tooltip><Tooltip text="Activer la commande vocale" /></tooltip>
+            </Button>
+            <Label fx:id="voiceStatusLabel" text="Micro Off"
+                   style="-fx-font-size: 9; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+        </VBox>
+    </HBox>
+
+    <Separator maxWidth="450" style="-fx-opacity: 0.5;" />
+
+    <VBox spacing="15" maxWidth="450">
+        <VBox spacing="5">
+            <Label text="Nom de la salle" style="-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <TextField fx:id="nameField" promptText="Ex: Salle de conférence"
+                       style="-fx-pref-height: 45; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <HBox spacing="15">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Capacité" style="-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                <TextField fx:id="capacityField" promptText="Ex: 30"
+                           style="-fx-pref-height: 45; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Étage" style="-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                <TextField fx:id="floorField" promptText="Ex: 1"
+                           style="-fx-pref-height: 45; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="5">
+            <Label text="Bâtiment / Bloc" style="-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <TextField fx:id="buildingField" promptText="Ex: Bloc G"
+                       style="-fx-pref-height: 45; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Statut actuel" style="-fx-text-fill: #475569; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <ComboBox fx:id="statusCombo" promptText="Choisir un statut" maxWidth="Infinity"
+                      style="-fx-pref-height: 45; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <VBox spacing="10" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 12; -fx-border-color: #cbd5e1; -fx-border-style: dashed; -fx-border-radius: 12;">
+            <Label text="Photo de la salle" style="-fx-text-fill: #475569; -fx-font-weight: bold;"/>
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button text="🖼️ Choisir une image" onAction="#choisirImage"
+                        style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <StackPane style="-fx-background-color: white; -fx-padding: 5; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 0);">
+                    <ImageView fx:id="previewImage" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <HBox spacing="20" alignment="CENTER" maxWidth="450">
+        <Button text="✖ Annuler" onAction="#annuler" prefWidth="150"
+                style="-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand;"/>
+        <Button text="💾 Enregistrer" onAction="#enregistrer" prefWidth="180"
+                style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(34,197,94,0.3), 10, 0, 0, 5);"/>
+    </HBox>
+</VBox>

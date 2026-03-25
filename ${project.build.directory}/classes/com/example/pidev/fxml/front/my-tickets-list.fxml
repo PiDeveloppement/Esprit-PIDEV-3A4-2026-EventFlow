@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.front.MyTicketsListController"
+      spacing="0" style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+
+    <!-- NAVBAR HEADER -->
+    <HBox spacing="20" style="-fx-background-color: white; -fx-padding: 20 40; -fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0;"
+          alignment="CENTER_LEFT" prefHeight="70">
+        <Button fx:id="backBtn" text="← Retour"
+                style="-fx-font-size: 13; -fx-padding: 10 20; -fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-text-fill: #1f2937; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="userNameLabel" text="Utilisateur" style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+    </HBox>
+
+    <!-- CONTENU PRINCIPAL -->
+    <ScrollPane style="-fx-background-color: #f8fafc;" VBox.vgrow="ALWAYS" fitToWidth="true">
+        <VBox spacing="30" style="-fx-padding: 40 60; -fx-background-color: #f8fafc;">
+
+            <!-- HEADER SECTION -->
+            <VBox spacing="8">
+                <Label text="📋 Mes billets d'événements" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="ticketCountLabel" text="0 billet(s)" style="-fx-font-size: 14; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
+            </VBox>
+
+            <!-- LISTE DES BILLETS -->
+            <VBox fx:id="ticketsContainer" spacing="20"/>
+
+            <!-- MESSAGE VIDE -->
+            <VBox fx:id="emptyStateBox" spacing="15" alignment="CENTER" style="-fx-padding: 80 40;">
+                <Label text="🎫" style="-fx-font-size: 60px;"/>
+                <Label text="Aucun billet pour le moment" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                <Label text="Vous n'avez encore participé à aucun événement.\nCliquez sur 'Retour' pour explorer les événements disponibles."
+                       style="-fx-font-size: 14; -fx-text-fill: #94a3b8; -fx-text-alignment: center;" wrapText="true"/>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>
+

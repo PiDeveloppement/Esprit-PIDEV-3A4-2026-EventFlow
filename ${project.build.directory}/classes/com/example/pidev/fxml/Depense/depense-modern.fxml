@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.PieChart?>
+
+<BorderPane prefHeight="900" prefWidth="1600"
+            style="-fx-background-color: #f1f5f9;"
+            stylesheets="@../../css/design-system.css"
+            xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.depense.DepenseListController">
+
+    <center>
+        <ScrollPane fitToHeight="true" fitToWidth="true"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox spacing="0">
+
+                <HBox alignment="CENTER_LEFT" spacing="20"
+                      style="-fx-background-color: white; -fx-padding: 28 35;
+                             -fx-border-color: #e2e8f0; -fx-border-width: 0 0 2 0;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+
+                    <VBox spacing="4">
+                        <Label styleClass="label-title" text="💳 Gestion des Dépenses" />
+                        <Label styleClass="label-description" text="Suivi détaillé de toutes les dépenses par budget" />
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <VBox alignment="CENTER_RIGHT" spacing="2">
+                        <Label style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" text="📊 Vue d'ensemble" />
+                        <Label style="-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-font-weight: bold;" text="17 Fév 2026" />
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="14"
+                      style="-fx-padding: 24 35; -fx-background-color: #f1f5f9;
+                             -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+
+                    <VBox spacing="10" styleClass="stat-card stat-card-rose" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label style="-fx-font-size: 32px;" text="💸" />
+                            <VBox spacing="3" HBox.hgrow="ALWAYS">
+                                <Label styleClass="label-section" text="Total Dépenses" />
+                                <Label fx:id="totalDepensesLabel" style="-fx-text-fill: #be123c;" styleClass="label-value" text="0 DT" />
+                            </VBox>
+                        </HBox>
+                        <Label style="-fx-text-fill: #e11d48; -fx-font-size: 12px; -fx-font-weight: bold;" text="Engagées" />
+                    </VBox>
+
+                    <VBox spacing="10" styleClass="stat-card stat-card-blue" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label style="-fx-font-size: 32px;" text="📋" />
+                            <VBox spacing="3" HBox.hgrow="ALWAYS">
+                                <Label styleClass="label-section" text="Nombre total" />
+                                <Label fx:id="countDepensesLabel" style="-fx-text-fill: #1e40af;" styleClass="label-value" text="0" />
+                            </VBox>
+                        </HBox>
+                        <Label style="-fx-text-fill: #2563eb; -fx-font-size: 12px; -fx-font-weight: bold;" text="Enregistrées" />
+                    </VBox>
+
+                    <VBox spacing="10" styleClass="stat-card stat-card-emerald" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label style="-fx-font-size: 32px;" text="📊" />
+                            <VBox spacing="3" HBox.hgrow="ALWAYS">
+                                <Label styleClass="label-section" text="Ligne moyenne" />
+                                <Label fx:id="avgDepenseLabel" style="-fx-text-fill: #15803d;" styleClass="label-value" text="0 DT" />
+                            </VBox>
+                        </HBox>
+                        <Label style="-fx-text-fill: #059669; -fx-font-size: 12px; -fx-font-weight: bold;" text="Par dépense" />
+                    </VBox>
+
+                    <VBox spacing="10" styleClass="stat-card stat-card-purple" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label style="-fx-font-size: 32px;" text="🏷" />
+                            <VBox spacing="3" HBox.hgrow="ALWAYS">
+                                <Label styleClass="label-section" text="Catégories" />
+                                <Label fx:id="categoriesLabel" style="-fx-text-fill: #7c3aed;" styleClass="label-value" text="0" />
+                            </VBox>
+                        </HBox>
+                        <Label style="-fx-text-fill: #a855f7; -fx-font-size: 12px; -fx-font-weight: bold;" text="Utilisées" />
+                    </VBox>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="14"
+                      style="-fx-padding: 20 35; -fx-background-color: white;
+                             -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+
+                    <VBox spacing="6">
+                        <Label text="Catégorie" style="-fx-text-fill:#64748b; -fx-font-size:12px; -fx-font-weight:700;"/>
+                        <ComboBox fx:id="filtreCategorie" prefWidth="220" styleClass="text-field" />
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Période" style="-fx-text-fill:#64748b; -fx-font-size:12px; -fx-font-weight:700;"/>
+                        <ComboBox fx:id="filtrePeriode" prefWidth="220" styleClass="text-field" />
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="État financier" style="-fx-text-fill:#64748b; -fx-font-size:12px; -fx-font-weight:700;"/>
+                        <ComboBox fx:id="filtreEtatFinancier" prefWidth="240" styleClass="text-field" />
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <Button fx:id="addBtn" minHeight="40" minWidth="170"
+                            styleClass="btn-success" text="➕ Nouvelle Dépense" />
+                </HBox>
+
+                <HBox alignment="CENTER" style="-fx-padding: 20 35;">
+                    <PieChart fx:id="categoryPieChart" prefWidth="700" prefHeight="400"
+                              title="Répartition des dépenses par catégorie"
+                              labelsVisible="true" legendVisible="true"/>
+                </HBox>
+
+                <VBox spacing="16" style="-fx-padding: 28 35;" VBox.vgrow="ALWAYS">
+                    <Label styleClass="label-subtitle" text="📋 Liste des Dépenses" />
+                    <TilePane fx:id="cardsPane" hgap="16" vgap="16" prefColumns="3" style="-fx-padding: 10;" />
+                    <Label fx:id="statusLabel" styleClass="label-description" text="..." />
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

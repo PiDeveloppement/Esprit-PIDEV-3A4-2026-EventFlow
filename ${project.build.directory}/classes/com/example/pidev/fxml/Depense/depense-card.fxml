@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane style="-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16;
+                   -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-padding: 14;"
+            xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.depense.DepenseCardController">
+
+    <VBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+          AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+
+        <HBox spacing="10">
+            <Label fx:id="descLabel" style="-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #0f172a;" text="Description" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="amountLabel" style="-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #dc2626;" text="0,00 DT" />
+        </HBox>
+
+        <Separator />
+
+        <GridPane hgap="10" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50" />
+                <ColumnConstraints percentWidth="50" />
+            </columnConstraints>
+
+            <VBox spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <Label style="-fx-text-fill:#64748b; -fx-font-size:12px;" text="Catégorie" />
+                <Label fx:id="categoryLabel" style="-fx-font-weight:900; -fx-text-fill:#0f172a;" text="—" />
+            </VBox>
+
+            <VBox spacing="2" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label style="-fx-text-fill:#64748b; -fx-font-size:12px;" text="Date" />
+                <Label fx:id="dateLabel" style="-fx-font-weight:900; -fx-text-fill:#0f172a;" text="—" />
+            </VBox>
+
+            <rowConstraints>
+                <RowConstraints />
+            </rowConstraints>
+        </GridPane>
+
+        <HBox spacing="10" style="-fx-padding: 8 0 0 0;">
+            <Button fx:id="detailsBtn"
+                    style="-fx-background-color:#2563eb; -fx-text-fill:white; -fx-font-weight:800;
+                           -fx-background-radius:12; -fx-padding: 8 14;"
+                    text="Détails" />
+
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Button fx:id="editBtn"
+                    style="-fx-background-color:#e0f2fe; -fx-text-fill:#0369a1; -fx-font-weight:900;
+                           -fx-background-radius:12; -fx-padding: 8 12;"
+                    text="Modifier" />
+
+            <Button fx:id="deleteBtn"
+                    style="-fx-background-color:#fee2e2; -fx-text-fill:#b91c1c; -fx-font-weight:900;
+                           -fx-background-radius:12; -fx-padding: 8 12;"
+                    text="Supprimer" />
+        </HBox>
+
+    </VBox>
+</AnchorPane>

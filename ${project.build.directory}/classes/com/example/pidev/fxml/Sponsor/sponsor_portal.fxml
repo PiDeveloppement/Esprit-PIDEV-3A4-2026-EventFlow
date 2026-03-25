@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+
+<BorderPane prefHeight="900" prefWidth="1600"
+            stylesheets="@../../css/design-system.css"
+            style="-fx-background-color: #f1f5f9;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.sponsor.SponsorPortalController">
+
+    <center>
+        <!-- ScrollPane principal : fitToWidth true, fitToHeight false -->
+        <ScrollPane fitToWidth="true" fitToHeight="false"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox spacing="0">
+                <VBox spacing="12" style="-fx-padding: 22 35; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="🧾 Sponsor Portal" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #0f172a;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="todayLabel" text="--" style="-fx-text-fill: #64748b; -fx-font-weight: 700;"/>
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="Compte email:" style="-fx-text-fill:#334155; -fx-font-weight:800;"/>
+                        <ComboBox fx:id="emailAccount" prefWidth="280" promptText="Choisir un email (demo)"/>
+                    </HBox>
+
+                    <HBox spacing="14">
+                        <VBox styleClass="stat-card stat-card-purple" HBox.hgrow="ALWAYS" spacing="8">
+                            <Label text="Mes Sponsors" styleClass="label-section"/>
+                            <Label fx:id="mySponsorsLabel" text="0" styleClass="label-value" style="-fx-text-fill:#7c3aed;"/>
+                        </VBox>
+                        <VBox styleClass="stat-card stat-card-emerald" HBox.hgrow="ALWAYS" spacing="8">
+                            <Label text="Ma Contribution" styleClass="label-section"/>
+                            <Label fx:id="myContributionLabel" text="0,00 DT" styleClass="label-value" style="-fx-text-fill:#15803d;"/>
+                        </VBox>
+                        <VBox styleClass="stat-card stat-card-blue" HBox.hgrow="ALWAYS" spacing="8">
+                            <Label text="Mes Événements" styleClass="label-section"/>
+                            <Label fx:id="myEventsLabel" text="0" styleClass="label-value" style="-fx-text-fill:#1e40af;"/>
+                        </VBox>
+                    </HBox>
+
+                    <BarChart fx:id="myContributionsChart" prefHeight="300" prefWidth="800" title="Mes contributions par sponsor">
+                        <xAxis>
+                            <CategoryAxis label="Entreprise"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Montant (DT)"/>
+                        </yAxis>
+                    </BarChart>
+
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefWidth="260" styleClass="text-field"/>
+                        <ComboBox fx:id="companyFilter" promptText="🏢 Entreprise" prefWidth="220" styleClass="text-field"/>
+                        <ComboBox fx:id="eventFilter" promptText="📅 Événement" prefWidth="220" styleClass="text-field"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="addSponsorBtn" text="➕ Nouveau Sponsor" styleClass="btn-success" minHeight="40" minWidth="180"/>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="14" style="-fx-padding: 18 35;">
+                    <Label text="📋 Mes Sponsors" styleClass="label-subtitle"/>
+                    <TilePane fx:id="cardsPane" prefColumns="3" hgap="16" vgap="16" style="-fx-padding: 10;"/>
+                    <Label fx:id="statusLabel" text="..." styleClass="label-description"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

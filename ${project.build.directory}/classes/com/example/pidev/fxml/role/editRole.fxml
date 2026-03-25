@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="0" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.role.EditRoleController"
+      style="-fx-background-color: #f8fafc;"
+      prefWidth="800" prefHeight="600"
+      alignment="TOP_CENTER">
+
+
+
+
+    <!-- Contenu principal -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+        <VBox spacing="30" style="-fx-padding: 40; -fx-background-color: #f8fafc;" alignment="TOP_CENTER">
+
+            <!-- Carte de modification (style identique à l'ancien formulaire) -->
+            <VBox spacing="25" maxWidth="600"
+                  style="-fx-background-color: white; -fx-background-radius: 16;
+                         -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);
+                         -fx-padding: 30;">
+
+                <!-- En-tête de la carte -->
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="formTitle" text="✏️ Modification du rôle"
+                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="formHint" text="Modifiez les informations du rôle"
+                           style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+                </HBox>
+
+                <!-- Champ de saisie -->
+                <VBox spacing="8">
+                    <Label text="Nom du rôle *"
+                           style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <TextField fx:id="roleNameField"
+                               promptText="Entrez le nom du rôle"
+                               style="-fx-background-color: white; -fx-background-radius: 10;
+                                      -fx-padding: 12 18; -fx-pref-height: 45;
+                                      -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 10;
+                                      -fx-font-size: 14px;">
+                        <HBox.margin>
+                            <Insets bottom="5"/>
+                        </HBox.margin>
+                    </TextField>
+                </VBox>
+
+                <!-- Boutons d'action -->
+                <HBox spacing="15" alignment="CENTER" style="-fx-padding: 15 0 5 0;">
+                    <Button fx:id="saveButton" text="💾 Enregistrer"
+                            onAction="#saveRole"
+                            style="-fx-background-color: linear-gradient(to right, #3b82f6, #1d4ed8);
+                                   -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;
+                                   -fx-background-radius: 10; -fx-padding: 12 30; -fx-pref-width: 180;
+                                   -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.3), 8, 0, 0, 2);"/>
+
+                    <Button fx:id="cancelButton" text="🔄 Annuler"
+                            onAction="#cancelEdit"
+                            style="-fx-background-color: white; -fx-text-fill: #475569;
+                                   -fx-font-weight: bold; -fx-font-size: 15px;
+                                   -fx-background-radius: 10; -fx-padding: 12 30; -fx-pref-width: 180;
+                                   -fx-border-color: #cbd5e1; -fx-border-width: 1;
+                                   -fx-cursor: hand;"/>
+                </HBox>
+
+                <!-- Indication champ obligatoire -->
+                <HBox alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                    <Label text="ℹ️ Les champs marqués d'un * sont obligatoires"
+                           style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Informations additionnelles -->
+            <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10 0 0 0;">
+                <Label text="⚡ Action non réversible"
+                       style="-fx-text-fill: #ef4444; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <Label text="•" style="-fx-text-fill: #cbd5e1;"/>
+                <Label text="🔄 Retour à la liste après validation"
+                       style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+            </HBox>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Footer -->
+    <HBox style="-fx-background-color: white; -fx-padding: 15 40; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;"
+          alignment="CENTER">
+        <Label text="© 2024 EventFlow - Modification de rôle"
+               style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+    </HBox>
+</VBox>

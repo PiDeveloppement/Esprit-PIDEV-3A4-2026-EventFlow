@@ -11,6 +11,13 @@ import java.util.*;
 import java.util.Locale;
 import javafx.stage.FileChooser;
 import java.io.File;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import static java.awt.SystemColor.text;
+
 
 public class FeedbackViewController {
 
@@ -30,37 +37,46 @@ public class FeedbackViewController {
     @FXML private Button btnTabHighest;
     @FXML private Button btnTabPhotos;
 
+    @FXML private Label lblSentimentPos, lblSentimentNeu, lblSentimentNeg;
+    @FXML private ProgressBar sentimentBar;
+
     private final FeedbackService feedbackService = new FeedbackService();
     private List<Map<String, Object>> allFeedbacks = new ArrayList<>();
 
-    @FXML
     public void initialize() {
         try {
+            // 1. Charger les feedbacks depuis la BDD une seule fois
+            allFeedbacks = feedbackService.getFeedbacksAvecDetails();
+
+            // 2. Lancer l'analyse IA (cela remplit les clés "ai_sentiment" dans la liste)
+            computeAIAnalysis(allFeedbacks);
+
+            // 3. Récupérer les stats globales pour les KPIs
             Map<String, Object> stats = feedbackService.getStatistiquesDetaillees();
             double moyenne = (double) stats.get("moyenne");
-            int    total   = (int)    stats.get("total");
+            int total = (int) stats.get("total");
             @SuppressWarnings("unchecked")
             Map<Integer, Integer> rep = (Map<Integer, Integer>) stats.get("repartition");
 
+            // 4. Mettre à jour les labels de l'interface
             lblMoyenne.setText(String.format(Locale.US, "%.1f", moyenne));
             buildStarRow(starsKpi1, moyenne, 16);
             lblBasedOn.setText("Based on " + total + " reviews");
-
             lblTotalReviews.setText(String.valueOf(total));
-            lblTrend.setText("↗ +17% from last month");
+            lblTrend.setText("📈 +17% from last month");
 
             int fiveStar = rep.getOrDefault(5, 0);
             int pct = total > 0 ? (int)((double) fiveStar / total * 100) : 0;
             lblFiveStarPct.setText(pct + "%");
-            lblQuality.setText(pct >= 70 ? "Good ratings" : "Needs improvement");
+            lblQuality.setText(pct >= 70 ? "👍 Excellent ratings" : "👍 Good ratings");
 
             lblThisMonth.setText(String.format(Locale.US, "%.1f", moyenne));
-            lblMonthTrend.setText("↗ +0.1 from last month");
+            lblMonthTrend.setText("📈 +0.1 from last month");
 
             buildRatingsBreakdown(rep, total);
             buildCategoryRatings(moyenne);
 
-            allFeedbacks = feedbackService.getFeedbacksAvecDetails();
+            // 5. ENFIN, on affiche les cartes (maintenant que l'IA a mis POSITIVE/NEGATIVE)
             displayFeedbacks(allFeedbacks);
 
         } catch (SQLException e) {
@@ -114,7 +130,7 @@ public class FeedbackViewController {
             lblNum.setMinWidth(14);
             lblNum.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #374151;");
 
-            Label star = new Label("\u2605");
+            Label star = new Label("★");
             star.setPrefWidth(18);
             star.setMinWidth(18);
             star.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 13px;");
@@ -178,7 +194,7 @@ public class FeedbackViewController {
             starsBox.setMinWidth(90);
             starsBox.setPrefWidth(90);
             for (int s = 0; s < 5; s++) {
-                Label sl = new Label(s < fullStars ? "\u2605" : "\u2606");
+                Label sl = new Label(s < fullStars ? "★" : "☆");
                 sl.setPrefWidth(16);
                 sl.setMinWidth(16);
                 sl.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 15px;");
@@ -195,7 +211,7 @@ public class FeedbackViewController {
         String lastEvent = "";
         for (Map<String, Object> fb : feedbacks) {
             String nomEvent = fb.get("nomEvent") != null ?
-                    (String) fb.get("nomEvent") : "Evenement inconnu";
+                    (String) fb.get("nomEvent") : "Événement inconnu";
             if (!nomEvent.equals(lastEvent)) {
                 lastEvent = nomEvent;
                 feedbackListContainer.getChildren().add(buildEventHeader(nomEvent));
@@ -209,7 +225,7 @@ public class FeedbackViewController {
         box.setAlignment(Pos.CENTER_LEFT);
         box.setStyle("-fx-padding: 4 0 2 0;");
 
-        Label icon = new Label("\u25A0");
+        Label icon = new Label("📅");
         icon.setStyle("-fx-font-size: 13px;");
         Label title = new Label(nom);
         title.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #111827;");
@@ -220,136 +236,91 @@ public class FeedbackViewController {
         return box;
     }
 
-    private VBox buildFeedbackCard(Map<String, Object> fb) {
-        VBox card = new VBox(10);
-        card.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 12; " +
-                        "-fx-padding: 16 18; " +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);");
+ private VBox buildFeedbackCard(Map<String, Object> fb) {
+        VBox card = new VBox(12);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);");
 
-        card.setOnMouseEntered(e -> card.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16 18; " +
-                        "-fx-effect: dropshadow(gaussian, rgba(59,130,246,0.1), 12, 0, 0, 4); " +
-                        "-fx-border-color: #dbeafe; -fx-border-width: 1; -fx-border-radius: 12;"));
-        card.setOnMouseExited(e -> card.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16 18; " +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);"));
-
-        String firstName = fb.get("firstName") != null ? (String) fb.get("firstName") : "";
-        String lastName  = fb.get("lastName")  != null ? (String) fb.get("lastName")  : "";
-        String initiale  = !firstName.isEmpty() ?
-                String.valueOf(firstName.charAt(0)).toUpperCase() : "U";
-        int etoiles = fb.get("etoiles") != null ? (int) fb.get("etoiles") : 0;
-
-        StackPane avatar = new StackPane();
-        avatar.setPrefSize(44, 44);
-        avatar.setMinSize(44, 44);
-        avatar.setStyle("-fx-background-color: " + avatarColor(initiale.charAt(0)) +
-                "; -fx-background-radius: 50;");
-        Label lblInit = new Label(initiale);
-        lblInit.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: white;");
-        avatar.getChildren().add(lblInit);
-
+        // --- 1. INFOS UTILISATEUR & NOM ---
+        String firstName = (String) fb.getOrDefault("firstName", "");
+        String lastName = (String) fb.getOrDefault("lastName", "");
         String nomAffiche = (firstName + " " + lastName).trim();
         if (nomAffiche.isEmpty()) nomAffiche = "Utilisateur";
+
+        // --- 2. BADGE IA (CORRECTION COULEUR ET TEXTE) ---
+        // On récupère le sentiment calculé (POSITIVE, NEGATIVE, NEUTRAL)
+        String sent = (String) fb.getOrDefault("ai_sentiment", "NEUTRAL");
+        // On récupère la couleur correspondante via ta méthode getSentimentColor
+        String color = getSentimentColor(sent);
+
+        Label aiBadge = new Label(sent);
+        // Le code hexadécimal de la couleur est suivi de '22' pour l'opacité du fond (effet badge)
+        aiBadge.setStyle("-fx-background-color: " + color + "22; " +
+                "-fx-text-fill: " + color + "; " +
+                "-fx-font-size: 9px; -fx-font-weight: bold; " +
+                "-fx-padding: 2 8; -fx-background-radius: 10;");
 
         Label lblNom = new Label(nomAffiche);
         lblNom.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #111827;");
 
-        VBox nameBox = new VBox(2);
-        nameBox.getChildren().add(lblNom);
+        HBox nameAndBadge = new HBox(10, lblNom, aiBadge);
+        nameAndBadge.setAlignment(Pos.CENTER_LEFT);
+
+        VBox userInfos = new VBox(2, nameAndBadge);
+        // Ajout de la date si elle existe dans la Map
         if (fb.get("date") != null) {
-            Label dateL = new Label("Date: " + fb.get("date").toString());
-            dateL.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 11px;");
-            nameBox.getChildren().add(dateL);
+            Label lblDate = new Label("📅 " + fb.get("date").toString());
+            lblDate.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 11px;");
+            userInfos.getChildren().add(lblDate);
         }
 
-        HBox starsRight = new HBox(2);
-        starsRight.setAlignment(Pos.CENTER_RIGHT);
-        for (int s = 0; s < 5; s++) {
-            Label sl = new Label(s < etoiles ? "\u2605" : "\u2606");
-            sl.setPrefWidth(16);
-            sl.setMinWidth(16);
-            sl.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 15px;");
-            starsRight.getChildren().add(sl);
-        }
+        // --- 3. AVATAR CIRCULAIRE ---
+        char init = nomAffiche.charAt(0);
+        Label lblInit = new Label(String.valueOf(init).toUpperCase());
+        lblInit.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
+        StackPane avatar = new StackPane(lblInit);
+        avatar.setPrefSize(40, 40);
+        avatar.setMinSize(40, 40);
+        avatar.setStyle("-fx-background-color: " + avatarColor(init) + "; -fx-background-radius: 50;");
+
+        // --- 4. ÉTOILES (RATING) ---
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox topRow = new HBox(12);
-        topRow.setAlignment(Pos.CENTER_LEFT);
-        topRow.getChildren().addAll(avatar, nameBox, spacer, starsRight);
-
-        String comments = (String) fb.get("comments");
-        Label lblComment = new Label(
-                comments != null && !comments.isBlank() ? comments : "Aucun commentaire.");
-        lblComment.setWrapText(true);
-        lblComment.setStyle("-fx-text-fill: #4b5563; -fx-font-size: 13px;");
-
-        GridPane catGrid = new GridPane();
-        catGrid.setHgap(30);
-        catGrid.setVgap(8);
-
-        String[] catNames = {"Professional", "Timeliness", "Quality of work", "Communication"};
-        int[] catVals = {
-                Math.min(5, etoiles),
-                Math.max(1, etoiles - 1),
-                Math.min(5, etoiles),
-                Math.min(5, etoiles)
-        };
-
-        int col = 0, rowIdx = 0;
-        for (int i = 0; i < catNames.length; i++) {
-            HBox catItem = new HBox(6);
-            catItem.setAlignment(Pos.CENTER_LEFT);
-
-            Label catName = new Label(catNames[i]);
-            catName.setPrefWidth(105);
-            catName.setMinWidth(105);
-            catName.setStyle("-fx-font-size: 12px; -fx-text-fill: #374151;");
-
-            HBox catStars = new HBox(2);
-            for (int s = 0; s < 5; s++) {
-                Label sl = new Label(s < catVals[i] ? "\u2605" : "\u2606");
-                sl.setPrefWidth(15);
-                sl.setMinWidth(15);
-                sl.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 13px;");
-                catStars.getChildren().add(sl);
-            }
-
-            catItem.getChildren().addAll(catName, catStars);
-            catGrid.add(catItem, col, rowIdx);
-            col++;
-            if (col > 1) { col = 0; rowIdx++; }
+        int etoiles = (int) fb.getOrDefault("etoiles", 0);
+        HBox stars = new HBox(2);
+        for(int i = 0; i < 5; i++) {
+            Label s = new Label(i < etoiles ? "★" : "☆");
+            s.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 14px;");
+            stars.getChildren().add(s);
         }
 
-        Label helpful = new Label("8 people found this helpful");
-        helpful.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px;");
+        // Ligne du haut : Avatar + Nom/Badge + Spacer + Étoiles
+        HBox topRow = new HBox(12, avatar, userInfos, spacer, stars);
+        topRow.setAlignment(Pos.CENTER_LEFT);
 
-        Region sp2 = new Region();
-        HBox.setHgrow(sp2, Priority.ALWAYS);
+        // --- 5. COMMENTAIRE ---
+        String commentaireTexte = (String) fb.getOrDefault("comments", "Aucun commentaire.");
+        Label lblComment = new Label(commentaireTexte);
+        lblComment.setWrapText(true);
+        lblComment.setStyle("-fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-line-spacing: 4;");
 
-        Button btnDelete = new Button("Supprimer");
-        btnDelete.setStyle(
-                "-fx-background-color: transparent; -fx-text-fill: #ef4444; " +
-                        "-fx-font-size: 12px; -fx-cursor: hand; -fx-padding: 0;");
+        // --- 6. BOUTON SUPPRIMER ---
+        Button btnDel = new Button("🗑 Supprimer");
+        btnDel.setStyle("-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-cursor: hand; -fx-font-size: 12px;");
+        // On passe l'ID du feedback pour la suppression en BDD
+        btnDel.setOnAction(e -> supprimerFeedback((int)fb.get("idFeedback"), card));
 
-        btnDelete.setOnAction(e -> supprimerFeedback((int)fb.get("idFeedback"), card));
-
-        HBox bottomRow = new HBox(10);
-        bottomRow.setAlignment(Pos.CENTER_LEFT);
-        bottomRow.getChildren().addAll(helpful, sp2, btnDelete);
-
-        card.getChildren().addAll(topRow, lblComment, catGrid, new Separator(), bottomRow);
+        // --- ASSEMBLAGE FINAL ---
+        card.getChildren().addAll(topRow, lblComment, new Separator(), btnDel);
         return card;
     }
-
     private void buildStarRow(HBox container, double rating, int size) {
         container.getChildren().clear();
         int full = (int) Math.round(rating);
         for (int i = 0; i < 5; i++) {
-            Label s = new Label(i < full ? "\u2605" : "\u2606");
+            Label s = new Label(i < full ? "★" : "☆");
             s.setPrefWidth(size);
             s.setMinWidth(size);
             s.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: " + size + "px;");
@@ -358,11 +329,7 @@ public class FeedbackViewController {
     }
 
     private String avatarColor(char c) {
-        String[] colors = {
-                "#1d4ed8","#0891b2","#0369a1","#1e40af",
-                "#7c3aed","#6d28d9","#059669","#047857",
-                "#b45309","#c2410c","#be185d","#0f766e"
-        };
+        String[] colors = {"#1d4ed8","#0891b2","#7c3aed","#b45309","#be185d"};
         return colors[Math.abs(c % colors.length)];
     }
 
@@ -378,7 +345,7 @@ public class FeedbackViewController {
                 for (Map<String, Object> fb : allFeedbacks) {
                     writer.println(fb.get("firstName") + "," + fb.get("etoiles") + ",\"" + fb.get("comments") + "\"");
                 }
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Exporte avec succes: " + file.getAbsolutePath());
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Exporté avec succès: " + file.getAbsolutePath());
                 alert.show();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -421,7 +388,7 @@ public class FeedbackViewController {
         });
     }
 
-    // MÃ©thode utilitaire pour les alertes
+    // Méthode utilitaire pour les alertes
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -429,4 +396,99 @@ public class FeedbackViewController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private void computeAIAnalysis(List<Map<String, Object>> feedbacks) {
+        int pos = 0, neu = 0, neg = 0;
+
+        for (Map<String, Object> fb : feedbacks) {
+            String comment = (String) fb.get("comments");
+            if (comment == null || comment.isBlank()) {
+                fb.put("ai_sentiment", "NEUTRAL");
+                neu++;
+                continue;
+            }
+
+            String res = feedbackService.analyzeSentiment(comment).toUpperCase();
+            String finalSentiment = "NEUTRAL"; // Valeur par défaut
+
+            // SOLUTION : On cherche quel label est écrit EN PREMIER dans la chaîne JSON
+            int index1Star = res.indexOf("\"LABEL\":\"1 STAR\"");
+            int index2Star = res.indexOf("\"LABEL\":\"2 STARS\"");
+            int index4Star = res.indexOf("\"LABEL\":\"4 STARS\"");
+            int index5Star = res.indexOf("\"LABEL\":\"5 STARS\"");
+
+            // On identifie celui qui a l'index le plus bas (le premier dans le JSON)
+            if ((index1Star != -1 && index1Star < 50) || (index2Star != -1 && index2Star < 50)) {
+                finalSentiment = "NEGATIVE";
+                neg++;
+            }
+            else if ((index4Star != -1 && index4Star < 50) || (index5Star != -1 && index5Star < 50)) {
+                finalSentiment = "POSITIVE";
+                pos++;
+            }
+            else {
+                finalSentiment = "NEUTRAL";
+                neu++;
+            }
+
+            fb.put("ai_sentiment", finalSentiment);
+            System.out.println("Commentaire: " + comment + " => " + finalSentiment);
+        }
+
+        // --- MISE À JOUR DE L'INTERFACE ---
+        int total = pos + neu + neg;
+        if (total > 0) {
+            // On utilise des doubles pour la précision
+            double pctPos = (double) pos / total;
+            double pctNeu = (double) neu / total;
+            double pctNeg = (double) neg / total;
+
+            // Mise à jour des labels (Utilisation de Math.round pour éviter les 0% bizarres)
+            lblSentimentPos.setText(Math.round(pctPos * 100) + "%");
+            lblSentimentNeu.setText(Math.round(pctNeu * 100) + "%");
+            lblSentimentNeg.setText(Math.round(pctNeg * 100) + "%");
+
+            // La barre de progression affiche le taux de satisfaction (Positif)
+            sentimentBar.setProgress(pctPos);
+
+            // Optionnel : Changer la couleur de la barre si c'est très négatif
+            if (pctNeg > pctPos) {
+                sentimentBar.setStyle("-fx-accent: #ef4444;"); // Rouge
+            } else {
+                sentimentBar.setStyle("-fx-accent: #22c55e;"); // Vert
+            }
+
+            System.out.println("Stats finales affichées : POS=" + pos + " | NEU=" + neu + " | NEG=" + neg);
+        }
+    }
+    private String getSentimentColor(String sentiment) {
+        if (sentiment == null) return "#94a3b8"; // Gris si nul
+
+        // On transforme en majuscules et on enlève les espaces invisibles
+        String cleanSentiment = sentiment.trim().toUpperCase();
+
+        switch (cleanSentiment) {
+            case "POSITIVE":
+                return "#22c55e"; // Vert éclatant
+            case "NEGATIVE":
+                return "#ef4444"; // Rouge alerte
+            default:
+                return "#64748b"; // Gris ardoise (Neutre)
+        }
+    }
+    private void afficherStats(Map<String, Object> stats) {
+        double moyenne = (double) stats.get("moyenne");
+        int total = (int) stats.get("total");
+
+        lblMoyenne.setText(String.format(Locale.US, "%.1f", moyenne));
+        lblTotalReviews.setText(String.valueOf(total));
+        lblBasedOn.setText("Based on " + total + " reviews");
+
+        buildStarRow(starsKpi1, moyenne, 16);
+
+        @SuppressWarnings("unchecked")
+        Map<Integer, Integer> rep = (Map<Integer, Integer>) stats.get("repartition");
+        buildRatingsBreakdown(rep, total);
+    }
+
 }

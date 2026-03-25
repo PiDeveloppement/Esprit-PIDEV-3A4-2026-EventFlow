@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" style="-fx-background-color: white; -fx-padding: 40;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.questionnaire.QuestionController">
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="15.0">
+            <children>
+                <Label text="📊 Répartition des Questions par Événement" textFill="#1e293b">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#switchToList" prefHeight="40.0"
+                        style="-fx-background-color: white; -fx-text-fill: #4f46e5; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;"
+                        text="⬅ Retour à la liste" />
+            </children>
+        </HBox>
+
+        <Separator style="-fx-padding: 10 0;" />
+
+        <StackPane VBox.vgrow="ALWAYS">
+            <children>
+                <PieChart fx:id="pieChartQuestions" prefHeight="500.0" prefWidth="700.0" />
+            </children>
+        </StackPane>
+    </children>
+
+</VBox>

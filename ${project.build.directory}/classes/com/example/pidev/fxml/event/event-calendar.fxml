@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<!-- ScrollPane externe pour toute la page -->
+<ScrollPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.event.EventCalendarController"
+            fitToWidth="true"
+            style="-fx-background-color: #f8fafc; -fx-border-color: transparent;"
+            VBox.vgrow="ALWAYS">
+
+<VBox spacing="15" style="-fx-padding: 20; -fx-background-color: #f8fafc;">
+
+    <!-- HEADER : Navigation mois + Vues -->
+    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;">
+
+        <!-- Navigation mois -->
+        <HBox spacing="10" alignment="CENTER">
+            <Button fx:id="prevMonthBtn" text="◄" prefWidth="40" prefHeight="40"
+                    style="-fx-font-size: 14px; -fx-padding: 8; -fx-cursor: hand;" onAction="#handlePrevMonth"/>
+
+            <Button fx:id="todayBtn" text="Aujourd'hui" prefHeight="40"
+                    style="-fx-padding: 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#handleToday"/>
+
+            <Button fx:id="nextMonthBtn" text="►" prefWidth="40" prefHeight="40"
+                    style="-fx-font-size: 14px; -fx-padding: 8; -fx-cursor: hand;" onAction="#handleNextMonth"/>
+        </HBox>
+
+        <!-- Titre mois/année -->
+        <Label fx:id="monthYearLabel" text="Mars 2026"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+               minWidth="200" alignment="CENTER"/>
+
+        <!-- Espace flexible -->
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Boutons vues -->
+        <HBox spacing="8" alignment="CENTER_RIGHT">
+            <Button fx:id="viewMoisBtn" text="📅 Mois" prefHeight="40"
+                    style="-fx-padding: 8 12; -fx-background-color: #1565C0; -fx-text-fill: white; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
+                    onAction="#handleViewMois"/>
+
+            <Button fx:id="viewSemaineBtn" text="📆 Semaine" prefHeight="40"
+                    style="-fx-padding: 8 12; -fx-background-color: #ccc; -fx-text-fill: #666; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
+                    onAction="#handleViewSemaine"/>
+
+            <Button fx:id="viewJourBtn" text="📄 Jour" prefHeight="40"
+                    style="-fx-padding: 8 12; -fx-background-color: #ccc; -fx-text-fill: #666; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
+                    onAction="#handleViewJour"/>
+
+            <Button fx:id="viewListeBtn" text="📋 Liste" prefHeight="40"
+                    style="-fx-padding: 8 12; -fx-background-color: #ccc; -fx-text-fill: #666; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
+                    onAction="#handleViewListe"/>
+        </HBox>
+    </HBox>
+
+    <!-- LÉGENDES : Catégories + Statuts (DYNAMIQUES depuis DB) -->
+    <VBox spacing="10">
+        <!-- Légende Catégories (dynamique depuis DB avec icon + color) -->
+        <HBox fx:id="legendeContainer" spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 12 15; -fx-background-color: white; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;">
+            <Label text="📂 Catégories:" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 12px;"/>
+            <!-- Les badges icon+color seront ajoutés dynamiquement depuis event_category -->
+        </HBox>
+
+        <!-- Légende Statuts (filtres cliquables, statut calculé auto depuis dates) -->
+        <HBox fx:id="statusLegendContainer" spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 12 15; -fx-background-color: white; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;">
+            <Label text="🔔 Statuts:" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 12px;"/>
+            <Label text="(Cliquez pour filtrer)" style="-fx-text-fill: #64748b; -fx-font-size: 10px; -fx-font-style: italic;"/>
+            <!-- Les badges statuts cliquables seront ajoutés dynamiquement -->
+        </HBox>
+    </VBox>
+
+    <!-- GRILLE CALENDRIER (pleine largeur avec scroll interne) -->
+    <VBox style="-fx-background-color: white; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;" VBox.vgrow="ALWAYS">
+
+        <!-- En-têtes colonnes (fixes, toujours visibles) -->
+        <HBox spacing="0" prefHeight="40" style="-fx-background-color: #f1f5f9; -fx-border-radius: 8 8 0 0;">
+            <Label text="Dimanche" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+            <Label text="Lundi" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+            <Label text="Mardi" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+            <Label text="Mercredi" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+            <Label text="Jeudi" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+            <Label text="Vendredi" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+            <Label text="Samedi" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140"/>
+        </HBox>
+
+        <!-- ScrollPane interne pour la grille des jours (scroll vertical) -->
+        <ScrollPane style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                    fitToWidth="true"
+                    prefHeight="600"
+                    VBox.vgrow="ALWAYS">
+            <VBox fx:id="calendarContainer" spacing="0" style="-fx-background-color: white; -fx-padding: 0;">
+                <!-- Les lignes de jours seront ajoutées dynamiquement -->
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
+
+</VBox>
+
+</ScrollPane>
+

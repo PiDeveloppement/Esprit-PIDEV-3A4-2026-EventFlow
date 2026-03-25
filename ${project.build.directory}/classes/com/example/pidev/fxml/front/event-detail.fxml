@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="0" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.front.EventDetailController"
+      style="-fx-background-color: #f8fafc;">
+
+    <!-- ==================== NAVBAR FIXE ==================== -->
+    <HBox style="-fx-background-color: white; -fx-padding: 15 60; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+          alignment="CENTER_LEFT" prefHeight="80">
+        <!-- Logo -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <ImageView fitHeight="140" fitWidth="140" preserveRatio="true">
+                <Image url="@../images/logo.png" />
+            </ImageView>
+
+        </HBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Liens de navigation -->
+        <HBox spacing="40" alignment="CENTER">
+            <Button text="Accueil" onAction="#handleGoToHome"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+            <Button text="Événements" onAction="#handleGoToEvents"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+            <Button text="Fonctionnalités" onAction="#handleGoToFeatures"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+            <Button text="Feedback" onAction="#handleGoToFeedback"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+            <Button text="Contact"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+        </HBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Boutons d'action -->
+        <HBox spacing="15">
+            <Button text="Connexion" onAction="#handleLogin"
+                    style="-fx-background-color: transparent; -fx-text-fill: #0D47A1; -fx-font-weight: bold;
+                           -fx-border-color: #0D47A1; -fx-border-width: 1.5; -fx-border-radius: 8;
+                           -fx-padding: 8 24; -fx-cursor: hand;"/>
+            <Button text="Inscription" onAction="#handleSignup"
+                    style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: bold;
+                           -fx-background-radius: 8; -fx-padding: 8 24; -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 8, 0, 0, 2);"/>
+        </HBox>
+    </HBox>
+
+    <!-- ==================== CONTENU PRINCIPAL ==================== -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+
+        <VBox spacing="0">
+
+            <!-- HERO SECTION COMPACT (150px avec gradient dynamique) -->
+            <StackPane fx:id="heroImage" prefHeight="150" maxHeight="150"
+                       style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <!-- L'image ou gradient sera défini dynamiquement selon la catégorie -->
+            </StackPane>
+
+            <!-- CONTENU PRINCIPAL (Layout moderne asymétrique) -->
+            <HBox spacing="0" style="-fx-padding: 0;">
+
+                <!-- COLONNE GAUCHE - Contenu principal (70%) -->
+                <VBox spacing="20" style="-fx-padding: 25 30 40 50;" HBox.hgrow="ALWAYS">
+
+                    <!-- BREADCRUMB Compact -->
+                    <Button text="← Événements" onAction="#handleGoToEvents"
+                            style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-cursor: hand;
+                                   -fx-font-weight: 500; -fx-font-size: 13px; -fx-padding: 5 0;"/>
+
+                    <!-- HEADER avec badges -->
+                    <VBox spacing="12">
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label fx:id="categoryBadge" text="📌 Catégorie"
+                                   style="-fx-background-color: #E3F2FD; -fx-text-fill: #0D47A1; -fx-padding: 6 14;
+                                          -fx-background-radius: 16; -fx-font-size: 12px; -fx-font-weight: 600;"/>
+                            <Label fx:id="statusBadge" text="✓ À venir"
+                                   style="-fx-background-color: #d1fae5; -fx-text-fill: #065f46; -fx-padding: 6 14;
+                                          -fx-background-radius: 16; -fx-font-size: 12px; -fx-font-weight: 600;"/>
+                        </HBox>
+
+                        <Label fx:id="titleLabel" text="Titre de l'événement"
+                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #0A1929;
+                                      -fx-wrap-text: true; -fx-line-spacing: 2px;"
+                               wrapText="true" maxWidth="650"/>
+                    </VBox>
+
+                    <!-- TIMELINE VISUELLE (Date, Heure, Durée) -->
+                    <VBox spacing="14" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <HBox spacing="25" alignment="CENTER_LEFT">
+                            <VBox spacing="6" alignment="CENTER" prefWidth="140">
+                                <Label text="📅" style="-fx-font-size: 24px;"/>
+                                <Label text="Date" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                <Label fx:id="dateLabel" text="15 Mars 2026"
+                                       style="-fx-text-fill: #0A1929; -fx-font-size: 14px; -fx-font-weight: 700;"/>
+                            </VBox>
+                            <Separator orientation="VERTICAL" prefHeight="50"/>
+                            <VBox spacing="6" alignment="CENTER" prefWidth="140">
+                                <Label text="⏰" style="-fx-font-size: 24px;"/>
+                                <Label text="Heure" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                <Label fx:id="timeLabel" text="14:00"
+                                       style="-fx-text-fill: #0A1929; -fx-font-size: 14px; -fx-font-weight: 700;"/>
+                            </VBox>
+                            <Separator orientation="VERTICAL" prefHeight="50"/>
+                            <VBox spacing="6" alignment="CENTER" prefWidth="140">
+                                <Label text="⏱️" style="-fx-font-size: 24px;"/>
+                                <Label text="Durée" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                <Label fx:id="durationLabel" text="2h00"
+                                       style="-fx-text-fill: #0A1929; -fx-font-size: 14px; -fx-font-weight: 700;"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- SECTION MÉTÉO (Dynamique) -->
+                    <VBox fx:id="weatherContainer" spacing="12" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <Label text="🌤️ Météo prévue"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0A1929;"/>
+
+                        <!-- Contenu météo (mis à jour dynamiquement) -->
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="8" alignment="CENTER" prefWidth="140">
+                                <Label fx:id="weatherEmoji" text="☀️"
+                                       style="-fx-font-size: 48px;"/>
+                                <Label fx:id="weatherTemp" text="22°C"
+                                       style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0A1929;"/>
+                            </VBox>
+
+                            <VBox spacing="12" HBox.hgrow="ALWAYS">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="📍" style="-fx-font-size: 16px;"/>
+                                    <VBox spacing="2">
+                                        <Label text="Description" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                        <Label fx:id="weatherDescription" text="Ciel dégagé"
+                                               style="-fx-text-fill: #0A1929; -fx-font-size: 14px; -fx-font-weight: 600;"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="💧" style="-fx-font-size: 16px;"/>
+                                    <VBox spacing="2">
+                                        <Label text="Risque de pluie" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                        <Label fx:id="weatherRain" text="10%"
+                                               style="-fx-text-fill: #0A1929; -fx-font-size: 14px; -fx-font-weight: 600;"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="💨" style="-fx-font-size: 16px;"/>
+                                    <VBox spacing="2">
+                                        <Label text="Humidité" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                        <Label fx:id="weatherHumidity" text="65%"
+                                               style="-fx-text-fill: #0A1929; -fx-font-size: 14px; -fx-font-weight: 600;"/>
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Message d'erreur (si météo indisponible) -->
+                        <Label fx:id="weatherErrorLabel" text="" visible="false" managed="false"
+                               style="-fx-text-fill: #ef4444; -fx-font-size: 13px; -fx-padding: 10;
+                                      -fx-background-color: #fee2e2; -fx-background-radius: 8;"/>
+                    </VBox>
+
+                    <!-- DESCRIPTION -->
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <Label text="📋 À propos"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0A1929;"/>
+                        <Label fx:id="descriptionLabel" text="Description de l'événement..."
+                               style="-fx-font-size: 14px; -fx-text-fill: #475569; -fx-line-spacing: 4px; -fx-wrap-text: true;"
+                               wrapText="true"/>
+                    </VBox>
+
+                    <!-- CE QUI VOUS ATTEND -->
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                              -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                        <Label text="✨ Ce qui vous attend"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0A1929;"/>
+                        <VBox spacing="8">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="✓" style="-fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <Label text="Contenu enrichissant et interactif"
+                                       style="-fx-text-fill: #475569; -fx-font-size: 14px;"/>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="✓" style="-fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <Label text="Networking avec des professionnels"
+                                       style="-fx-text-fill: #475569; -fx-font-size: 14px;"/>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="✓" style="-fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <Label text="Certificat de participation"
+                                       style="-fx-text-fill: #475569; -fx-font-size: 14px;"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- INFOS COMPLÉMENTAIRES -->
+                    <HBox spacing="15">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: #f8fafc; -fx-padding: 18; -fx-background-radius: 12;
+                                     -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                            <Label text="📍 Lieu"
+                                   style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                            <Label fx:id="locationLabel" text="Salle de conférence"
+                                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #0A1929; -fx-wrap-text: true;"
+                                   wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="10" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: #f8fafc; -fx-padding: 18; -fx-background-radius: 12;
+                                     -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+                            <Label text="👤 Organisateur"
+                                   style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                            <Label fx:id="organizerLabel" text="EventFlow"
+                                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #0A1929;"/>
+                        </VBox>
+                    </HBox>
+
+                </VBox>
+
+                <!-- COLONNE DROITE - Card sticky (30%) -->
+                <VBox spacing="0" style="-fx-padding: 25 50 40 0;" prefWidth="380" maxWidth="380">
+
+                    <!-- CARD D'ACTION STICKY (Glassmorphism) -->
+                    <VBox spacing="16" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 16;
+                                              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20, 0, 0, 8);
+                                              -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 16;">
+
+                        <!-- PRIX avec urgence -->
+                        <VBox spacing="8" alignment="CENTER">
+                            <Label fx:id="priceLabel" text="Gratuit"
+                                   style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;"/>
+                            <Label fx:id="capacityLabel" text="⚡ Plus que 12 places"
+                                   style="-fx-text-fill: #ef4444; -fx-font-size: 13px; -fx-font-weight: 700;
+                                          -fx-background-color: #fee2e2; -fx-padding: 4 10; -fx-background-radius: 8;"/>
+                        </VBox>
+
+                        <!-- BOUTON CTA Principal -->
+                        <Button text="🎫 Réserver ma place" onAction="#handleParticipate"
+                                style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;
+                                       -fx-background-radius: 12; -fx-padding: 16 0; -fx-cursor: hand; -fx-pref-width: 100%;
+                                       -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.4), 15, 0, 0, 5);"/>
+
+                        <Separator style="-fx-padding: 4 0;"/>
+
+                        <!-- INFOS CLÉS -->
+                        <VBox spacing="12">
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <Label text="👥" style="-fx-font-size: 20px;"/>
+                                <VBox spacing="2">
+                                    <Label text="Capacité totale" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;"/>
+                                    <Label fx:id="capacityInfoLabel" text="50 personnes"
+                                           style="-fx-text-fill: #0A1929; -fx-font-size: 13px; -fx-font-weight: 600;"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <!-- BADGE SÉCURITÉ -->
+                        <HBox spacing="8" alignment="CENTER" style="-fx-padding: 12 0 0 0;">
+                            <Label text="🔒" style="-fx-font-size: 16px;"/>
+                            <Label text="Inscription 100% sécurisée"
+                                   style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 500;"/>
+                        </HBox>
+                    </VBox>
+
+                </VBox>
+
+            </HBox>
+
+            <!-- FOOTER COMPACT -->
+            <VBox spacing="10" alignment="CENTER" style="-fx-padding: 30 0 25 0; -fx-background-color: white;
+                                                          -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;">
+                <Label text="© 2026 EventFlow - Tous droits réservés"
+                       style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+                <HBox spacing="20" alignment="CENTER">
+                    <Button text="Conditions" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                    <Button text="Confidentialité" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                    <Button text="Contact" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>
+

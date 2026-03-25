@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+
+<!-- SCROLLPANE PRINCIPAL -->
+<ScrollPane fitToWidth="true" fitToHeight="true"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.auth.LoginController"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+
+    <!-- Contenu principal qui défile -->
+    <BorderPane prefHeight="800" prefWidth="1200"
+                style="-fx-background-color: linear-gradient(to bottom right, #f0f8ff, #e6f2ff);">
+
+        <!-- BOUTON RETOUR EN HAUT À GAUCHE -->
+        <top>
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 20 0 0 40;">
+                <Button text="← Retour à l'accueil"
+                        onAction="#goToLanding"
+                        style="-fx-background-color: transparent; -fx-text-fill: #2196F3;
+                               -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;
+                               -fx-border-color: #2196F3; -fx-border-width: 1;
+                               -fx-border-radius: 20; -fx-background-radius: 20;
+                               -fx-padding: 8 20;"/>
+            </HBox>
+        </top>
+
+        <center>
+            <GridPane alignment="CENTER" hgap="60" vgap="20">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="45"/>
+                    <ColumnConstraints percentWidth="55"/>
+                </columnConstraints>
+
+                <!-- Partie gauche : Présentation avec logo -->
+                <VBox alignment="CENTER" spacing="40" GridPane.columnIndex="0"
+                      style="-fx-padding: 40 60 40 40;">
+
+                    <!-- Logo EventFlow -->
+                    <ImageView fitHeight="222" fitWidth="222" preserveRatio="true">
+                        <Image url="@images/logo.png" />
+                    </ImageView>
+
+                    <!-- Points forts -->
+                    <VBox spacing="25" prefWidth="380">
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane>
+                                <Circle radius="22" fill="rgba(33, 150, 243, 0.1)"/>
+                                <Label text="📅" style="-fx-font-size: 18px; -fx-text-fill: #2196F3;"/>
+                            </StackPane>
+                            <VBox spacing="3">
+                                <Label text="Créez des événements"
+                                       style="-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                <Label text="Organisez et planifiez facilement"
+                                       style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane>
+                                <Circle radius="22" fill="rgba(33, 150, 243, 0.1)"/>
+                                <Label text="👥" style="-fx-font-size: 18px; -fx-text-fill: #2196F3;"/>
+                            </StackPane>
+                            <VBox spacing="3">
+                                <Label text="Gérez les participants"
+                                       style="-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                <Label text="Suivi en temps réel des inscriptions"
+                                       style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane>
+                                <Circle radius="22" fill="rgba(33, 150, 243, 0.1)"/>
+                                <Label text="💰" style="-fx-font-size: 18px; -fx-text-fill: #2196F3;"/>
+                            </StackPane>
+                            <VBox spacing="3">
+                                <Label text="Suivez votre budget"
+                                       style="-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                <Label text="Contrôlez les dépenses et recettes"
+                                       style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Partie droite : Carte de connexion -->
+                <HBox alignment="CENTER" spacing="20" GridPane.columnIndex="1"
+                      style="-fx-padding: 60;">
+
+                    <!-- Carte de connexion -->
+                    <VBox alignment="TOP_CENTER" spacing="25"
+                          style="-fx-padding: 35 40; -fx-background-color: white;
+                                 -fx-background-radius: 15;
+                                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+                                 -fx-max-width: 420;">
+
+                        <!-- En-tête centré -->
+                        <VBox alignment="CENTER" spacing="6">
+                            <Label text="Connexion"
+                                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
+                            <Label text="Accédez à votre espace de gestion"
+                                   style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                        </VBox>
+
+                        <!-- Formulaire compact -->
+                        <VBox spacing="18" prefWidth="350">
+                            <Label fx:id="loginMessageLabel" textFill="red"
+                                   style="-fx-font-size: 12px; -fx-alignment: center; -fx-pref-width: 350;"/>
+
+                            <TextField fx:id="emailField" promptText="Email universitaire"
+                                       style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 12 14;
+                                              -fx-border-color: #e0e0e0; -fx-border-width: 1;
+                                              -fx-background-color: white; -fx-font-size: 13px;"/>
+
+                            <!-- Remplacer la section du champ mot de passe par celle-ci -->
+                            <StackPane>
+                                <PasswordField fx:id="passwordField" promptText="Mot de passe"
+                                               style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 12 14;
+                          -fx-border-color: #e0e0e0; -fx-border-width: 1;
+                          -fx-background-color: white; -fx-font-size: 13px;
+                          -fx-pref-width: 350;"/>
+
+                                <TextField fx:id="visiblePasswordField" promptText="Mot de passe"
+                                           style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 12 14;
+                      -fx-border-color: #e0e0e0; -fx-border-width: 1;
+                      -fx-background-color: white; -fx-font-size: 13px;
+                      -fx-pref-width: 350;"
+                                           visible="false" managed="false"/>
+
+                                <!-- Bouton œil sans rectangle -->
+                                <Label fx:id="eyeIcon"
+                                       text="👁️"
+                                       onMouseClicked="#togglePasswordVisibility"
+                                       style="-fx-font-size: 20px; -fx-text-fill: #666666;
+                  -fx-background-color: transparent;
+                  -fx-cursor: hand;
+                  -fx-padding: 0 10 0 0;"
+                                       alignment="CENTER_RIGHT"
+                                       StackPane.alignment="CENTER_RIGHT"/>
+                            </StackPane>
+                        </VBox>
+
+                        <!-- Options et boutons -->
+                        <VBox spacing="15" alignment="CENTER" prefWidth="350">
+                            <CheckBox fx:id="rememberCheckbox"
+                                      text="Se souvenir de moi"
+                                      style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+
+                            <!-- Lien mot de passe oublié -->
+                            <HBox alignment="CENTER">
+                                <Hyperlink fx:id="forgotPasswordLink"
+                                           text="Mot de passe oublié ?"
+                                           onAction="#handleForgotPassword"
+                                           style="-fx-text-fill: #2196F3; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                            </HBox>
+
+                            <!-- Bouton Se connecter -->
+                            <Button fx:id="submitButton" text="Se connecter"
+                                    onAction="#loginButtonOnAction"
+                                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;
+                                           -fx-background-radius: 8; -fx-padding: 12 35; -fx-font-size: 14px;
+                                           -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.3), 10, 0, 0, 3);
+                                           -fx-pref-width: 280;"/>
+
+                            <!-- Bouton Annuler -->
+                            <Button fx:id="cancelButton" text="Annuler"
+                                    onAction="#cancelButtonOnAction"
+                                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;
+                                           -fx-background-radius: 8; -fx-padding: 12 35; -fx-font-size: 14px;
+                                           -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.3), 10, 0, 0, 3);
+                                           -fx-pref-width: 280;"/>
+
+                            <!-- Liens de navigation -->
+                            <VBox spacing="10" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                                <HBox alignment="CENTER" spacing="5">
+                                    <Label text="Nouveau sur EventFlow?" style="-fx-text-fill: #666666; -fx-font-size: 12px;"/>
+                                    <Hyperlink text="Créer un compte"
+                                               onAction="#goToSignup"
+                                               style="-fx-text-fill: #2196F3; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- BOUTON FLOTTANT DE CONNEXION FACIALE -->
+                    <StackPane alignment="CENTER">
+                        <Button fx:id="facialLoginButton"
+                                onAction="#handleFacialLogin"
+                                style="-fx-background-color: linear-gradient(to bottom, #6c5ce7, #a463f5);
+                                       -fx-background-radius: 40;
+                                       -fx-min-width: 80;
+                                       -fx-min-height: 80;
+                                       -fx-max-width: 80;
+                                       -fx-max-height: 80;
+                                       -fx-cursor: hand;
+                                       -fx-effect: dropshadow(gaussian, rgba(108, 92, 231, 0.6), 20, 0, 0, 10);
+                                       -fx-border-width: 0;
+                                       -fx-translate-y: -30;">
+                            <graphic>
+                                <StackPane>
+                                    <Circle radius="30" fill="white" opacity="0.2"/>
+                                    <Label text="👤" style="-fx-font-size: 38px; -fx-text-fill: white;"/>
+                                    <StackPane translateX="20" translateY="-20">
+                                        <Circle radius="14" fill="#4CAF50" stroke="white" strokeWidth="2"/>
+                                        <Label text="🔓" style="-fx-font-size: 12px; -fx-text-fill: white;"/>
+                                    </StackPane>
+                                    <Circle radius="38" fill="transparent" stroke="white" strokeWidth="2"
+                                            strokeDashArray="10,10" opacity="0.3"/>
+                                </StackPane>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Connexion par reconnaissance faciale"
+                                         style="-fx-font-size: 12px; -fx-background-color: #333;
+                                                -fx-text-fill: white; -fx-padding: 8;"/>
+                            </tooltip>
+                        </Button>
+                        <Label text="Face ID"
+                               style="-fx-text-fill: #6c5ce7; -fx-font-weight: bold; -fx-font-size: 11px;
+                                      -fx-background-color: white; -fx-background-radius: 10;
+                                      -fx-padding: 3 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+                                      -fx-translate-y: 50;"/>
+                    </StackPane>
+                </HBox>
+            </GridPane>
+        </center>
+
+        <bottom>
+            <VBox alignment="CENTER" spacing="10"
+                  style="-fx-padding: 20; -fx-background-color: rgba(33, 150, 243, 0.05);">
+
+                <Label text="© 2026 EventFlow - Tous droits réservés"
+                       style="-fx-text-fill: #666666; -fx-font-size: 12px;"/>
+                <HBox spacing="20" alignment="CENTER">
+                    <Hyperlink text="Conditions d'utilisation"
+                               style="-fx-text-fill: #2196F3; -fx-font-size: 12px;"/>
+                    <Hyperlink text="Politique de confidentialité"
+                               style="-fx-text-fill: #2196F3; -fx-font-size: 12px;"/>
+                    <Hyperlink text="Support"
+                               style="-fx-text-fill: #2196F3; -fx-font-size: 12px;"/>
+                </HBox>
+            </VBox>
+        </bottom>
+    </BorderPane>
+</ScrollPane>

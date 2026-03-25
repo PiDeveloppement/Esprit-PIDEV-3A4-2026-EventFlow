@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.chat.ChatController"
+      prefWidth="450" prefHeight="600"
+      style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 10;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 0);">
+
+    <!-- En-tête du chat -->
+    <HBox alignment="CENTER_LEFT" spacing="10"
+          style="-fx-background-color: linear-gradient(to right, #2196F3, #1565C0);
+                 -fx-background-radius: 10; -fx-padding: 15;">
+
+        <!-- Avatar robot -->
+        <StackPane>
+            <Circle radius="20" fill="white" opacity="0.2"/>
+            <Label style="-fx-font-size: 28px;" text="🤖" />
+        </StackPane>
+
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"
+                   text="Assistant IA - EventFlow" />
+            <Label fx:id="statusIndicator"
+                   style="-fx-font-size: 11px; -fx-text-fill: #BBDEFB;"
+                   text="● Connecté • Posez vos questions" />
+        </VBox>
+    </HBox>
+
+    <!-- Zone de chat -->
+    <ScrollPane fx:id="scrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background: white; -fx-background-color: white;
+                       -fx-border-color: #ddd; -fx-border-radius: 10; -fx-background-radius: 10;">
+        <VBox fx:id="chatBox" spacing="10" style="-fx-padding: 15;">
+            <!-- Le contenu sera ajouté dynamiquement par ChatController -->
+        </VBox>
+    </ScrollPane>
+
+    <!-- Zone de saisie -->
+    <HBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10;
+                               -fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 10;">
+        <TextField fx:id="inputField" promptText="Posez votre question..." HBox.hgrow="ALWAYS"
+                   style="-fx-padding: 12; -fx-background-radius: 20; -fx-border-radius: 20;
+                          -fx-border-color: #ccc;">
+            <font>
+                <Font size="14" />
+            </font>
+        </TextField>
+        <Button fx:id="sendButton" onAction="#handleSendMessage"
+                style="-fx-background-color: #2196F3; -fx-background-radius: 20;
+                       -fx-padding: 10 20; -fx-cursor: hand;"
+                text="Envoyer" textFill="white">
+            <font>
+                <Font size="14" />
+            </font>
+        </Button>
+    </HBox>
+
+    <!-- Bouton nouvelle conversation -->
+    <HBox alignment="CENTER" spacing="8">
+        <Button fx:id="clearButton" onAction="#handleClearChat"
+                style="-fx-background-color: #f44336; -fx-background-radius: 20;
+                       -fx-padding: 8 15; -fx-cursor: hand; -fx-text-fill: white;"
+                text="🗑️ Nouvelle conversation" />
+    </HBox>
+</VBox>

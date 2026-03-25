@@ -2,6 +2,7 @@ package com.example.pidev.controller.questionnaire;
 
 import com.example.pidev.MainController;
 import com.example.pidev.model.questionnaire.Question;
+import com.example.pidev.service.questionnaire.BadWordService;
 import com.example.pidev.service.questionnaire.FeedbackService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -28,7 +29,7 @@ public class ResultatController {
     private int participantId;
 
     private final FeedbackService fs = new FeedbackService();
-
+    private final BadWordService badWordService = new BadWordService();
     @FXML
     public void initialize() {
         setupEditStars();
@@ -131,8 +132,20 @@ public class ResultatController {
     @FXML
     private void onModifier() {
         try {
-            fs.modifierFeedback(feedbackId, txtAreaComment.getText(), etoilesModif);
-            afficherAlerte("Succès", "Votre avis a été mis à jour !", Alert.AlertType.INFORMATION);
+            // 2. Récupérer le texte brut
+            String texteBrut = txtAreaComment.getText();
+
+            // 3. Filtrer le texte via l'API
+            // Note: Cela peut prendre 1-2 secondes car c'est un appel réseau
+            String texteFiltre = badWordService.filtrerTexte(texteBrut);
+
+            // 4. Mettre à jour l'affichage pour que l'utilisateur voie les étoiles (****)
+            txtAreaComment.setText(texteFiltre);
+
+            // 5. Envoyer le texte filtré à la base de données
+            fs.modifierFeedback(feedbackId, texteFiltre, etoilesModif);
+
+            afficherAlerte("Succès", "Votre avis a été mis à jour (les mots inappropriés ont été censurés) !", Alert.AlertType.INFORMATION);
         } catch (SQLException e) {
             afficherAlerte("Erreur", "Erreur SQL : " + e.getMessage(), Alert.AlertType.ERROR);
         }

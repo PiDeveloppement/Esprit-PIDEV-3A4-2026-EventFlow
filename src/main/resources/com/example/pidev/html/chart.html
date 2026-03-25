@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        body { margin: 0; padding: 15px; background: transparent; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; gap: 20px; }
+        .chart-box { background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        h3 { font-size: 14px; color: #64748b; margin: 0 0 10px 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+<div class="chart-box">
+    <h3>Évolution Mensuelle</h3>
+    <div id="chartLine"></div>
+</div>
+<div class="chart-box">
+    <h3>Répartition par Statut</h3>
+    <div id="chartDonut"></div>
+</div>
+
+<script>
+    var lineChart, donutChart;
+
+    // Configuration de la Courbe
+    lineChart = new ApexCharts(document.querySelector("#chartLine"), {
+        chart: { type: 'area', height: 200, toolbar: {show: false}, sparkline: {enabled: false} },
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
+        series: [{ name: 'Événements', data: [] }],
+        colors: ['#0ea5e9'],
+        xaxis: { categories: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'] }
+    });
+    lineChart.render();
+
+    // Configuration du Donut (Cercle)
+    donutChart = new ApexCharts(document.querySelector("#chartDonut"), {
+        chart: { type: 'donut', height: 200 },
+        series: [],
+        labels: ['À venir', 'En cours', 'Terminé'],
+        colors: ['#3b82f6', '#e2e8f0', '#94a3b8'],
+        plotOptions: { pie: { donut: { size: '70%' } } },
+        legend: { position: 'bottom' }
+    });
+    donutChart.render();
+
+    function updateCurve(data) { lineChart.updateSeries([{ data: data }]); }
+    function updateDonut(data) { donutChart.updateSeries(data); }
+</script>
+</body>
+</html>

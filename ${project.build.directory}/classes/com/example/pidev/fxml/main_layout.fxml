@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.geometry.Insets?>
+
+<StackPane fx:id="mainStackPane"
+           xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.pidev.MainController"
+           prefHeight="900" prefWidth="1400"
+           stylesheets="/com/example/pidev/css/atlantafx-custom.css">
+
+    <!-- VOTRE CONTENU PRINCIPAL EXISTANT (INCHANGÉ) -->
+    <HBox alignment="TOP_LEFT" StackPane.alignment="TOP_LEFT">
+        <VBox prefWidth="220" spacing="0" styleClass="sidebar-container-topbar" VBox.vgrow="ALWAYS">
+
+            <VBox style="-fx-background-color: #0D47A1; -fx-padding: 25 15;" alignment="CENTER" spacing="8">
+                <ImageView fitHeight="140" fitWidth="99" preserveRatio="true">
+                    <Image url="@images/logo.png" />
+                </ImageView>
+                <VBox spacing="1" alignment="CENTER">
+                    <Label text="EventFlow" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    <Label text="Gestion Événements" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 11px;"/>
+                </VBox>
+            </VBox>
+
+            <ScrollPane fitToWidth="true" vbarPolicy="NEVER"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"
+                        VBox.vgrow="ALWAYS">
+                <VBox spacing="6" alignment="CENTER" style="-fx-padding: 25 15;">
+
+                    <Button fx:id="dashboardBtn" text="Dashboard" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
+                        <graphic><Text text="📊" style="-fx-font-size: 16px; -fx-fill: white;"/></graphic>
+                    </Button>
+
+                    <VBox spacing="2" maxWidth="190">
+                        <Button fx:id="eventsToggleBtn" text="Événements" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
+                            <graphic>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Text text="📅" style="-fx-font-size: 16px; -fx-fill: white;"/>
+                                    <Text fx:id="eventsArrow" text="▶" style="-fx-font-size: 12px; -fx-fill: white;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <VBox fx:id="eventsSubmenu" spacing="1" visible="false" managed="false">
+                            <Button fx:id="eventsListBtn" text="    Liste événements" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📋" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="categoriesBtn" text="    Catégories" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="🏷️" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="ticketsBtn" text="    Billets" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="🎫" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="2" maxWidth="190">
+                        <Button fx:id="usersToggleBtn" text="Participants" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
+                            <graphic>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Text text="👥" style="-fx-font-size: 16px; -fx-fill: white;"/>
+                                    <Text fx:id="usersArrow" text="▶" style="-fx-font-size: 12px; -fx-fill: white;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <VBox fx:id="usersSubmenu" spacing="1" visible="false" managed="false">
+                            <Button fx:id="inscriptionsBtn" text="    Inscriptions" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📝" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="rolesBtn" text="    Rôles" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="👤" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="2" maxWidth="190">
+                        <Button fx:id="sponsorsBtn" text="Sponsors" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
+                            <graphic>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Text text="💼" style="-fx-font-size: 16px; -fx-fill: white;"/>
+                                    <Text fx:id="sponsorsArrow" text="▶" style="-fx-font-size: 12px; -fx-fill: white;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <VBox fx:id="sponsorsSubmenu" spacing="1" visible="false" managed="false">
+                            <Button fx:id="sponsorsListBtn" text="Sponsors" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📋" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="budgetBtn" text="Budget" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="💰" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="contratsBtn" text="Depences" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📄" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="2" maxWidth="190">
+                        <Button fx:id="resourcesToggleBtn" text="Ressources" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
+                            <graphic>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Text text="📦" style="-fx-font-size: 16px; -fx-fill: white;"/>
+                                    <Text fx:id="resourcesArrow" text="▶" style="-fx-font-size: 12px; -fx-fill: white;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <VBox fx:id="resourcesSubmenu" spacing="1" visible="false" managed="false">
+                            <Button fx:id="reservationsBtn" text="    Réservations" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📅" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="equipementsBtn" text="    Équipements" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="💻" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="sallesBtn" text="    Salles" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="🏢" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="2" maxWidth="190">
+                        <Button fx:id="questionnairesToggleBtn" text="Questionnaires" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
+                            <graphic>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Text text="📝" style="-fx-font-size: 16px; -fx-fill: white;"/>
+                                    <Text fx:id="questionnairesArrow" text="▶" style="-fx-font-size: 12px; -fx-fill: white;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <VBox fx:id="questionnairesSubmenu" spacing="1" visible="false" managed="false">
+                            <Button fx:id="questionsBtn" text="    Questions" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="❓" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="reponsesBtn" text="    Réponses" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📊" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                            <Button fx:id="participantQuizBtn" text="    Passer Quiz" maxWidth="180" prefHeight="35" styleClass="submenu-button">
+                                <graphic><Text text="📝" style="-fx-font-size: 14px; -fx-fill: white;"/></graphic>
+                            </Button>
+                        </VBox>
+                    </VBox>
+
+                </VBox>
+            </ScrollPane>
+
+            <VBox style="-fx-padding: 0 15 25 15; -fx-background-color: transparent;">
+                <Region prefHeight="6"/>
+                <Button fx:id="logoutBtn" text="Déconnexion" maxWidth="190" prefHeight="45" styleClass="logout-button">
+                    <graphic><Text text="🚪" style="-fx-font-size: 16px; -fx-fill: #ffcdd2;"/></graphic>
+                </Button>
+            </VBox>
+        </VBox>
+
+        <VBox spacing="0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+
+            <HBox style="-fx-background-color: #1565C0; -fx-padding: 8 20 8 20; -fx-spacing: 15;"
+                  alignment="CENTER_LEFT" prefHeight="60">
+                <HBox spacing="5" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="400">
+                    <TextField fx:id="globalSearchField" promptText="Recherche globale..."
+                               style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 20;
+                                      -fx-padding: 8 15; -fx-pref-width: 300; -fx-text-fill: white;
+                                      -fx-border-color: transparent; -fx-border-radius: 20;
+                                      -fx-prompt-text-fill: rgba(255,255,255,0.5);"/>
+                    <Button text="🔍" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 16px;"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox spacing="20" alignment="CENTER_RIGHT">
+                    <VBox alignment="CENTER_RIGHT" spacing="0">
+                        <Label fx:id="navDateLabel" text="Dimanche 15 février 2026"
+                               style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                        <Label fx:id="navTimeLabel" text="14:40:48"
+                               style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 11px;"/>
+                    </VBox>
+                    <MenuButton fx:id="profileMenu"
+                                style="-fx-background-color: rgba(255,255,255,0.2); -fx-border-color: rgba(255,255,255,0.3);
+                                       -fx-border-width: 1; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 5 15;">
+                        <graphic>
+                            <HBox spacing="8" alignment="CENTER">
+                                <StackPane fx:id="avatarContainer" alignment="CENTER" style="-fx-cursor: hand;">
+                                    <Circle radius="18" fill="rgba(255,255,255,0.3)"/>
+                                    <Circle radius="16" fill="white"/>
+                                    <ImageView fx:id="profileImageView" fitHeight="28" fitWidth="28" preserveRatio="true" visible="false">
+                                        <clip><Circle radius="14" centerX="14" centerY="14"/></clip>
+                                    </ImageView>
+                                    <StackPane fx:id="initialsContainer" visible="true">
+                                        <Circle radius="14" fill="#1565C0"/>
+                                        <Text fx:id="userInitialsText" text="OA"
+                                              style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-fill: white;"
+                                              StackPane.alignment="CENTER"/>
+                                    </StackPane>
+                                </StackPane>
+                                <VBox spacing="0" alignment="CENTER_LEFT">
+                                    <Label fx:id="userNameLabel" text="Ons Abdesslem"
+                                           style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                                    <Label fx:id="userRoleLabel" text="Administrateur"
+                                           style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 11px;"/>
+                                </VBox>
+                                <Text text="▼" style="-fx-font-size: 10px; -fx-fill: white;"/>
+                            </HBox>
+                        </graphic>
+                        <items>
+                            <MenuItem text="👤 Mon Profil" onAction="#showProfile"/>
+                            <MenuItem text="⚙️ Paramètres" onAction="#showSettings"/>
+                            <SeparatorMenuItem/>
+                            <MenuItem text="🚪 Déconnexion" onAction="#logout"/>
+                        </items>
+                    </MenuButton>
+                </HBox>
+            </HBox>
+
+            <VBox spacing="0" VBox.vgrow="ALWAYS">
+                <HBox style="-fx-background-color: white; -fx-padding: 15 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+                      alignment="CENTER_LEFT">
+                    <VBox spacing="5">
+                        <Label fx:id="pageTitle" text="Tableau de bord"
+                               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        <Label fx:id="pageSubtitle" text="Aperçu général de votre activité"
+                               style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <!-- KPI CONTAINER (caché par défaut, géré dynamiquement) -->
+                    <HBox fx:id="kpiContainer" spacing="20" alignment="CENTER_RIGHT"
+                          visible="false" managed="false">
+                        <!-- Les KPI seront ajoutés dynamiquement par le MainController -->
+                    </HBox>
+                </HBox>
+
+                <VBox fx:id="pageContentContainer" VBox.vgrow="ALWAYS"
+                      style="-fx-background-color: #f8fafc; -fx-padding: 20;"/>
+            </VBox>
+        </VBox>
+    </HBox>
+
+    <!-- ===== NOUVEAU : PANNEAU DE CHAT MODERNE (SUPERPOSÉ) ===== -->
+    <VBox fx:id="chatPanel"
+          visible="false" managed="false"
+          style="-fx-background-color: white;
+                 -fx-pref-width: 400;
+                 -fx-max-width: 400;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, -5, 0);
+                 -fx-background-radius: 16 0 0 16;
+                 -fx-border-color: #e0e0e0;
+                 -fx-border-width: 0 0 0 1;"
+          StackPane.alignment="CENTER_RIGHT">
+
+        <!-- Overlay transparent pour animation (optionnel) -->
+        <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+
+        <!-- En-tête moderne -->
+        <HBox alignment="CENTER_LEFT" spacing="12"
+              style="-fx-background-color: linear-gradient(to right, #2196F3, #1565C0);
+                     -fx-padding: 20 15;">
+            <StackPane>
+                <Circle radius="22" fill="white" opacity="0.2"/>
+                <Label text="🤖" style="-fx-font-size: 28px;"/>
+            </StackPane>
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label text="Assistant IA"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label fx:id="statusIndicator"
+                       text="● Connecté"
+                       style="-fx-font-size: 12px; -fx-text-fill: #BBDEFB;"/>
+            </VBox>
+            <Button fx:id="closeChatButton"
+                    onAction="#toggleChatPanel"
+                    style="-fx-background-color: rgba(255,255,255,0.2);
+                           -fx-background-radius: 20;
+                           -fx-text-fill: white; -fx-cursor: hand;
+                           -fx-font-size: 16px; -fx-font-weight: bold;"
+                    text="✕" prefWidth="32" prefHeight="32"/>
+        </HBox>
+
+        <!-- Zone de chat -->
+        <ScrollPane fx:id="chatScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
+                    style="-fx-background: #f8f9fa; -fx-background-color: #f8f9fa;
+                           -fx-border-color: null;">
+            <VBox fx:id="chatBox" spacing="15" style="-fx-padding: 20;">
+                <!-- Message de bienvenue -->
+                <HBox alignment="CENTER_LEFT">
+                    <StackPane style="-fx-padding: 0 10 0 0;">
+                        <Circle radius="18" fill="#2196F3" opacity="0.2"/>
+                        <Label text="🤖" style="-fx-font-size: 20px;"/>
+                    </StackPane>
+                    <VBox style="-fx-background-color: #E3F2FD;
+                                 -fx-background-radius: 16 16 16 5;
+                                 -fx-padding: 12;">
+                        <Label text="🎉 Bonjour ! Je suis votre assistant de gestion."
+                               wrapText="true" style="-fx-text-fill: #333; -fx-font-size: 13px;"/>
+                        <Label text="Posez-moi des questions sur les utilisateurs, événements..."
+                               wrapText="true" style="-fx-text-fill: #666; -fx-font-size: 12px;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Suggestions rapides -->
+                <VBox spacing="8" style="-fx-padding: 10 0 0 25;">
+                    <Label text="✨ Suggestions"
+                           style="-fx-font-weight: bold; -fx-text-fill: #666; -fx-font-size: 11px;"/>
+                    <Button onAction="#handleSuggestion"
+                            style="-fx-background-color: #E3F2FD;
+                                   -fx-background-radius: 20;
+                                   -fx-padding: 10 15;
+                                   -fx-cursor: hand;
+                                   -fx-alignment: CENTER_LEFT;
+                                   -fx-border-color: #90CAF9;
+                                   -fx-border-radius: 20;
+                                   -fx-max-width: 350;"
+                            text="📊 Combien d'utilisateurs sont inscrits ?"
+                            userData="statistiques"/>
+                    <Button onAction="#handleSuggestion"
+                            style="-fx-background-color: #E3F2FD;
+                                   -fx-background-radius: 20;
+                                   -fx-padding: 10 15;
+                                   -fx-cursor: hand;
+                                   -fx-alignment: CENTER_LEFT;
+                                   -fx-border-color: #90CAF9;
+                                   -fx-border-radius: 20;
+                                   -fx-max-width: 350;"
+                            text="👥 Liste des administrateurs"
+                            userData="liste admins"/>
+                    <Button onAction="#handleSuggestion"
+                            style="-fx-background-color: #E3F2FD;
+                                   -fx-background-radius: 20;
+                                   -fx-padding: 10 15;
+                                   -fx-cursor: hand;
+                                   -fx-alignment: CENTER_LEFT;
+                                   -fx-border-color: #90CAF9;
+                                   -fx-border-radius: 20;
+                                   -fx-max-width: 350;"
+                            text="📅 Nouveaux utilisateurs ce mois"
+                            userData="nouveaux utilisateurs"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+
+        <!-- Zone de saisie -->
+        <HBox spacing="10" style="-fx-background-color: white;
+                                   -fx-padding: 15;
+                                   -fx-border-color: #e0e0e0;
+                                   -fx-border-width: 1 0 0 0;">
+            <TextField fx:id="inputField"
+                       promptText="Écrivez votre message..."
+                       HBox.hgrow="ALWAYS"
+                       style="-fx-background-color: #f8f9fa;
+                              -fx-background-radius: 25;
+                              -fx-padding: 12 20;
+                              -fx-border-color: #e0e0e0;
+                              -fx-border-radius: 25;"/>
+            <Button fx:id="sendButton" onAction="#handleSendMessage"
+                    style="-fx-background-color: #2196F3;
+                           -fx-background-radius: 25;
+                           -fx-padding: 12 25;
+                           -fx-cursor: hand;"
+                    text="Envoyer" textFill="white"/>
+        </HBox>
+
+        <!-- Footer -->
+        <HBox alignment="CENTER" spacing="10"
+              style="-fx-background-color: #f8f9fa;
+                     -fx-padding: 10;">
+            <Button fx:id="clearButton" onAction="#handleClearChat"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #f44336;
+                           -fx-cursor: hand;
+                           -fx-font-size: 12px;"
+                    text="🗑️ Effacer"/>
+            <Label text="•" style="-fx-text-fill: #ccc;"/>
+            <Label text="Astuce: Entrée pour envoyer"
+                   style="-fx-text-fill: #999; -fx-font-size: 11px;"/>
+        </HBox>
+    </VBox>
+
+    <!-- ===== BOUTON FLOTTANT ASSISTANT CHAT (EN BAS À DROITE) ===== -->
+    <Button fx:id="chatFloatingButton"
+            onAction="#toggleChatPanel"
+            style="-fx-background-color: linear-gradient(to bottom, #2196F3, #1565C0);
+                   -fx-background-radius: 30;
+                   -fx-min-width: 60; -fx-min-height: 60;
+                   -fx-max-width: 60; -fx-max-height: 60;
+                   -fx-cursor: hand;
+                   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 4);
+                   -fx-translate-x: -20; -fx-translate-y: -20;"
+            StackPane.alignment="BOTTOM_RIGHT">
+        <graphic>
+            <StackPane>
+                <Label text="🤖" style="-fx-font-size: 28px; -fx-text-fill: white;"/>
+                <Circle radius="6" fill="#4CAF50" stroke="white" strokeWidth="2"
+                        translateX="15" translateY="-15"/>
+            </StackPane>
+        </graphic>
+        <tooltip>
+            <Tooltip text="Assistant IA - Cliquez pour discuter !" />
+        </tooltip>
+    </Button>
+    <!-- ===== FIN BOUTON FLOTTANT ===== -->
+
+</StackPane>

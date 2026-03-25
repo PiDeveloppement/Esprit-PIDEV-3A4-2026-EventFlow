@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<VBox spacing="25" styleClass="form-container" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.EquipementFormController">
+    <padding><Insets bottom="30" left="30" right="30" top="30" /></padding>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <StackPane style="-fx-background-color: #3b82f6; -fx-background-radius: 10; -fx-padding: 10;">
+            <Text text="🛠️" style="-fx-fill: white; -fx-font-size: 20;" />
+        </StackPane>
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label fx:id="titleLabel" text="Ajouter un Équipement" styleClass="form-title" />
+            <Label text="Mise à jour de l'inventaire en temps réel" styleClass="form-subtitle" />
+        </VBox>
+
+        <VBox alignment="CENTER_RIGHT" spacing="5">
+            <Button fx:id="voiceBtn" onAction="#toggleVoiceControl" prefHeight="45" prefWidth="45"
+                    style="-fx-background-color: #ef4444; -fx-background-radius: 50; -fx-cursor: hand;" text="🎙️" textFill="WHITE">
+                <tooltip><Tooltip text="Activer la commande vocale" /></tooltip>
+            </Button>
+            <Label fx:id="voiceStatusLabel" text="Micro Off" style="-fx-font-size: 10; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" />
+        </VBox>
+    </HBox>
+
+    <Separator style="-fx-opacity: 0.3;" />
+
+    <GridPane hgap="20" vgap="20">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
+        </columnConstraints>
+
+        <VBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
+            <Label text="Nom de l'équipement" styleClass="field-label" />
+            <TextField fx:id="nameField" promptText="Ex: Vidéoprojecteur Epson" styleClass="modern-text-field" />
+        </VBox>
+
+        <VBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="0">
+            <Label text="Catégorie" styleClass="field-label" />
+            <TextField fx:id="typeField" promptText="Ex: Multimédia" styleClass="modern-text-field" />
+        </VBox>
+
+        <VBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label text="Quantité" styleClass="field-label" />
+            <TextField fx:id="quantityField" promptText="0" styleClass="modern-text-field" />
+        </VBox>
+
+        <VBox spacing="8" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2">
+            <Label text="Statut de disponibilité" styleClass="field-label" />
+            <ComboBox fx:id="statusCombo" maxWidth="Infinity" styleClass="modern-combo-box" promptText="Choisir un état..." />
+        </VBox>
+
+        <VBox spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="image-upload-card">
+            <Label text="Visuel de l'article" styleClass="field-label" />
+            <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-border-style: dashed;">
+                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                    <Text text="Format supporté : PNG, JPG" style="-fx-fill: #94a3b8; -fx-font-size: 11;" />
+                    <Button onAction="#choisirImage" text="🖼️ Sélectionner un fichier" styleClass="btn-secondary" />
+                </VBox>
+                <StackPane prefHeight="80" prefWidth="80" styleClass="image-preview-wrapper">
+                    <ImageView fx:id="previewImage" fitHeight="70" fitWidth="70" preserveRatio="true" />
+                </StackPane>
+            </HBox>
+        </VBox>
+    </GridPane>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button onAction="#annuler" text="✖ Annuler" styleClass="btn-cancel" />
+        <Button fx:id="btnValider" onAction="#enregistrer" text="💾 Confirmer l'enregistrement" styleClass="btn-save" />
+    </HBox>
+</VBox>
