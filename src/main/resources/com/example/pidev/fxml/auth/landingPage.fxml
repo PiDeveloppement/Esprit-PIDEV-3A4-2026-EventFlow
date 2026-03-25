@@ -24,12 +24,12 @@
         <HBox spacing="34" alignment="CENTER">
             <Button text="Accueil" onAction="#scrollToTop"
                     style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 600; -fx-cursor: hand;"/>
-            <Button fx:id="eventsBtn" text="Evenements" onAction="#handleGoToEvents"
+            <Button fx:id="eventsBtn" text="Événements" onAction="#handleGoToEvents"
                     style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 600; -fx-cursor: hand;"/>
             <Button fx:id="sponsorRecoBtn" text="Recommandations sponsor" onAction="#handleSponsorPortal"
                     visible="false" managed="false"
                     style="-fx-background-color: transparent; -fx-text-fill: #0D47A1; -fx-font-size: 16px; -fx-font-weight: 700; -fx-cursor: hand;"/>
-            <Button text="Fonctionnalites" onAction="#scrollToFeatures"
+            <Button text="Fonctionnalités" onAction="#scrollToFeatures"
                     style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 600; -fx-cursor: hand;"/>
             <Button text="Feedback" onAction="#handleFeedback"
                     style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 600; -fx-cursor: hand;"/>
@@ -56,7 +56,7 @@
                            -fx-background-radius: 8; -fx-padding: 6 14; -fx-cursor: hand;">
             <items>
                 <MenuItem fx:id="profileMenuItem" text="Mon profil" onAction="#handleProfile"/>
-                <MenuItem fx:id="logoutMenuItem" text="Deconnexion" onAction="#handleLogout"/>
+                <MenuItem fx:id="logoutMenuItem" text="Déconnexion" onAction="#handleLogout"/>
             </items>
         </MenuButton>
     </HBox>
@@ -66,32 +66,48 @@
                 hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
 
         <VBox spacing="0">
-            <VBox fx:id="homeSection" spacing="30" style="-fx-padding: 70 100;">
+            <VBox fx:id="homeSection" spacing="40" style="-fx-padding: 80 100;">
                 <HBox spacing="60" alignment="CENTER">
-                    <VBox spacing="22" HBox.hgrow="ALWAYS" maxWidth="640">
-                        <Label text="Organisez vos evenements avec simplicite"
-                               style="-fx-font-size: 46px; -fx-font-weight: 800; -fx-text-fill: #0A1929;"
+                    <VBox spacing="25" HBox.hgrow="ALWAYS" maxWidth="600">
+                        <Label text="Organisez vos événements&#10;comme jamais auparavant"
+                               style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #0A1929;"
                                wrapText="true"/>
-                        <Label text="EventFlow centralise la gestion des evenements, des participants, des sponsors et des ressources."
+                        <Label text="EventFlow est la plateforme tout-en-un qui simplifie la gestion de vos événements, participants, sponsors et ressources. Rejoignez des milliers d'organisateurs satisfaits."
                                style="-fx-font-size: 18px; -fx-text-fill: #546e7a;"
                                wrapText="true"/>
-                        <HBox spacing="18" style="-fx-padding: 8 0 0 0;">
-                            <Button text="Commencer" onAction="#handleSignup"
+                        <HBox spacing="20" style="-fx-padding: 10 0 0 0;">
+                            <Button text="Commencer gratuite..." onAction="#handleSignup"
                                     style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: 700; -fx-font-size: 16px;
-                                           -fx-background-radius: 10; -fx-padding: 14 30; -fx-cursor: hand;"/>
-                            <Button text="Voir la demo" onAction="#handleDemo"
+                                           -fx-background-radius: 10; -fx-padding: 15 35; -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.4), 12, 0, 0, 4);"/>
+                            <Button text="Voir la d..." onAction="#handleDemo"
                                     style="-fx-background-color: white; -fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 16px;
                                            -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 10;
-                                           -fx-background-radius: 10; -fx-padding: 14 28; -fx-cursor: hand;"/>
-                            <Button text="Get Certificate" onAction="#handleGetCertificate"
+                                           -fx-background-radius: 10; -fx-padding: 15 35; -fx-cursor: hand;"/>
+                            <Button text="🎓 Get Certifi..." onAction="#handleGetCertificate"
                                     style="-fx-background-color: #f59e0b; -fx-text-fill: white;
-                                           -fx-font-weight: 700; -fx-font-size: 16px; -fx-background-radius: 10;
-                                           -fx-padding: 14 24; -fx-cursor: hand;"/>
+                                           -fx-font-weight: bold; -fx-font-size: 16px; -fx-background-radius: 10;
+                                           -fx-padding: 15 25; -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, rgba(245,158,11,0.4), 12, 0, 0, 4);"/>
+                        </HBox>
+                        <HBox spacing="50" style="-fx-padding: 30 0 0 0;">
+                            <VBox spacing="5">
+                                <Label text="500+" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;"/>
+                                <Label text="Événements" style="-fx-text-fill: #64748b; -fx-font-size: 15px;"/>
+                            </VBox>
+                            <VBox spacing="5">
+                                <Label text="10k+" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;"/>
+                                <Label text="Participants" style="-fx-text-fill: #64748b; -fx-font-size: 15px;"/>
+                            </VBox>
+                            <VBox spacing="5">
+                                <Label text="200+" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #0D47A1;"/>
+                                <Label text="Sponsors" style="-fx-text-fill: #64748b; -fx-font-size: 15px;"/>
+                            </VBox>
                         </HBox>
                     </VBox>
-                    <StackPane prefWidth="420" prefHeight="360"
-                               style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #E3F2FD, #BBDEFB); -fx-background-radius: 28;">
-                        <Label text="EF" style="-fx-font-size: 120px; -fx-font-weight: 900; -fx-text-fill: #0D47A1;"/>
+                    <StackPane prefWidth="450" prefHeight="400"
+                               style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #E3F2FD, #BBDEFB); -fx-background-radius: 30;">
+                        <Label text="🚀" style="-fx-font-size: 140px;"/>
                     </StackPane>
                 </HBox>
             </VBox>

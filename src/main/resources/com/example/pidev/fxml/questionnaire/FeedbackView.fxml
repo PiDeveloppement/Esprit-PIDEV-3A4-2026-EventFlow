@@ -2,11 +2,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.questionnaire.FeedbackViewController"
-      style="-fx-background-color: #f1f5f9;"
-      spacing="0">
+<ScrollPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.questionnaire.FeedbackViewController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+    <VBox style="-fx-background-color: #f8fafc;"
+          spacing="0">
 
     <!-- HEADER BLANC -->
     <VBox style="-fx-background-color: white;
@@ -20,7 +25,7 @@
                 <Label text="See what customers are saying about your work"
                        style="-fx-font-size: 12px; -fx-text-fill: #9ca3af;"/>
             </VBox>
-            <Button fx:id="btnExport" text="⬆  Export" onAction="#handleExport"
+            <Button fx:id="btnExport" text="↑  Export" onAction="#handleExport"
                     style="-fx-background-color: white; -fx-text-fill: #374151;
                            -fx-font-size: 12px; -fx-font-weight: 600;
                            -fx-background-radius: 8; -fx-border-color: #d1d5db;
@@ -94,9 +99,9 @@
     <!-- CORPS -->
     <HBox spacing="0" VBox.vgrow="ALWAYS">
 
-        <!-- PANNEAU GAUCHE — 320px -->
-        <VBox style="-fx-background-color: #f1f5f9; -fx-padding: 16 14;"
-              prefWidth="360" minWidth="360" spacing="12">
+        <!-- PANNEAU GAUCHE â€” 320px -->
+        <VBox style="-fx-background-color: #f8fafc; -fx-padding: 16 14;"
+              prefWidth="320" minWidth="320" spacing="12">
             <VBox style="-fx-background-color: white; -fx-background-radius: 12;
                          -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 12;
                          -fx-padding: 14 10;" spacing="10">
@@ -117,7 +122,7 @@
 
         <!-- PANNEAU DROIT -->
         <VBox VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
-              style="-fx-background-color: #f1f5f9;" spacing="0">
+              style="-fx-background-color: #f8fafc;" spacing="0">
 
             <HBox style="-fx-background-color: white; -fx-padding: 0 20;
                          -fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0;" spacing="0">
@@ -138,14 +143,12 @@
                                -fx-border-width: 0 0 2.5 0;"/>
             </HBox>
 
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
-                        style="-fx-background-color: transparent; -fx-border-color: transparent;"
-                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-                <VBox fx:id="feedbackListContainer" spacing="12"
-                      style="-fx-padding: 16 20;"/>
-            </ScrollPane>
+            <VBox fx:id="feedbackListContainer" spacing="12"
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-padding: 16 20;"/>
 
         </VBox>
     </HBox>
 
-</VBox>
+    </VBox>
+</ScrollPane>

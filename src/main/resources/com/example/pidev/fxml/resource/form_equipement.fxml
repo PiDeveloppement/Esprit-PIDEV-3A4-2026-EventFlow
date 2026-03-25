@@ -5,7 +5,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 
-<VBox spacing="25" styleClass="form-container" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.EquipementFormController">
+<ScrollPane fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.EquipementFormController">
+<content>
+<VBox spacing="25" styleClass="form-container" stylesheets="@style.css">
     <padding><Insets bottom="30" left="30" right="30" top="30" /></padding>
 
     <HBox spacing="15" alignment="CENTER_LEFT">
@@ -73,3 +81,5 @@
         <Button fx:id="btnValider" onAction="#enregistrer" text="💾 Confirmer l'enregistrement" styleClass="btn-save" />
     </HBox>
 </VBox>
+</content>
+</ScrollPane>

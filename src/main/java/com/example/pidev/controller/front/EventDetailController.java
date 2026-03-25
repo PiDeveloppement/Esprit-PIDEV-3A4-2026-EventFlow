@@ -386,4 +386,3 @@ public class EventDetailController {
     }
 }
 
-

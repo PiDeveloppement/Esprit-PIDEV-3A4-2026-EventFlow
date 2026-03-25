@@ -7,6 +7,7 @@ import com.example.pidev.model.weather.WeatherData;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.event.EventCategoryService;
 import com.example.pidev.service.weather.WeatherService;
+import com.example.pidev.utils.UserSession;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -905,6 +906,14 @@ public class EventFormController {
         field.setStyle("-fx-border-color: #ced4da; -fx-background-color: #f8f9fa;");
     }
 
+    private String safeTrim(TextInputControl field) {
+        if (field == null) {
+            return "";
+        }
+        String text = field.getText();
+        return text == null ? "" : text.trim();
+    }
+
     // ==================== ACTIONS ====================
 
     @FXML
@@ -944,8 +953,8 @@ public class EventFormController {
             return;
         }
 
-        String title = titleField.getText().trim();
-        String description = descriptionArea.getText().trim();
+        String title = safeTrim(titleField);
+        String description = safeTrim(descriptionArea);
         String gouvernorat = gouvernoratCombo.getValue();
         String ville = villeCombo.getValue();
         String location = locationCombo.getValue();
@@ -953,15 +962,28 @@ public class EventFormController {
         // Si l'utilisateur a choisi "Autre (saisir manuellement)" ou qu'il n'y a pas de sélection
         if (location == null || location.isEmpty() || location.equals("Autre (saisir manuellement)")) {
             // Laisser l'utilisateur saisir manuellement
-            location = locationCombo.getEditor().getText().trim();
+            location = safeTrim(locationCombo.getEditor());
             if (location.isEmpty()) {
                 showError("Erreur", "Veuillez sélectionner ou saisir un lieu");
                 return;
             }
         }
 
-        int capacity = Integer.parseInt(capacityField.getText());
-        String imageUrl = imageUrlField.getText().trim();
+        String capacityText = safeTrim(capacityField);
+        if (capacityText.isEmpty()) {
+            showError("Erreur", "Veuillez saisir une capacité valide");
+            return;
+        }
+
+        int capacity;
+        try {
+            capacity = Integer.parseInt(capacityText);
+        } catch (NumberFormatException e) {
+            showError("Erreur", "La capacité doit être un nombre entier");
+            return;
+        }
+
+        String imageUrl = safeTrim(imageUrlField);
 
         String categoryName = categoryCombo.getValue();
         int categoryId = 1;
@@ -971,7 +993,26 @@ public class EventFormController {
         }
 
         boolean isFree = freeCheckbox.isSelected();
-        double price = isFree ? 0 : Double.parseDouble(priceField.getText());
+        double price = 0;
+        if (!isFree) {
+            String priceText = safeTrim(priceField);
+            if (priceText.isEmpty()) {
+                showError("Erreur", "Veuillez saisir un prix valide");
+                return;
+            }
+            try {
+                price = Double.parseDouble(priceText);
+            } catch (NumberFormatException e) {
+                showError("Erreur", "Le prix doit être un nombre valide");
+                return;
+            }
+        }
+
+        int creatorId = UserSession.getInstance().getUserId();
+        if (creatorId <= 0) {
+            showError("Erreur", "Utilisateur non connecté. Veuillez vous reconnecter.");
+            return;
+        }
 
         LocalDateTime startDate = LocalDateTime.of(
                 startDatePicker.getValue(),
@@ -989,7 +1030,7 @@ public class EventFormController {
             if (currentEvent == null) {
                 // Création
                 Event newEvent = new Event(title, description, startDate, endDate,
-                        location, capacity, imageUrl, categoryId, 1,
+                        location, capacity, imageUrl, categoryId, creatorId,
                         isFree, price);
                 newEvent.setGouvernorat(gouvernorat);
                 newEvent.setVille(ville);
@@ -1020,6 +1061,7 @@ public class EventFormController {
                 currentEvent.setCapacity(capacity);
                 currentEvent.setImageUrl(imageUrl);
                 currentEvent.setCategoryId(categoryId);
+                currentEvent.setCreatedBy(creatorId);
                 currentEvent.setFree(isFree);
                 currentEvent.setTicketPrice(price);
 

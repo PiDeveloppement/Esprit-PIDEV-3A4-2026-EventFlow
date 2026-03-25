@@ -5,9 +5,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 
-<VBox spacing="25" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.resource.SalleFormController">
+<ScrollPane fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.SalleFormController">
+    <content>
+<VBox spacing="25" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
 
     <padding>
         <Insets top="30" right="50" bottom="30" left="50"/>
@@ -89,3 +95,5 @@
                 style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 45; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(34,197,94,0.3), 10, 0, 0, 5);"/>
     </HBox>
 </VBox>
+    </content>
+</ScrollPane>

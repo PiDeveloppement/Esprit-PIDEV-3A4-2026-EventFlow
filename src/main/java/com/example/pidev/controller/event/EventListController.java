@@ -463,8 +463,12 @@ public class EventListController {
         long upcoming = allEvents.stream()
                 .filter(e -> e.getStartDate() != null && e.getStartDate().isAfter(LocalDateTime.now()))
                 .count();
-        totalLabel.setText(String.valueOf(total));
-        upcomingLabel.setText(String.valueOf(upcoming));
+        if (totalLabel != null) {
+            totalLabel.setText(String.valueOf(total));
+        }
+        if (upcomingLabel != null) {
+            upcomingLabel.setText(String.valueOf(upcoming));
+        }
     }
 
     @FXML
@@ -937,4 +941,3 @@ public class EventListController {
         }
     }
 }
-

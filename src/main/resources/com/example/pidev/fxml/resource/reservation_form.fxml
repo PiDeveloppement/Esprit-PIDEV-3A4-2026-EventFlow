@@ -3,7 +3,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
 
-<VBox spacing="20.0" style="-fx-background-color: #f1f5f9; -fx-padding: 30;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.ReservationFormController">
+<ScrollPane fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.ReservationFormController">
+<content>
+<VBox spacing="20.0" style="-fx-background-color: #f1f5f9; -fx-padding: 30;">
     <HBox spacing="15" alignment="CENTER_LEFT">
         <Button text="← Retour" onAction="#goBack" style="-fx-background-color: #64748b; -fx-text-fill: white;"/>
         <Label text="Formulaire de Réservation" style="-fx-font-size: 20; -fx-font-weight: bold;" />
@@ -47,3 +55,5 @@
 
     <Label fx:id="voiceStatusLabel" text="Micro désactivé" style="-fx-text-fill: #94a3b8; -fx-font-style: italic;" />
 </VBox>
+</content>
+</ScrollPane>

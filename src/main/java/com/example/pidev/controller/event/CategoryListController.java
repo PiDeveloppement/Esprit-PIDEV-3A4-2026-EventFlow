@@ -34,7 +34,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
- * Controller pour la liste des catégories - Version avec recherche corrigée
+ * Controller pour la liste des catÃ©gories - Version avec recherche corrigÃ©e
  * @author Ons Abdesslem
  */
 public class CategoryListController {
@@ -83,7 +83,7 @@ public class CategoryListController {
 
     @FXML
     public void initialize() {
-        System.out.println("✅ CategoryListController initialisé");
+        System.out.println("âœ… CategoryListController initialisÃ©");
 
         categoryService = new EventCategoryService();
 
@@ -91,7 +91,7 @@ public class CategoryListController {
         setupTableColumns();
         loadCategories();
 
-        // ========== DATE/HEURE TEMPS RÉEL ==========
+        // ========== DATE/HEURE TEMPS RÃ‰EL ==========
         updateDateTime();
         Timeline clock = new Timeline(
                 new KeyFrame(Duration.ZERO, e -> updateDateTime()),
@@ -125,9 +125,9 @@ public class CategoryListController {
     private void setupFilters() {
         // ============ RECHERCHE ============
         if (searchField != null) {
-            searchField.setPromptText("Rechercher une catégorie...");
+            searchField.setPromptText("Rechercher une catÃ©gorie...");
             searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-                System.out.println("🔍 Recherche changée: '" + newVal + "' (ancienne: '" + oldVal + "')");
+                System.out.println("ðŸ” Recherche changÃ©e: '" + newVal + "' (ancienne: '" + oldVal + "')");
                 currentPage = 1;
                 applyFilters();
             });
@@ -138,7 +138,7 @@ public class CategoryListController {
             statusFilter.getItems().addAll("Tous les statuts", "Actif", "Inactif");
             statusFilter.setValue("Tous les statuts");
             statusFilter.valueProperty().addListener((obs, old, newVal) -> {
-                System.out.println("📊 Filtre statut changé: " + newVal);
+                System.out.println("ðŸ“Š Filtre statut changÃ©: " + newVal);
                 currentPage = 1;
                 applyFilters();
             });
@@ -150,7 +150,7 @@ public class CategoryListController {
             configureColorFilterCells();
             colorFilter.setValue("Toutes les couleurs");
             colorFilter.valueProperty().addListener((obs, old, newVal) -> {
-                System.out.println("🎨 Filtre couleur changé: " + newVal);
+                System.out.println("ðŸŽ¨ Filtre couleur changÃ©: " + newVal);
                 currentPage = 1;
                 applyFilters();
             });
@@ -158,20 +158,20 @@ public class CategoryListController {
 
         // ============ TRI (ORDRE) ============
         if (sortOrder != null) {
-            sortOrder.getItems().addAll("A → Z", "Z → A", "Plus récents", "Plus anciens");
-            sortOrder.setValue("A → Z");
+            sortOrder.getItems().addAll("A â†’ Z", "Z â†’ A", "Plus rÃ©cents", "Plus anciens");
+            sortOrder.setValue("A â†’ Z");
             sortOrder.valueProperty().addListener((obs, old, newVal) -> {
-                System.out.println("🔤 Tri changé: " + newVal);
+                System.out.println("ðŸ”¤ Tri changÃ©: " + newVal);
                 currentPage = 1;
                 applyFilters();
             });
         }
 
-        System.out.println("✅ Filtres configurés");
+        System.out.println("âœ… Filtres configurÃ©s");
     }
 
     /**
-     * Configure les cellules du filtre COULEUR avec affichage personnalisé
+     * Configure les cellules du filtre COULEUR avec affichage personnalisÃ©
      */
     private void configureColorFilterCells() {
         colorFilter.setCellFactory(listView -> new ListCell<>() {
@@ -257,7 +257,7 @@ public class CategoryListController {
     }
 
     private void setupTableColumns() {
-        // Catégorie avec icône
+        // CatÃ©gorie avec icÃ´ne
         categoryCol.setCellValueFactory(param ->
                 new javafx.beans.property.SimpleObjectProperty<>(param.getValue())
         );
@@ -268,7 +268,7 @@ public class CategoryListController {
                 if (empty || cat == null) {
                     setGraphic(null);
                 } else {
-                    Label icon = new Label(cat.getIcon() != null ? cat.getIcon() : "📌");
+                    Label icon = new Label(cat.getIcon() != null ? cat.getIcon() : "ðŸ“Œ");
                     icon.setStyle("-fx-font-size: 22px;");
                     Label name = new Label(cat.getName());
                     name.setStyle("-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;");
@@ -402,9 +402,9 @@ public class CategoryListController {
             populateColorFilter();
             applyFilters();
             updateStatistics();
-            System.out.println("✅ " + allCategories.size() + " catégories chargées");
+            System.out.println("âœ… " + allCategories.size() + " catÃ©gories chargÃ©es");
         } catch (Exception e) {
-            System.err.println("❌ Erreur: " + e.getMessage());
+            System.err.println("âŒ Erreur: " + e.getMessage());
         }
     }
 
@@ -430,7 +430,7 @@ public class CategoryListController {
             colorFilter.setValue("Toutes les couleurs");
         }
 
-        System.out.println("✅ Filtre couleur mis à jour avec " + (colors.size() + 1) + " options");
+        System.out.println("âœ… Filtre couleur mis Ã  jour avec " + (colors.size() + 1) + " options");
     }
 
     private String extractColorHex(String colorText) {
@@ -462,11 +462,11 @@ public class CategoryListController {
     }
 
     /**
-     * Méthode de filtrage avec la recherche de l'ancien code (qui fonctionnait)
+     * MÃ©thode de filtrage avec la recherche de l'ancien code (qui fonctionnait)
      */
     private void applyFilters() {
         if (allCategories == null || allCategories.isEmpty()) {
-            System.out.println("⚠️ Aucune catégorie chargée");
+            System.out.println("âš ï¸ Aucune catÃ©gorie chargÃ©e");
             return;
         }
 
@@ -479,15 +479,15 @@ public class CategoryListController {
 
         // ========== LOGS DE DIAGNOSTIC ==========
         if (!searchText.isEmpty()) {
-            System.out.println("\n🔎 DIAGNOSTIC DE RECHERCHE");
+            System.out.println("\nðŸ”Ž DIAGNOSTIC DE RECHERCHE");
             System.out.println("   Texte saisi: '" + searchField.getText() + "'");
-            System.out.println("   Texte traité: '" + searchText + "'");
-            System.out.println("   Total catégories: " + allCategories.size());
+            System.out.println("   Texte traitÃ©: '" + searchText + "'");
+            System.out.println("   Total catÃ©gories: " + allCategories.size());
         }
 
         List<EventCategory> filtered = allCategories.stream()
                 .filter(cat -> {
-                    // RECHERCHE - cherche au DÉBUT du nom (startsWith) et dans la description
+                    // RECHERCHE - cherche au DÃ‰BUT du nom (startsWith) et dans la description
                     boolean matchSearch = searchText.isEmpty() ||
                             cat.getName().toLowerCase().startsWith(searchText) ||
                             (cat.getDescription() != null && cat.getDescription().toLowerCase().startsWith(searchText));
@@ -500,14 +500,14 @@ public class CategoryListController {
                             (selectedColorHex != null && cat.getColor() != null &&
                                     cat.getColor().equalsIgnoreCase(selectedColorHex));
 
-                    // Log détaillé pour chaque catégorie
+                    // Log dÃ©taillÃ© pour chaque catÃ©gorie
                     if (!searchText.isEmpty()) {
                         boolean nameMatch = cat.getName().toLowerCase().startsWith(searchText);
                         boolean descMatch = cat.getDescription() != null &&
                                 cat.getDescription().toLowerCase().startsWith(searchText);
                         if (matchSearch) {
                             String source = nameMatch ? "(nom)" : descMatch ? "(desc)" : "(vide)";
-                            System.out.println("   ✅ '" + cat.getName() + "' " + source);
+                            System.out.println("   âœ… '" + cat.getName() + "' " + source);
                         }
                     }
 
@@ -516,14 +516,14 @@ public class CategoryListController {
                 .collect(Collectors.toList());
 
         if (!searchText.isEmpty()) {
-            System.out.println("   📊 Résultat: " + filtered.size() + "/" + allCategories.size() + " catégories\n");
+            System.out.println("   ðŸ“Š RÃ©sultat: " + filtered.size() + "/" + allCategories.size() + " catÃ©gories\n");
         }
 
         if (sort != null) {
             switch (sort) {
-                case "A → Z": filtered.sort(Comparator.comparing(EventCategory::getName)); break;
-                case "Z → A": filtered.sort(Comparator.comparing(EventCategory::getName).reversed()); break;
-                case "Plus récents": filtered.sort(Comparator.comparing(EventCategory::getCreatedAt).reversed()); break;
+                case "A â†’ Z": filtered.sort(Comparator.comparing(EventCategory::getName)); break;
+                case "Z â†’ A": filtered.sort(Comparator.comparing(EventCategory::getName).reversed()); break;
+                case "Plus rÃ©cents": filtered.sort(Comparator.comparing(EventCategory::getCreatedAt).reversed()); break;
                 case "Plus anciens": filtered.sort(Comparator.comparing(EventCategory::getCreatedAt)); break;
             }
         } else {
@@ -532,13 +532,13 @@ public class CategoryListController {
 
         filteredCategories = filtered;
         currentPage = 1;
-        resultLabel.setText(filtered.size() + " résultat(s) trouvé(s)");
+        resultLabel.setText(filtered.size() + " rÃ©sultat(s) trouvÃ©(s)");
         setupPagination();
     }
 
     @FXML
     private void handleAdd() {
-        System.out.println("[CategoryList] handleAdd() appelé");
+        System.out.println("[CategoryList] handleAdd() appelÃ©");
         if (helloController == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Erreur de navigation");
@@ -550,17 +550,17 @@ public class CategoryListController {
     }
 
     private void handleView(EventCategory category) {
-        System.out.println("👁️ Consultation de: " + category.getName());
+        System.out.println("ðŸ‘ï¸ Consultation de: " + category.getName());
         if (helloController != null) {
             helloController.showCategoryView(category);
         } else {
             Alert details = new Alert(Alert.AlertType.INFORMATION);
-            details.setTitle("Détails");
+            details.setTitle("DÃ©tails");
             details.setHeaderText(category.getDisplayName());
             details.setContentText(String.format(
-                    "Description: %s\n\nCouleur: %s\n\nStatut: %s\n\nÉvénements: %d",
+                    "Description: %s\n\nCouleur: %s\n\nStatut: %s\n\nÃ‰vÃ©nements: %d",
                     category.getDescription(), category.getColor(),
-                    category.isActive() ? "✅ Actif" : "❌ Inactif",
+                    category.isActive() ? "âœ… Actif" : "âŒ Inactif",
                     category.getEventCount()
             ));
             details.showAndWait();
@@ -568,7 +568,7 @@ public class CategoryListController {
     }
 
     private void handleEdit(EventCategory category) {
-        System.out.println("✏️ Modification de: " + category.getName());
+        System.out.println("âœï¸ Modification de: " + category.getName());
         if (helloController != null) {
             helloController.showCategoryForm(category);
         }
@@ -578,14 +578,14 @@ public class CategoryListController {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmation");
         confirm.setHeaderText("Supprimer " + category.getName() + " ?");
-        confirm.setContentText("Cette action est irréversible.");
+        confirm.setContentText("Cette action est irrÃ©versible.");
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 if (categoryService.deleteCategory(category.getId())) {
-                    showSuccess("Succès", "Catégorie supprimée !");
+                    showSuccess("SuccÃ¨s", "CatÃ©gorie supprimÃ©e !");
                     loadCategories();
 
-                    // Rafraîchir les KPI après suppression
+                    // RafraÃ®chir les KPI aprÃ¨s suppression
                     if (helloController != null) {
                         helloController.refreshKPIs();
                     }
@@ -695,7 +695,7 @@ public class CategoryListController {
             paginationContainer.getChildren().add(lastPageBtn);
         }
 
-        Button nextBtn = new Button("Suivant »");
+        Button nextBtn = new Button("Suivant Â»");
         nextBtn.getStyleClass().add("btn-pagination");
         nextBtn.setDisable(currentPage == totalPages);
         nextBtn.setOnAction(e -> handleNextPage());
@@ -728,7 +728,7 @@ public class CategoryListController {
     }
 
     /**
-     * Export des catégories en PDF
+     * Export des catÃ©gories en PDF
      */
     @FXML
     private void handleExportPDF() {
@@ -750,13 +750,13 @@ public class CategoryListController {
             File file = fileChooser.showSaveDialog(categoryTable.getScene().getWindow());
 
             if (file != null) {
-                // Créer le PDF
+                // CrÃ©er le PDF
                 PdfWriter writer = new PdfWriter(file.getAbsolutePath());
                 PdfDocument pdfDoc = new PdfDocument(writer);
                 Document document = new Document(pdfDoc);
 
-                // En-tête
-                Paragraph header = new Paragraph("EventFlow - Liste des Catégories")
+                // En-tÃªte
+                Paragraph header = new Paragraph("EventFlow - Liste des CatÃ©gories")
                         .setFontSize(20)
                         .setBold()
                         .setTextAlignment(TextAlignment.CENTER)
@@ -765,9 +765,9 @@ public class CategoryListController {
 
                 // Date d'exportation
                 String dateExport = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm", Locale.FRENCH)
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy Ã  HH:mm", Locale.FRENCH)
                 );
-                Paragraph dateInfo = new Paragraph("Exporté le " + dateExport)
+                Paragraph dateInfo = new Paragraph("ExportÃ© le " + dateExport)
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.CENTER)
                         .setFontColor(ColorConstants.GRAY);
@@ -783,7 +783,7 @@ public class CategoryListController {
                 int totalEvents = allCategories.stream().mapToInt(EventCategory::getEventCount).sum();
 
                 Paragraph stats = new Paragraph(
-                        String.format("Total: %d catégories | Actives: %d | Inactives: %d | Événements: %d",
+                        String.format("Total: %d catÃ©gories | Actives: %d | Inactives: %d | Ã‰vÃ©nements: %d",
                                 totalCat, activeCat, inactiveCat, totalEvents))
                         .setFontSize(11)
                         .setTextAlignment(TextAlignment.CENTER)
@@ -792,13 +792,13 @@ public class CategoryListController {
 
                 document.add(new Paragraph("\n"));
 
-                // Créer le tableau
+                // CrÃ©er le tableau
                 float[] columnWidths = {3, 5, 2, 2, 2};
                 Table table = new Table(UnitValue.createPercentArray(columnWidths))
                         .useAllAvailableWidth();
 
-                // En-têtes de colonnes
-                String[] headers = {"Catégorie", "Description", "Couleur", "Statut", "Événements"};
+                // En-tÃªtes de colonnes
+                String[] headers = {"CatÃ©gorie", "Description", "Couleur", "Statut", "Ã‰vÃ©nements"};
                 for (String headerText : headers) {
                     Cell headerCell = new Cell()
                             .add(new Paragraph(headerText).setBold())
@@ -809,7 +809,7 @@ public class CategoryListController {
                     table.addHeaderCell(headerCell);
                 }
 
-                // Ajouter les données
+                // Ajouter les donnÃ©es
                 for (EventCategory category : allCategories) {
                     // Nom
                     table.addCell(new Cell()
@@ -832,7 +832,7 @@ public class CategoryListController {
                             .setPadding(6));
 
                     // Statut
-                    String status = category.isActive() ? "✓ Actif" : "✗ Inactif";
+                    String status = category.isActive() ? "âœ“ Actif" : "âœ— Inactif";
                     DeviceRgb statusColor = category.isActive()
                             ? new DeviceRgb(76, 175, 80)
                             : new DeviceRgb(244, 67, 54);
@@ -842,7 +842,7 @@ public class CategoryListController {
                             .setTextAlignment(TextAlignment.CENTER)
                             .setPadding(6));
 
-                    // Nombre d'événements
+                    // Nombre d'Ã©vÃ©nements
                     table.addCell(new Cell()
                             .add(new Paragraph(String.valueOf(category.getEventCount())))
                             .setTextAlignment(TextAlignment.CENTER)
@@ -853,7 +853,7 @@ public class CategoryListController {
 
                 // Footer
                 document.add(new Paragraph("\n"));
-                Paragraph footer = new Paragraph("© 2026 EventFlow - Gestion des événements")
+                Paragraph footer = new Paragraph("Â© 2026 EventFlow - Gestion des Ã©vÃ©nements")
                         .setFontSize(9)
                         .setTextAlignment(TextAlignment.CENTER)
                         .setFontColor(ColorConstants.LIGHT_GRAY);
@@ -862,19 +862,19 @@ public class CategoryListController {
                 // Fermer le document
                 document.close();
 
-                // Afficher un message de succès
+                // Afficher un message de succÃ¨s
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Export réussi");
+                alert.setTitle("Export rÃ©ussi");
                 alert.setHeaderText(null);
-                alert.setContentText("Le PDF a été exporté avec succès !\n\n" +
-                        totalCat + " catégories exportées.\nFichier: " + file.getName());
+                alert.setContentText("Le PDF a Ã©tÃ© exportÃ© avec succÃ¨s !\n\n" +
+                        totalCat + " catÃ©gories exportÃ©es.\nFichier: " + file.getName());
                 alert.showAndWait();
 
-                System.out.println("✅ PDF exporté: " + file.getAbsolutePath());
+                System.out.println("âœ… PDF exportÃ©: " + file.getAbsolutePath());
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur export PDF: " + e.getMessage());
+            System.err.println("âŒ Erreur export PDF: " + e.getMessage());
             e.printStackTrace();
 
             Alert alert = new Alert(Alert.AlertType.ERROR);

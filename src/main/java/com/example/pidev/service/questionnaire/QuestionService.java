@@ -98,13 +98,17 @@ public class QuestionService {
      * Modifie une question existante.
      */
     public void modifier(Question q) throws SQLException {
-        String req = "UPDATE questions SET id_event=?, texte_question=?, bonne_reponse=?, points=? WHERE id_question=?";
+        String req = "UPDATE questions SET id_event=?, texte_question=?, bonne_reponse=?, points=?, option1=?, option2=?, option3=?, id_user=? WHERE id_question=?";
         try (PreparedStatement pst = conn.prepareStatement(req)) {
             pst.setInt(1, q.getIdEvent());
             pst.setString(2, q.getTexte());
             pst.setString(3, q.getReponse());
             pst.setInt(4, q.getPoints());
-            pst.setInt(5, q.getIdQuestion());
+            pst.setString(5, q.getOption1());
+            pst.setString(6, q.getOption2());
+            pst.setString(7, q.getOption3());
+            pst.setInt(8, q.getIdUser());
+            pst.setInt(9, q.getIdQuestion());
             pst.executeUpdate();
         }
     }

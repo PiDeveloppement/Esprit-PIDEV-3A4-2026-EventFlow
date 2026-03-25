@@ -102,7 +102,7 @@ public class SponsorAdminController implements Initializable {
             baseList.setAll(sponsorService.getAllSponsors());
             updateGlobalStats();
             if (statusLabel != null)
-                statusLabel.setText("📊 " + baseList.size() + " sponsors");
+                statusLabel.setText("Stats: " + baseList.size() + " sponsors");
             renderCards();
         } catch (Exception e) {
             showError("DB", e.getMessage());
@@ -150,7 +150,7 @@ public class SponsorAdminController implements Initializable {
         });
 
         if (statusLabel != null)
-            statusLabel.setText("📊 " + filtered.size() + " sponsors");
+            statusLabel.setText("Stats: " + filtered.size() + " sponsors");
         renderCards();
     }
 
@@ -204,7 +204,7 @@ public class SponsorAdminController implements Initializable {
             }
             if (contributionsChart != null) {
                 contributionsChart.setData(pieData);
-                contributionsChart.setTitle("Répartition des contributions par événement");
+                contributionsChart.setTitle("Repartition des contributions par evenement");
                 contributionsChart.setLabelsVisible(true);
                 contributionsChart.setLegendVisible(true);
             }
@@ -230,7 +230,7 @@ public class SponsorAdminController implements Initializable {
             baseList.setAll(found);
             updateGlobalStats();
             if (statusLabel != null)
-                statusLabel.setText("🔍 " + found.size() + " résultat(s) pour \"" + query + "\"");
+                statusLabel.setText("Recherche: " + found.size() + " resultat(s) pour \"" + query + "\"");
             renderCards();
         } catch (Exception e) {
             showError("Recherche", "Erreur : " + e.getMessage());
@@ -241,12 +241,12 @@ public class SponsorAdminController implements Initializable {
         try {
             List<Sponsor> sponsorsToExport = new ArrayList<>(filtered);
             if (sponsorsToExport.isEmpty()) {
-                showError("Export", "Aucun sponsor à exporter.");
+                showError("Export", "Aucun sponsor Ã  exporter.");
                 return;
             }
             Map<String, Double> contributions = sponsorService.getTotalContributionByEvent();
             JsonObject chartConfig = QuickChartService.createPieChart(
-                    "Répartition des contributions",
+                    "RÃ©partition des contributions",
                     contributions.keySet().toArray(new String[0]),
                     contributions.values().stream().mapToDouble(Double::doubleValue).toArray()
             );
@@ -259,7 +259,7 @@ public class SponsorAdminController implements Initializable {
                     exportExcelBtn != null ? exportExcelBtn.getScene().getWindow() : null);
             if (file != null) {
                 ExcelExportService.exportSponsors(sponsorsToExport, chartConfig, file.getAbsolutePath());
-                showInfo("Export réussi", "Le fichier Excel a été généré avec succès !");
+                showInfo("Export rÃ©ussi", "Le fichier Excel a Ã©tÃ© gÃ©nÃ©rÃ© avec succÃ¨s !");
             }
         } catch (Exception e) {
             showError("Export", "Erreur : " + e.getMessage());
@@ -315,7 +315,7 @@ public class SponsorAdminController implements Initializable {
             String eventTitle = sponsorService.getEventTitleById(s.getEvent_id());
             File pdf = pdfService.generateSponsorContractPdf(s, eventTitle);
             if (!Desktop.isDesktopSupported()) {
-                showError("PDF", "Desktop non supporté.");
+                showError("PDF", "Desktop non supportÃ©.");
                 return;
             }
             Desktop.getDesktop().open(pdf);
@@ -338,7 +338,7 @@ public class SponsorAdminController implements Initializable {
                     }
             );
         } catch (Exception e) {
-            showError("UI", "Impossible d'ouvrir détails : " + e.getMessage());
+            showError("UI", "Impossible d'ouvrir dÃ©tails : " + e.getMessage());
         }
     }
 
@@ -354,3 +354,5 @@ public class SponsorAdminController implements Initializable {
         a.showAndWait();
     }
 }
+
+

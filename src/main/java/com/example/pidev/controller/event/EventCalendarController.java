@@ -196,8 +196,8 @@ public class EventCalendarController {
 
         if (isActive) {
             badge.setStyle(String.format(
-                "-fx-background-color: %s; -fx-border-radius: 6; -fx-border-color: %s; -fx-border-width: 2;",
-                status.bgColor, status.borderColor
+                    "-fx-background-color: %s; -fx-border-radius: 6; -fx-border-color: %s; -fx-border-width: 2;",
+                    status.bgColor, status.borderColor
             ));
         } else {
             badge.setStyle("-fx-background-color: #f1f5f9; -fx-border-radius: 6; -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-opacity: 0.6;");
@@ -317,8 +317,8 @@ public class EventCalendarController {
 
         EventStatus status = getEventStatus(event);
         chip.setStyle(String.format(
-            "-fx-background-color: %s; -fx-border-radius: 4; -fx-border-color: %s; -fx-border-width: 1;",
-            status.bgColor, status.borderColor
+                "-fx-background-color: %s; -fx-border-radius: 4; -fx-border-color: %s; -fx-border-width: 1;",
+                status.bgColor, status.borderColor
         ));
 
         EventCategory cat = categoriesById.get(event.getCategoryId());
@@ -403,8 +403,8 @@ public class EventCalendarController {
 
         EventStatus status = getEventStatus(event);
         box.setStyle(String.format(
-            "-fx-background-color: %s; -fx-border-radius: 6; -fx-border-color: %s; -fx-border-width: 1;",
-            status.bgColor, status.borderColor
+                "-fx-background-color: %s; -fx-border-radius: 6; -fx-border-color: %s; -fx-border-width: 1;",
+                status.bgColor, status.borderColor
         ));
 
         EventCategory cat = categoriesById.get(event.getCategoryId());
@@ -417,7 +417,7 @@ public class EventCalendarController {
         titleLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
         String timeStr = event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm")) + " - " +
-                        event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"));
+                event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"));
         Label timeLabel = new Label("🕐 " + timeStr);
         timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #64748b;");
 
@@ -480,8 +480,8 @@ public class EventCalendarController {
 
         Label statusBadge = new Label(status.label);
         statusBadge.setStyle(String.format(
-            "-fx-background-color: %s; -fx-text-fill: %s; -fx-padding: 4 12; -fx-border-radius: 12; -fx-background-radius: 12; -fx-font-size: 10px; -fx-font-weight: bold;",
-            status.bgColor, status.borderColor
+                "-fx-background-color: %s; -fx-text-fill: %s; -fx-padding: 4 12; -fx-border-radius: 12; -fx-background-radius: 12; -fx-font-size: 10px; -fx-font-weight: bold;",
+                status.bgColor, status.borderColor
         ));
 
         Region spacer = new Region();
@@ -491,7 +491,7 @@ public class EventCalendarController {
         box.getChildren().add(headerBox);
 
         String timeStr = event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm")) + " - " +
-                        event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"));
+                event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"));
         Label timeLabel = new Label("🕐 " + timeStr);
         timeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
         box.getChildren().add(timeLabel);
@@ -520,7 +520,7 @@ public class EventCalendarController {
 
         List<Event> allMonthEvents = eventsByDate.entrySet().stream()
                 .filter(entry -> entry.getKey().getYear() == currentMonth.getYear() &&
-                                entry.getKey().getMonth() == currentMonth.getMonth())
+                        entry.getKey().getMonth() == currentMonth.getMonth())
                 .flatMap(entry -> entry.getValue().stream())
                 .filter(event -> activeStatusFilters.contains(getEventStatus(event)))
                 .sorted(Comparator.comparing(Event::getStartDate))
@@ -555,8 +555,8 @@ public class EventCalendarController {
 
         EventStatus status = getEventStatus(event);
         box.setStyle(String.format(
-            "-fx-background-color: %s; -fx-border-radius: 6; -fx-border-color: %s; -fx-border-width: 1; -fx-margin: 5 0;",
-            status.bgColor, status.borderColor
+                "-fx-background-color: %s; -fx-border-radius: 6; -fx-border-color: %s; -fx-border-width: 1; -fx-margin: 5 0;",
+                status.bgColor, status.borderColor
         ));
 
         EventCategory cat = categoriesById.get(event.getCategoryId());
@@ -577,8 +577,8 @@ public class EventCalendarController {
 
         Label statusLabel = new Label(status.label);
         statusLabel.setStyle(String.format(
-            "-fx-background-color: %s; -fx-text-fill: %s; -fx-padding: 4 10; -fx-border-radius: 10; -fx-background-radius: 10; -fx-font-size: 9px; -fx-font-weight: bold;",
-            "white", status.borderColor
+                "-fx-background-color: %s; -fx-text-fill: %s; -fx-padding: 4 10; -fx-border-radius: 10; -fx-background-radius: 10; -fx-font-size: 9px; -fx-font-weight: bold;",
+                "white", status.borderColor
         ));
 
         box.getChildren().addAll(iconLabel, textBox, statusLabel);
@@ -637,4 +637,3 @@ public class EventCalendarController {
         this.mainController = mainController;
     }
 }
-

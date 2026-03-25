@@ -479,7 +479,10 @@ public class LandingPageController implements Initializable {
                 return;
             }
             currentScene = root.getScene();
-            VBox feedbackContenu = construireFeedbackContenu();
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pidev/fxml/questionnaire/FeedbackView.fxml")
+            );
+            Parent feedbackContenu = loader.load();
             if (root.getChildren().size() > 1) {
                 root.getChildren().set(1, feedbackContenu);
             } else {
@@ -663,7 +666,7 @@ public class LandingPageController implements Initializable {
     private void retourLandingPage() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/example/pidev/fxml/auth/LandingPage.fxml")
+                    getClass().getResource("/com/example/pidev/fxml/auth/landingPage.fxml")
             );
             VBox newRoot = loader.load();
             VBox currentRoot = (VBox) currentScene.getRoot();

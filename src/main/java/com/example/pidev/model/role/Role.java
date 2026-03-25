@@ -8,8 +8,8 @@ import java.util.List;
 
 
 public class Role {
-@Id
-@GeneratedValue(strategy =GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy =GenerationType.IDENTITY)
     private long Id_Role;
     private String RoleName;
     @OneToMany(mappedBy="role")

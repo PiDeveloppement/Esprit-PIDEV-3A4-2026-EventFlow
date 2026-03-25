@@ -4,9 +4,15 @@ import com.example.pidev.model.event.Event;
 import com.example.pidev.utils.DBConnection;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Service pour gérer les opérations CRUD sur les événements
@@ -36,38 +42,38 @@ public class EventService {
             return false;
         }
 
-        String sql = "INSERT INTO event (title, description, start_date, end_date, location, " +
-                "capacity, image_url, category_id, created_by, status, is_free, ticket_price) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Set<String> writableColumns = loadWritableEventColumns();
+            Map<String, Object> values = buildEventWriteMap(event, writableColumns);
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            pstmt.setString(1, event.getTitle());
-            pstmt.setString(2, event.getDescription());
-            pstmt.setTimestamp(3, event.getStartDate() != null ? Timestamp.valueOf(event.getStartDate()) : null);
-            pstmt.setTimestamp(4, event.getEndDate() != null ? Timestamp.valueOf(event.getEndDate()) : null);
-            pstmt.setString(5, event.getLocation());
-            pstmt.setInt(6, event.getCapacity());
-            pstmt.setString(7, event.getImageUrl());
-            pstmt.setInt(8, event.getCategoryId());
-            pstmt.setInt(9, event.getCreatedBy());
-            pstmt.setString(10, event.getStatus() != null ? event.getStatus().name() : "DRAFT");
-            pstmt.setBoolean(11, event.isFree());
-            pstmt.setDouble(12, event.getTicketPrice());
-
-            int rowsAffected = pstmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                // Récupérer l'ID généré
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        event.setId(rs.getInt(1));
-                    }
-                }
-                System.out.println("✅ Événement ajouté avec succès: " + event.getTitle());
-                return true;
+            if (values.isEmpty()) {
+                System.err.println("❌ Erreur: aucune colonne écrivable détectée dans la table event");
+                return false;
             }
 
+            String columns = String.join(", ", values.keySet());
+            String placeholders = String.join(", ", values.keySet().stream().map(k -> "?").toList());
+            String sql = "INSERT INTO event (" + columns + ") VALUES (" + placeholders + ")";
+
+            try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                int index = 1;
+                for (Object value : values.values()) {
+                    bindValue(pstmt, index++, value);
+                }
+
+                int rowsAffected = pstmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    // Récupérer l'ID généré
+                    try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            event.setId(rs.getInt(1));
+                        }
+                    }
+                    System.out.println("✅ Événement ajouté avec succès: " + event.getTitle());
+                    return true;
+                }
+            }
         } catch (SQLException e) {
             System.err.println("❌ Erreur lors de l'ajout de l'événement: " + e.getMessage());
             e.printStackTrace();
@@ -225,40 +231,39 @@ public class EventService {
             return false;
         }
 
-        String sql = "UPDATE event SET title = ?, description = ?, start_date = ?, end_date = ?, " +
-                "location = ?, capacity = ?, image_url = ?, category_id = ?, created_by = ?, " +
-                "status = ?, is_free = ?, ticket_price = ? WHERE id = ?";
+        try {
+            Set<String> writableColumns = loadWritableEventColumns();
+            Map<String, Object> values = buildEventWriteMap(event, writableColumns);
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
-            pstmt.setString(1, event.getTitle());
-            pstmt.setString(2, event.getDescription());
-            pstmt.setTimestamp(3, event.getStartDate() != null ? Timestamp.valueOf(event.getStartDate()) : null);
-            pstmt.setTimestamp(4, event.getEndDate() != null ? Timestamp.valueOf(event.getEndDate()) : null);
-            pstmt.setString(5, event.getLocation());
-            pstmt.setInt(6, event.getCapacity());
-            pstmt.setString(7, event.getImageUrl());
-            pstmt.setInt(8, event.getCategoryId());
-            pstmt.setInt(9, event.getCreatedBy());
-            pstmt.setString(10, event.getStatus() != null ? event.getStatus().name() : "DRAFT");
-            pstmt.setBoolean(11, event.isFree());
-            pstmt.setDouble(12, event.getTicketPrice());
-            pstmt.setInt(13, event.getId());
-
-            int rowsAffected = pstmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                System.out.println("✅ Événement mis à jour avec succès: " + event.getTitle());
-
-                // Recharger l'événement pour obtenir le updated_at mis à jour
-                Event updatedEvent = getEventById(event.getId());
-                if (updatedEvent != null) {
-                    event.setUpdatedAt(updatedEvent.getUpdatedAt());
-                }
-
-                return true;
+            if (values.isEmpty()) {
+                System.err.println("❌ Erreur: aucune colonne écrivable détectée pour la mise à jour");
+                return false;
             }
 
+            String assignments = String.join(", ", values.keySet().stream().map(k -> k + " = ?").toList());
+            String sql = "UPDATE event SET " + assignments + " WHERE id = ?";
+
+            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                int index = 1;
+                for (Object value : values.values()) {
+                    bindValue(pstmt, index++, value);
+                }
+                pstmt.setInt(index, event.getId());
+
+                int rowsAffected = pstmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    System.out.println("✅ Événement mis à jour avec succès: " + event.getTitle());
+
+                    // Recharger l'événement pour obtenir le updated_at mis à jour
+                    Event updatedEvent = getEventById(event.getId());
+                    if (updatedEvent != null) {
+                        event.setUpdatedAt(updatedEvent.getUpdatedAt());
+                    }
+
+                    return true;
+                }
+            }
         } catch (SQLException e) {
             System.err.println("❌ Erreur lors de la mise à jour de l'événement: " + e.getMessage());
             e.printStackTrace();
@@ -420,6 +425,105 @@ public class EventService {
         }
 
         return event;
+    }
+
+    private Set<String> loadWritableEventColumns() throws SQLException {
+        Set<String> columns = new HashSet<>();
+        String sql = """
+                SELECT COLUMN_NAME, EXTRA
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'event'
+                """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String column = rs.getString("COLUMN_NAME");
+                String extra = rs.getString("EXTRA");
+                boolean generated = extra != null && extra.toLowerCase().contains("generated");
+                if (!generated && column != null) {
+                    columns.add(column.toLowerCase());
+                }
+            }
+        }
+        return columns;
+    }
+
+    private Map<String, Object> buildEventWriteMap(Event event, Set<String> writableColumns) {
+        Map<String, Object> values = new LinkedHashMap<>();
+
+        putIfWritable(values, writableColumns, "title", event.getTitle());
+        putIfWritable(values, writableColumns, "description", event.getDescription());
+        putIfWritable(values, writableColumns, "location", event.getLocation());
+        putIfWritable(values, writableColumns, "gouvernorat", event.getGouvernorat());
+        putIfWritable(values, writableColumns, "ville", event.getVille());
+        putIfWritable(values, writableColumns, "capacity", event.getCapacity());
+        putIfWritable(values, writableColumns, "image_url", event.getImageUrl());
+        putIfWritable(values, writableColumns, "category_id", event.getCategoryId());
+        Integer organizerId = event.getCreatedBy() > 0 ? event.getCreatedBy() : null;
+        putIfWritable(values, writableColumns, "created_by", organizerId);
+        // Compatibilite avec schemas qui utilisent organizer_id au lieu de created_by.
+        putIfWritable(values, writableColumns, "organizer_id", organizerId);
+        putIfWritable(values, writableColumns, "organisateur_id", organizerId);
+        putIfWritable(values, writableColumns, "status", event.getStatus() != null ? event.getStatus().name() : "DRAFT");
+        putIfWritable(values, writableColumns, "is_free", event.isFree());
+        putIfWritable(values, writableColumns, "ticket_price", event.getTicketPrice());
+
+        LocalDateTime start = event.getStartDate();
+        LocalDateTime end = event.getEndDate();
+
+        putIfWritable(values, writableColumns, "start_date", start != null ? Timestamp.valueOf(start) : null);
+        putIfWritable(values, writableColumns, "end_date", end != null ? Timestamp.valueOf(end) : null);
+        putIfWritable(values, writableColumns, "start_datetime", start != null ? Timestamp.valueOf(start) : null);
+        putIfWritable(values, writableColumns, "end_datetime", end != null ? Timestamp.valueOf(end) : null);
+        putIfWritable(values, writableColumns, "date_debut", start != null ? Timestamp.valueOf(start) : null);
+        putIfWritable(values, writableColumns, "date_fin", end != null ? Timestamp.valueOf(end) : null);
+
+        putIfWritable(values, writableColumns, "event_date", start != null ? Date.valueOf(start.toLocalDate()) : null);
+        putIfWritable(values, writableColumns, "start_time", start != null ? Time.valueOf(start.toLocalTime()) : null);
+        putIfWritable(values, writableColumns, "end_time", end != null ? Time.valueOf(end.toLocalTime()) : null);
+        putIfWritable(values, writableColumns, "date_event", start != null ? Date.valueOf(start.toLocalDate()) : null);
+        putIfWritable(values, writableColumns, "heure_debut", start != null ? Time.valueOf(start.toLocalTime()) : null);
+        putIfWritable(values, writableColumns, "heure_fin", end != null ? Time.valueOf(end.toLocalTime()) : null);
+
+        return values;
+    }
+
+    private void putIfWritable(Map<String, Object> target, Set<String> writableColumns, String column, Object value) {
+        if (writableColumns.contains(column.toLowerCase()) && !target.containsKey(column)) {
+            target.put(column, value);
+        }
+    }
+
+    private void bindValue(PreparedStatement pstmt, int index, Object value) throws SQLException {
+        if (value == null) {
+            pstmt.setObject(index, null);
+            return;
+        }
+        if (value instanceof String v) {
+            pstmt.setString(index, v);
+        } else if (value instanceof Integer v) {
+            pstmt.setInt(index, v);
+        } else if (value instanceof Boolean v) {
+            pstmt.setBoolean(index, v);
+        } else if (value instanceof Double v) {
+            pstmt.setDouble(index, v);
+        } else if (value instanceof Timestamp v) {
+            pstmt.setTimestamp(index, v);
+        } else if (value instanceof Date v) {
+            pstmt.setDate(index, v);
+        } else if (value instanceof Time v) {
+            pstmt.setTime(index, v);
+        } else if (value instanceof LocalDateTime v) {
+            pstmt.setTimestamp(index, Timestamp.valueOf(v));
+        } else if (value instanceof LocalDate v) {
+            pstmt.setDate(index, Date.valueOf(v));
+        } else if (value instanceof LocalTime v) {
+            pstmt.setTime(index, Time.valueOf(v));
+        } else {
+            pstmt.setObject(index, value);
+        }
     }
     // ==================== MÉTHODES POUR LE CHATBOT ====================
 

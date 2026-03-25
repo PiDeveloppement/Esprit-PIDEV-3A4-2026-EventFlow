@@ -47,15 +47,15 @@ public class FeedbackViewController {
             lblBasedOn.setText("Based on " + total + " reviews");
 
             lblTotalReviews.setText(String.valueOf(total));
-            lblTrend.setText("📈  +17% from last month");
+            lblTrend.setText("↗ +17% from last month");
 
             int fiveStar = rep.getOrDefault(5, 0);
             int pct = total > 0 ? (int)((double) fiveStar / total * 100) : 0;
             lblFiveStarPct.setText(pct + "%");
-            lblQuality.setText(pct >= 70 ? "👍  Excellent ratings" : "👍  Good ratings");
+            lblQuality.setText(pct >= 70 ? "Good ratings" : "Needs improvement");
 
             lblThisMonth.setText(String.format(Locale.US, "%.1f", moyenne));
-            lblMonthTrend.setText("📈  +0.1 from last month");
+            lblMonthTrend.setText("↗ +0.1 from last month");
 
             buildRatingsBreakdown(rep, total);
             buildCategoryRatings(moyenne);
@@ -114,7 +114,7 @@ public class FeedbackViewController {
             lblNum.setMinWidth(14);
             lblNum.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #374151;");
 
-            Label star = new Label("★");
+            Label star = new Label("\u2605");
             star.setPrefWidth(18);
             star.setMinWidth(18);
             star.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 13px;");
@@ -178,7 +178,7 @@ public class FeedbackViewController {
             starsBox.setMinWidth(90);
             starsBox.setPrefWidth(90);
             for (int s = 0; s < 5; s++) {
-                Label sl = new Label(s < fullStars ? "★" : "☆");
+                Label sl = new Label(s < fullStars ? "\u2605" : "\u2606");
                 sl.setPrefWidth(16);
                 sl.setMinWidth(16);
                 sl.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 15px;");
@@ -195,7 +195,7 @@ public class FeedbackViewController {
         String lastEvent = "";
         for (Map<String, Object> fb : feedbacks) {
             String nomEvent = fb.get("nomEvent") != null ?
-                    (String) fb.get("nomEvent") : "Événement inconnu";
+                    (String) fb.get("nomEvent") : "Evenement inconnu";
             if (!nomEvent.equals(lastEvent)) {
                 lastEvent = nomEvent;
                 feedbackListContainer.getChildren().add(buildEventHeader(nomEvent));
@@ -209,7 +209,7 @@ public class FeedbackViewController {
         box.setAlignment(Pos.CENTER_LEFT);
         box.setStyle("-fx-padding: 4 0 2 0;");
 
-        Label icon = new Label("📅");
+        Label icon = new Label("\u25A0");
         icon.setStyle("-fx-font-size: 13px;");
         Label title = new Label(nom);
         title.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #111827;");
@@ -259,7 +259,7 @@ public class FeedbackViewController {
         VBox nameBox = new VBox(2);
         nameBox.getChildren().add(lblNom);
         if (fb.get("date") != null) {
-            Label dateL = new Label("📅 " + fb.get("date").toString());
+            Label dateL = new Label("Date: " + fb.get("date").toString());
             dateL.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 11px;");
             nameBox.getChildren().add(dateL);
         }
@@ -267,7 +267,7 @@ public class FeedbackViewController {
         HBox starsRight = new HBox(2);
         starsRight.setAlignment(Pos.CENTER_RIGHT);
         for (int s = 0; s < 5; s++) {
-            Label sl = new Label(s < etoiles ? "★" : "☆");
+            Label sl = new Label(s < etoiles ? "\u2605" : "\u2606");
             sl.setPrefWidth(16);
             sl.setMinWidth(16);
             sl.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 15px;");
@@ -311,7 +311,7 @@ public class FeedbackViewController {
 
             HBox catStars = new HBox(2);
             for (int s = 0; s < 5; s++) {
-                Label sl = new Label(s < catVals[i] ? "★" : "☆");
+                Label sl = new Label(s < catVals[i] ? "\u2605" : "\u2606");
                 sl.setPrefWidth(15);
                 sl.setMinWidth(15);
                 sl.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 13px;");
@@ -324,13 +324,13 @@ public class FeedbackViewController {
             if (col > 1) { col = 0; rowIdx++; }
         }
 
-        Label helpful = new Label("👍  8 people found this helpful");
+        Label helpful = new Label("8 people found this helpful");
         helpful.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px;");
 
         Region sp2 = new Region();
         HBox.setHgrow(sp2, Priority.ALWAYS);
 
-        Button btnDelete = new Button("🗑  Supprimer");
+        Button btnDelete = new Button("Supprimer");
         btnDelete.setStyle(
                 "-fx-background-color: transparent; -fx-text-fill: #ef4444; " +
                         "-fx-font-size: 12px; -fx-cursor: hand; -fx-padding: 0;");
@@ -349,7 +349,7 @@ public class FeedbackViewController {
         container.getChildren().clear();
         int full = (int) Math.round(rating);
         for (int i = 0; i < 5; i++) {
-            Label s = new Label(i < full ? "★" : "☆");
+            Label s = new Label(i < full ? "\u2605" : "\u2606");
             s.setPrefWidth(size);
             s.setMinWidth(size);
             s.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: " + size + "px;");
@@ -378,7 +378,7 @@ public class FeedbackViewController {
                 for (Map<String, Object> fb : allFeedbacks) {
                     writer.println(fb.get("firstName") + "," + fb.get("etoiles") + ",\"" + fb.get("comments") + "\"");
                 }
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Exporté avec succès: " + file.getAbsolutePath());
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Exporte avec succes: " + file.getAbsolutePath());
                 alert.show();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -421,7 +421,7 @@ public class FeedbackViewController {
         });
     }
 
-    // Méthode utilitaire pour les alertes
+    // MÃ©thode utilitaire pour les alertes
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);

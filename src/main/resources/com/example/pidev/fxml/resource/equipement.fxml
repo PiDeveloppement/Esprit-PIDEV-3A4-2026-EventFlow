@@ -4,9 +4,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
 
-<VBox spacing="25" styleClass="main-container" stylesheets="@style.css"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.resource.EquipementController">
+<ScrollPane fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.EquipementController">
+    <content>
+<VBox spacing="25" styleClass="main-container" stylesheets="@style.css">
 
     <padding>
         <Insets bottom="30" left="30" right="30" top="30" />
@@ -63,3 +69,5 @@
         </TableView>
     </VBox>
 </VBox>
+    </content>
+</ScrollPane>

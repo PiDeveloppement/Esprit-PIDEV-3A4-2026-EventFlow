@@ -180,7 +180,7 @@ public class HelloApplication extends Application {
             return;
         }
         navigateTo(
-                "/com/example/pidev/fxml/MainLayout.fxml",
+                "/com/example/pidev/fxml/main_layout.fxml",
                 "EventFlow - Dashboard"
         );
         primaryStage.setMinWidth(960);

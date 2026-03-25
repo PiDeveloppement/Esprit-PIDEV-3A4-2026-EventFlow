@@ -5,11 +5,15 @@
 <?import javafx.scene.web.WebView?>
 <?import javafx.scene.image.ImageView?>
 
-<VBox spacing="20" style="-fx-background-color: #f1f5f9;"
-      stylesheets="@style.css"
-      xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.resource.SalleController">
+<ScrollPane fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.SalleController">
+    <content>
+<VBox spacing="20" style="-fx-background-color: #f1f5f9;" stylesheets="@style.css">
 
     <padding>
         <Insets top="25" right="30" bottom="25" left="30"/>
@@ -89,3 +93,5 @@
         </VBox>
     </HBox>
 </VBox>
+    </content>
+</ScrollPane>

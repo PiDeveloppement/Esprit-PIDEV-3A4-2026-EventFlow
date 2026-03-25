@@ -39,4 +39,3 @@ public class QRCodeMigration {
         System.out.println("\n✨ Vous pouvez maintenant lancer l'application normalement.");
     }
 }
-
