@@ -26,6 +26,7 @@ import com.itextpdf.layout.element.*;
 import com.itextpdf.layout.properties.*;
 import com.itextpdf.kernel.colors.ColorConstants;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -163,12 +164,20 @@ public class ReservationController implements Initializable {
                     setGraphic(null);
                 } else {
                     try {
-                        String finalPath = path;
-                        if (path.contains(":/") || path.contains(":\\")) {
-                            if (!path.startsWith("file:")) {
-                                finalPath = "file:/" + path.replace("\\", "/");
-                            }
+                        String normalized = path.replace("file:/", "").replace("%20", " ").replace("\\", "/");
+                        String fileName = new File(normalized).getName();
+                        File imageFile = new File(normalized);
+
+                        if (!imageFile.exists()) {
+                            imageFile = new File("uploads/" + fileName);
                         }
+                        if (!imageFile.exists()) {
+                            imageFile = new File("src/uploads/" + fileName);
+                        }
+
+                        String finalPath = imageFile.exists()
+                                ? imageFile.toURI().toString()
+                                : (path.startsWith("file:") ? path : "file:/" + path.replace("\\", "/"));
                         v.setImage(new Image(finalPath, 40, 40, true, true));
                         setGraphic(v);
                     } catch (Exception ex) {

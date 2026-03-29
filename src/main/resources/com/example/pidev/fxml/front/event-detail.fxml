@@ -62,7 +62,7 @@
 
             <!-- HERO SECTION COMPACT (150px avec gradient dynamique) -->
             <StackPane fx:id="heroImage" prefHeight="150" maxHeight="150"
-                       style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                       style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #667eea 0%, #764ba2 100%);">
                 <!-- L'image ou gradient sera défini dynamiquement selon la catégorie -->
             </StackPane>
 

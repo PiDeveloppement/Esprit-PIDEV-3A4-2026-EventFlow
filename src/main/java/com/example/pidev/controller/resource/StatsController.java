@@ -8,12 +8,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.chart.PieChart;
+
 import java.util.Map;
 
 public class StatsController {
 
-    @FXML private PieChart pieChart; // Utilisation du composant natif
-    private final ReservationService resService = new ReservationService();
+    @FXML
+    private PieChart pieChart;
+
+    private final ReservationService reservationService = new ReservationService();
 
     @FXML
     public void initialize() {
@@ -21,20 +24,26 @@ public class StatsController {
     }
 
     private void setupChart() {
-        // 1. Récupérer les données de ton service
-        Map<String, Integer> typeData = resService.getStatsByType();
+        Map<String, Integer> statsByType = reservationService.getStatsByType();
 
-        // 2. Transformer les données pour le graphique
+        if (statsByType == null || statsByType.isEmpty()) {
+            pieChart.setData(FXCollections.observableArrayList(
+                    new PieChart.Data("Aucune reservation", 1)
+            ));
+            pieChart.setTitle("Aucune donnee a afficher");
+            pieChart.setLegendVisible(false);
+            pieChart.setLabelsVisible(true);
+            pieChart.setClockwise(true);
+            return;
+        }
+
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+        statsByType.forEach((label, value) ->
+                pieChartData.add(new PieChart.Data(label + " (" + value + ")", value))
+        );
 
-        typeData.forEach((label, value) -> {
-            pieChartData.add(new PieChart.Data(label + " (" + value + ")", value));
-        });
-
-        // 3. Afficher les données
         pieChart.setData(pieChartData);
-
-        // Optionnel : Ajouter des labels visibles
+        pieChart.setLegendVisible(true);
         pieChart.setLabelsVisible(true);
         pieChart.setClockwise(true);
     }

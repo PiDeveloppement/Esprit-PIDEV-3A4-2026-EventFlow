@@ -13,7 +13,7 @@
           spacing="15" alignment="CENTER_LEFT" prefHeight="70">
 
         <TextField fx:id="searchField"
-                   promptText="Rechercher une categorie..."
+                   promptText="Rechercher une catégorie..."
                    style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 15; -fx-pref-width: 300;
                           -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
 
@@ -46,7 +46,7 @@
                        -fx-background-radius: 8; -fx-cursor: hand;"
                 minWidth="140"/>
 
-        <Button fx:id="addBtn" text="Creer une categorie"
+        <Button fx:id="addBtn" text="Créer une catégorie"
                 onAction="#handleAdd"
                 style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8 20;
                        -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;"
@@ -76,26 +76,26 @@
                                -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;
                                -fx-cursor: hand;">
                     <graphic>
-                        <Label text="Rafraichir" style="-fx-font-size: 13px;"/>
+                        <Label text="Rafraîchir" style="-fx-font-size: 13px;"/>
                     </graphic>
                 </Button>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Label text="Total:"
+                <Label text="Total :"
                        style="-fx-text-fill: #475569; -fx-font-size: 13px;"/>
                 <Label fx:id="totalLabel"
                        text="0"
                        style="-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-font-weight: bold;"/>
 
-                <Label text="Evenements:"
+                <Label text="Événements :"
                        style="-fx-text-fill: #475569; -fx-font-size: 13px;"/>
                 <Label fx:id="eventsLabel"
                        text="0"
                        style="-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-font-weight: bold;"/>
 
                 <Label fx:id="resultLabel"
-                       text="0 resultat(s) trouve(s)"
+                       text="0 résultat(s) trouvé(s)"
                        style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
             </HBox>
 
@@ -104,7 +104,7 @@
                        prefHeight="400"
                        style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
                 <columns>
-                    <TableColumn fx:id="categoryCol" text="Categorie" prefWidth="180"/>
+                    <TableColumn fx:id="categoryCol" text="Catégorie" prefWidth="180"/>
                     <TableColumn fx:id="descriptionCol" text="Description" prefWidth="480"/>
                     <TableColumn fx:id="colorCol" text="Couleur" prefWidth="140"/>
                     <TableColumn fx:id="statusCol" text="Statut" prefWidth="120"/>
@@ -117,9 +117,9 @@
 
             <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
                 <HBox spacing="8" alignment="CENTER">
-                    <Button fx:id="prevBtn" text="Precedent" onAction="#handlePrevPage"
+                    <Button fx:id="prevBtn" text="Précédent" onAction="#handlePrevPage"
                             style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 16;
-                       -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                                   -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-radius: 8; -fx-cursor: hand;"/>
 
                     <HBox fx:id="paginationContainer" spacing="4" alignment="CENTER"/>
                 </HBox>
@@ -131,7 +131,7 @@
             </HBox>
 
             <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
-                <Label text="2026 EventFlow - Gestion des categories"
+                <Label text="2026 EventFlow - Gestion des catégories"
                        style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
             </HBox>
 

@@ -88,6 +88,7 @@ public class CategoryListController {
         categoryService = new EventCategoryService();
 
         setupFilters();
+        normalizeCategoryUiTexts();
         setupTableColumns();
         loadCategories();
 
@@ -173,6 +174,30 @@ public class CategoryListController {
     /**
      * Configure les cellules du filtre COULEUR avec affichage personnalisÃ©
      */
+    private void normalizeCategoryUiTexts() {
+        if (searchField != null) {
+            searchField.setPromptText("Rechercher une catégorie...");
+        }
+
+        if (statusFilter != null) {
+            statusFilter.getItems().setAll("Tous les statuts", "Actif", "Inactif");
+            if (statusFilter.getValue() == null || !statusFilter.getItems().contains(statusFilter.getValue())) {
+                statusFilter.setValue("Tous les statuts");
+            }
+        }
+
+        if (sortOrder != null) {
+            sortOrder.getItems().setAll("A → Z", "Z → A", "Plus récents", "Plus anciens");
+            if (sortOrder.getValue() == null || !sortOrder.getItems().contains(sortOrder.getValue())) {
+                sortOrder.setValue("A → Z");
+            }
+        }
+
+        if (resultLabel != null && (resultLabel.getText() == null || resultLabel.getText().isBlank())) {
+            resultLabel.setText("0 résultat(s) trouvé(s)");
+        }
+    }
+
     private void configureColorFilterCells() {
         colorFilter.setCellFactory(listView -> new ListCell<>() {
             private final Circle colorCircle = new Circle(7);
@@ -521,6 +546,9 @@ public class CategoryListController {
 
         if (sort != null) {
             switch (sort) {
+                case "A → Z": filtered.sort(Comparator.comparing(EventCategory::getName)); break;
+                case "Z → A": filtered.sort(Comparator.comparing(EventCategory::getName).reversed()); break;
+                case "Plus récents": filtered.sort(Comparator.comparing(EventCategory::getCreatedAt).reversed()); break;
                 case "A â†’ Z": filtered.sort(Comparator.comparing(EventCategory::getName)); break;
                 case "Z â†’ A": filtered.sort(Comparator.comparing(EventCategory::getName).reversed()); break;
                 case "Plus rÃ©cents": filtered.sort(Comparator.comparing(EventCategory::getCreatedAt).reversed()); break;
@@ -533,6 +561,7 @@ public class CategoryListController {
         filteredCategories = filtered;
         currentPage = 1;
         resultLabel.setText(filtered.size() + " rÃ©sultat(s) trouvÃ©(s)");
+        resultLabel.setText(filtered.size() + " résultat(s) trouvé(s)");
         setupPagination();
     }
 
@@ -561,6 +590,13 @@ public class CategoryListController {
                     "Description: %s\n\nCouleur: %s\n\nStatut: %s\n\nÃ‰vÃ©nements: %d",
                     category.getDescription(), category.getColor(),
                     category.isActive() ? "âœ… Actif" : "âŒ Inactif",
+                    category.getEventCount()
+            ));
+            details.setTitle("Détails");
+            details.setContentText(String.format(
+                    "Description : %s\n\nCouleur : %s\n\nStatut : %s\n\nÉvénements : %d",
+                    category.getDescription(), category.getColor(),
+                    category.isActive() ? "Actif" : "Inactif",
                     category.getEventCount()
             ));
             details.showAndWait();
@@ -697,6 +733,7 @@ public class CategoryListController {
 
         Button nextBtn = new Button("Suivant Â»");
         nextBtn.getStyleClass().add("btn-pagination");
+        nextBtn.setText("Suivant »");
         nextBtn.setDisable(currentPage == totalPages);
         nextBtn.setOnAction(e -> handleNextPage());
         paginationContainer.getChildren().add(nextBtn);
@@ -903,4 +940,3 @@ public class CategoryListController {
         }
     }
 }
-

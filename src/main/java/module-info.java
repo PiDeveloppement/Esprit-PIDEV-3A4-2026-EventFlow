@@ -14,6 +14,10 @@ module com.example.pidev {
     requires javafx.web; // On la garde ici
     requires java.desktop;
     requires java.net.http;
+    requires com.google.gson;
+    requires commons.math3;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     requires kernel;
     requires layout;

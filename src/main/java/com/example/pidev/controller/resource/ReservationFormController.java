@@ -14,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import org.json.JSONObject;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -128,7 +129,18 @@ public class ReservationFormController {
 
     private void handleVoiceCommand(String command) {
         System.out.println("🎙️ Analyse de l'ordre : " + command);
-        String lowerCmd = command.toLowerCase();
+        String lowerCmd = normalizeVoiceText(command);
+
+        if (lowerCmd.contains("annule") || lowerCmd.contains("quitter") || lowerCmd.contains("retour") || lowerCmd.contains("back")) {
+            goBack();
+            return;
+        }
+        if (lowerCmd.contains("reserve") || lowerCmd.contains("reserver")
+                || lowerCmd.contains("valide")
+                || lowerCmd.contains("confirme") || lowerCmd.contains("confirmer")) {
+            validerAction();
+            return;
+        }
 
         // 1. GESTION DES ACTIONS (ANNULER / RÉSERVER)
         if (lowerCmd.contains("annule") || lowerCmd.contains("quitter") || lowerCmd.contains("retour")) {
@@ -153,6 +165,11 @@ public class ReservationFormController {
         }
 
         // 3. DÉTECTION DE LA QUANTITÉ (Support Chiffres ET Lettres)
+        if (lowerCmd.contains("equipement") || lowerCmd.contains("materiel")) {
+            typeCombo.setValue("EQUIPEMENT");
+            chargerRessources();
+        }
+
         String numeric = lowerCmd.replaceAll("[^0-9]", "");
         if (!numeric.isEmpty()) {
             quantityField.setText(numeric);
@@ -180,8 +197,20 @@ public class ReservationFormController {
 
         // 5. DÉTECTION DE LA RESSOURCE (RECHERCHE DYNAMIQUE)
         // On compare les mots dits avec les noms dans la liste
+        if (lowerCmd.contains("debut") || lowerCmd.contains("commence") || lowerCmd.contains("start")) {
+            LocalDate date = parseVoiceDate(lowerCmd);
+            if (date != null) {
+                startDatePicker.setValue(date);
+            }
+        } else if (lowerCmd.contains("fin") || lowerCmd.contains("termine") || lowerCmd.contains("end")) {
+            LocalDate date = parseVoiceDate(lowerCmd);
+            if (date != null) {
+                endDatePicker.setValue(date);
+            }
+        }
+
         itemCombo.getItems().stream()
-                .filter(item -> lowerCmd.contains(item.toString().toLowerCase()))
+                .filter(item -> lowerCmd.contains(normalizeVoiceText(item.toString())))
                 .findFirst()
                 .ifPresent(item -> {
                     itemCombo.setValue(item);
@@ -190,6 +219,7 @@ public class ReservationFormController {
     }
     private LocalDate parseVoiceDate(String text) {
         try {
+            text = normalizeVoiceText(text);
             int day = 1;
             // Extraction du jour
             String numeric = text.replaceAll("[^0-9]", "");
@@ -211,10 +241,29 @@ public class ReservationFormController {
             else if (text.contains("novembre")) month = 11;
             else if (text.contains("décembre")) month = 12;
 
-            return LocalDate.of(2026, month, day);
+            if (text.contains("fevrier")) month = 2;
+            else if (text.contains("aout")) month = 8;
+            else if (text.contains("decembre")) month = 12;
+
+            int year = LocalDate.now().getYear();
+            if (text.contains("annee prochaine") || text.contains("prochaine annee")) {
+                year = year + 1;
+            }
+
+            return LocalDate.of(year, month, day);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String normalizeVoiceText(String value) {
+        if (value == null) {
+            return "";
+        }
+        return Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toLowerCase()
+                .trim();
     }
 
     // --- TES MÉTHODES ORIGINALES (NON MODIFIÉES) ---
@@ -509,4 +558,3 @@ public class ReservationFormController {
         endDatePicker.setDayCellFactory(dayCellFactory);
     }
 }
-

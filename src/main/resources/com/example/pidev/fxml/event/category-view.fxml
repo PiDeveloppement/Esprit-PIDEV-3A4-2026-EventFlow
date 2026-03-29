@@ -11,8 +11,6 @@
       stylesheets="@../../css/atlantafx-custom.css"
       VBox.vgrow="ALWAYS">
 
-    <!-- ===================== NAVBAR DYNAMIQUE ===================== -->
-
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
                 hbarPolicy="AS_NEEDED"
                 vbarPolicy="AS_NEEDED"
@@ -29,7 +27,7 @@
                                -fx-border-width: 1; -fx-cursor: hand;"/>
 
                 <VBox spacing="5">
-                    <Label text="Détails de la Catégorie"
+                    <Label text="Détails de la catégorie"
                            style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                     <Label text="Consultation des informations de la catégorie"
                            style="-fx-text-fill: #6c757d; -fx-font-size: 13px;"/>
@@ -42,7 +40,6 @@
                                           -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 16;
                                           -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 10, 0, 0, 2);">
 
-                    <!-- EN-TÊTE CATÉGORIE -->
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <Label fx:id="iconLabel" text=""
                                style="-fx-font-size: 48px; -fx-background-color: #f8f9fa; -fx-padding: 15;
@@ -51,7 +48,7 @@
                         <VBox spacing="5">
                             <Label fx:id="nameLabel" text=""
                                    style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
-                            <Label text="Catégorie d'événement"
+                            <Label text="Catégorie d’événement"
                                    style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
                         </VBox>
                     </HBox>
@@ -65,7 +62,6 @@
                             <ColumnConstraints hgrow="ALWAYS" percentWidth="34"/>
                         </columnConstraints>
 
-                        <!-- Ligne 1 -->
                         <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
                             <Label text="NOM" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
                             <Label fx:id="detailNameLabel" text=""
@@ -86,7 +82,6 @@
                             </HBox>
                         </VBox>
 
-                        <!-- Ligne 2 -->
                         <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
                             <Label text="COULEUR" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
                             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -100,13 +95,11 @@
                             </HBox>
                         </VBox>
 
-                        <!-- CRÉÉE LE - LIGNE CORRIGÉE -->
                         <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
                             <Label text="CRÉÉE LE" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
                             <Label fx:id="createdAtLabel" text="" style="-fx-font-size: 14px; -fx-text-fill: #334155;"/>
                         </VBox>
 
-                        <!-- MODIFIÉE LE - LIGNE CORRIGÉE -->
                         <VBox spacing="8" GridPane.columnIndex="2" GridPane.rowIndex="1">
                             <Label text="MODIFIÉE LE" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
                             <Label fx:id="updatedAtLabel" text="" style="-fx-font-size: 14px; -fx-text-fill: #334155;"/>
@@ -115,7 +108,6 @@
 
                     <Separator style="-fx-background-color: #e9ecef;"/>
 
-                    <!-- DESCRIPTION -->
                     <VBox spacing="12">
                         <Label text="DESCRIPTION" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
                         <Label fx:id="descriptionLabel" wrapText="true"
@@ -124,14 +116,12 @@
                                       -fx-text-fill: #334155;"/>
                     </VBox>
 
-                    <!-- MÉTADONNÉES -->
                     <HBox spacing="30" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
                         <Label fx:id="createdByLabel" text="" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
                         <Label fx:id="updatedByLabel" text="" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
                     </HBox>
                 </VBox>
 
-                <!-- BOUTON FERMER -->
                 <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
                     <Button text="Fermer" onAction="#handleBack"
                             style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px;
@@ -139,7 +129,6 @@
                                    -fx-font-weight: 600;"/>
                 </HBox>
 
-                <!-- Footer -->
                 <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
                     <Label text="© 2026 EventFlow - Gestion des catégories"
                            style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>

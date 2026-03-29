@@ -34,7 +34,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Properties;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javafx.scene.image.WritableImage;
@@ -531,13 +534,14 @@ public class EventFormController {
     @FXML
     private void handleGenererAffiche() {
         final String titre = titleField != null ? titleField.getText().trim() : "";
+        final String description = descriptionArea != null ? descriptionArea.getText().trim() : "";
         final String gouvernorat = gouvernoratCombo != null && gouvernoratCombo.getValue() != null ? gouvernoratCombo.getValue().trim() : "";
         final String categorie = categoryCombo != null && categoryCombo.getValue() != null ? categoryCombo.getValue().trim() : "";
 
-        if (titre.isEmpty() || gouvernorat.isEmpty() || categorie.isEmpty()) {
+        if (titre.isEmpty() || description.isEmpty() || gouvernorat.isEmpty() || categorie.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Champs requis"); alert.setHeaderText(null);
-            alert.setContentText("Merci de renseigner le titre, le gouvernorat et la categorie avant de generer l'affiche.");
+            alert.setContentText("Merci de renseigner le titre, la description, le gouvernorat et la categorie avant de generer l'affiche.");
             alert.showAndWait();
             return;
         }
@@ -545,19 +549,33 @@ public class EventFormController {
         btnGenererAffiche.setDisable(true);
         loadingSpinner.setManaged(true); loadingSpinner.setVisible(true);
         afficheStatus.setText("Generation en cours...");
+        final long requestSeed = System.currentTimeMillis();
+        final String prompt = buildPosterPrompt(titre, description, categorie, gouvernorat);
 
         Thread worker = new Thread(() -> {
             java.net.HttpURLConnection conn = null;
             java.io.InputStream inputStream = null;
             try {
-                String prompt = String.format(
-                        "professional university event poster, title: %s, category: %s, location: %s, modern design, vibrant colors, no text overlay",
-                        titre, categorie, gouvernorat);
-
                 java.net.URL urlObj = new java.net.URL("https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell");
                 conn = (java.net.HttpURLConnection) urlObj.openConnection();
                 conn.setRequestMethod("POST");
-                String hfToken = System.getenv("HF_TOKEN");
+                String hfToken = resolveHfToken();
+                if (hfToken == null || hfToken.isBlank()) {
+                    Image publicImage = fetchImageFromPublicApi(prompt, requestSeed);
+                    if (publicImage != null && !publicImage.isError()) {
+                        final Image generatedImage = publicImage;
+                        Platform.runLater(() -> {
+                            try {
+                                displayGeneratedPoster(generatedImage, titre, description, categorie, gouvernorat, "Affiche generee via API publique.");
+                            } finally {
+                                btnGenererAffiche.setDisable(false);
+                                loadingSpinner.setVisible(false); loadingSpinner.setManaged(false);
+                            }
+                        });
+                        return;
+                    }
+                    throw new Exception("HF_TOKEN manquant");
+                }
                 conn.setRequestProperty("Authorization", "Bearer " + hfToken);
 
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -566,7 +584,12 @@ public class EventFormController {
                 conn.setConnectTimeout(60000); conn.setReadTimeout(60000);
 
                 String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"");
-                String body = String.format("{\"inputs\":\"%s\",\"parameters\":{\"num_inference_steps\":4}}", safePrompt);
+                String body = String.format(
+                        Locale.ROOT,
+                        "{\"inputs\":\"%s\",\"parameters\":{\"num_inference_steps\":4,\"seed\":%d}}",
+                        safePrompt,
+                        requestSeed
+                );
                 try (java.io.OutputStream os = conn.getOutputStream()) { os.write(body.getBytes(StandardCharsets.UTF_8)); os.flush(); }
 
                 int responseCode = conn.getResponseCode();
@@ -589,7 +612,10 @@ public class EventFormController {
 
                 Platform.runLater(() -> {
                     try {
-                        affichePreview.getChildren().clear();
+                        if (description != null && !description.isBlank()) {
+                            displayGeneratedPoster(image, titre, description, categorie, gouvernorat, "Affiche generee avec succes!");
+                        } else {
+                            affichePreview.getChildren().clear();
                         ImageView bg = new ImageView(image);
                         bg.setFitWidth(300); bg.setFitHeight(450);
                         bg.setPreserveRatio(false); bg.setSmooth(true);
@@ -622,6 +648,7 @@ public class EventFormController {
 
                         affichePreview.getChildren().addAll(bg, overlay);
                         afficheStatus.setText("Affiche generee avec succes!");
+                        }
                     } finally {
                         btnGenererAffiche.setDisable(false);
                         loadingSpinner.setVisible(false); loadingSpinner.setManaged(false);
@@ -629,14 +656,53 @@ public class EventFormController {
                 });
 
             } catch (Exception ex) {
+                Image publicImage = fetchImageFromPublicApi(prompt, requestSeed);
+                if (publicImage != null && !publicImage.isError()) {
+                    final Image generatedImage = publicImage;
+                    Platform.runLater(() -> {
+                        try {
+                            displayGeneratedPoster(generatedImage, titre, description, categorie, gouvernorat, "Affiche generee via API publique.");
+                        } finally {
+                            btnGenererAffiche.setDisable(false);
+                            loadingSpinner.setVisible(false); loadingSpinner.setManaged(false);
+                        }
+                    });
+                    return;
+                }
+
                 Platform.runLater(() -> {
+                    affichePreview.getChildren().clear();
+                    Region bg = new Region();
+                    bg.setPrefSize(300, 450);
+                    bg.setMinSize(300, 450);
+                    bg.setMaxSize(300, 450);
+                    bg.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f172a, #1d4ed8, #0891b2); -fx-background-radius: 12;");
+
+                    Label fallbackTitle = new Label(titre);
+                    fallbackTitle.setWrapText(true);
+                    fallbackTitle.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
+                    Label fallbackDescription = new Label(compactDescription(description, 110));
+                    fallbackDescription.setWrapText(true);
+                    fallbackDescription.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+                    Label fallbackMeta = new Label(categorie + " | " + gouvernorat);
+                    fallbackMeta.setWrapText(true);
+                    fallbackMeta.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+                    Label fallbackNote = new Label("Affiche locale (API indisponible)");
+                    fallbackNote.setStyle("-fx-text-fill: #90CDF4; -fx-font-size: 11px;");
+
+                    Region spacer = new Region();
+                    VBox.setVgrow(spacer, Priority.ALWAYS);
+                    VBox overlay = new VBox(8, spacer, fallbackTitle, fallbackDescription, fallbackMeta, fallbackNote);
+                    overlay.setAlignment(Pos.BOTTOM_LEFT);
+                    overlay.setPadding(new Insets(16));
+                    overlay.setPrefSize(300, 450);
+                    overlay.setMaxSize(300, 450);
+                    overlay.setStyle("-fx-background-color: rgba(0,0,0,0.45); -fx-background-radius: 12;");
+
+                    affichePreview.getChildren().addAll(bg, overlay);
                     btnGenererAffiche.setDisable(false);
                     loadingSpinner.setVisible(false); loadingSpinner.setManaged(false);
-                    afficheStatus.setText("Erreur: " + ex.getMessage());
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Generation echouee"); alert.setHeaderText(null);
-                    alert.setContentText("Impossible de generer l'affiche: " + ex.getMessage());
-                    alert.showAndWait();
+                    afficheStatus.setText("Affiche generee localement (API indisponible).");
                 });
             } finally {
                 try { if (inputStream != null) inputStream.close(); if (conn != null) conn.disconnect(); } catch (Exception e) { e.printStackTrace(); }
@@ -644,6 +710,154 @@ public class EventFormController {
         });
         worker.setDaemon(true);
         worker.start();
+    }
+
+    private String buildPosterPrompt(String titre, String description, String categorie, String gouvernorat) {
+        String c = String.format(Locale.ROOT, "%s %s %s", titre, description, categorie).toLowerCase(Locale.ROOT);
+        String cleanDescription = compactDescription(description, 220);
+        String thematicHint = "modern university event scene";
+        if (c.contains("ia") || c.contains("intelligence") || c.contains("tech")) {
+            thematicHint = "artificial intelligence conference stage, digital screens, innovation";
+        } else if (c.contains("robot")) {
+            thematicHint = "robotics workshop, engineering lab, students and prototypes";
+        } else if (c.contains("marketing")) {
+            thematicHint = "marketing seminar, business presentation, professional audience";
+        } else if (c.contains("hackathon")) {
+            thematicHint = "hackathon coding event, laptops, collaborative tech space";
+        }
+
+        return String.format(
+                Locale.ROOT,
+                "professional event poster background, %s, title \"%s\", description \"%s\", category \"%s\", location \"%s\", realistic photography, coherent with event context, conference or seminar atmosphere, no cartoon, no fish, no underwater scene, no fantasy character, no mascot, no watermark, no logo, no text",
+                thematicHint,
+                titre,
+                cleanDescription,
+                categorie,
+                gouvernorat
+        );
+    }
+
+    private String compactDescription(String value, int maxLen) {
+        if (value == null) {
+            return "";
+        }
+        String normalized = value.replaceAll("\\s+", " ").trim();
+        if (normalized.length() <= maxLen) {
+            return normalized;
+        }
+        return normalized.substring(0, maxLen - 1).trim() + "...";
+    }
+
+    private void displayGeneratedPoster(Image image, String titre, String description, String categorie, String gouvernorat, String statusText) {
+        affichePreview.getChildren().clear();
+        ImageView bg = new ImageView(image);
+        bg.setFitWidth(300); bg.setFitHeight(450);
+        bg.setPreserveRatio(false); bg.setSmooth(true);
+
+        final String dateStr = startDatePicker != null && startDatePicker.getValue() != null
+                ? startDatePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+        final boolean gratuit = freeCheckbox != null && freeCheckbox.isSelected();
+        final String prixStr = gratuit ? "Gratuit" : (priceField != null ? priceField.getText().trim() + " DT" : "");
+
+        Label titreLbl = new Label(titre);
+        titreLbl.setWrapText(true);
+        titreLbl.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
+        Label descriptionLbl = new Label(compactDescription(description, 110));
+        descriptionLbl.setWrapText(true);
+        descriptionLbl.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+        Label categorieLbl = new Label(categorie);
+        categorieLbl.setStyle("-fx-text-fill: #90CDF4; -fx-font-size: 12px;");
+        Label lieuLbl = new Label("Lieu: " + gouvernorat);
+        lieuLbl.setWrapText(true);
+        lieuLbl.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+        Label dateLbl = new Label("Date: " + dateStr);
+        dateLbl.setStyle("-fx-text-fill: #E2E8F0; -fx-font-size: 12px;");
+        Label prixLbl = new Label("Prix: " + prixStr);
+        prixLbl.setStyle(gratuit ? "-fx-text-fill: #68D391; -fx-font-size: 12px; -fx-font-weight: bold;" : "-fx-text-fill: #FBD38D; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+        VBox overlay = new VBox(6, spacer, titreLbl, descriptionLbl, categorieLbl, lieuLbl, dateLbl, prixLbl);
+        overlay.setAlignment(Pos.BOTTOM_LEFT);
+        overlay.setPadding(new Insets(16));
+        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.6);");
+        overlay.setPrefSize(300, 450); overlay.setMaxSize(300, 450);
+
+        affichePreview.getChildren().addAll(bg, overlay);
+        afficheStatus.setText(statusText);
+    }
+
+    private String resolveHfToken() {
+        String token = System.getenv("HF_TOKEN");
+        if (token == null || token.isBlank()) token = System.getProperty("HF_TOKEN");
+        if (token == null || token.isBlank()) {
+            File config = new File("config/local-secrets.properties");
+            if (config.exists()) {
+                Properties props = new Properties();
+                try (FileInputStream fis = new FileInputStream(config)) {
+                    props.load(fis);
+                    token = props.getProperty("HF_TOKEN", "");
+                } catch (IOException ignored) {}
+            }
+        }
+        return token == null ? "" : token.trim();
+    }
+
+    private Image fetchImageFromPublicApi(String prompt, long requestSeed) {
+        String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
+        String negativePrompt = URLEncoder.encode(
+                "cartoon, fish, underwater, anime, mascot, fantasy, watermark, logo, text",
+                StandardCharsets.UTF_8
+        );
+        String[] pollinationsUrls = new String[] {
+                "https://image.pollinations.ai/prompt/" + encodedPrompt
+                        + "?width=768&height=1152&model=flux&nologo=true&safe=true&enhance=true&seed=" + requestSeed
+                        + "&negative=" + negativePrompt,
+                "https://image.pollinations.ai/prompt/" + encodedPrompt
+                        + "?width=768&height=1152&model=turbo&nologo=true&safe=true&enhance=true&seed=" + (requestSeed + 31)
+                        + "&negative=" + negativePrompt
+        };
+
+        for (String url : pollinationsUrls) {
+            Image image = fetchImageFromDirectUrl(url, "image/png,image/*");
+            if (image != null && !image.isError()) {
+                return image;
+            }
+        }
+
+        return null;
+    }
+
+    private Image fetchImageFromDirectUrl(String url, String acceptHeader) {
+        java.net.HttpURLConnection conn = null;
+        java.io.InputStream stream = null;
+        try {
+            conn = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+            conn.setRequestMethod("GET");
+            conn.setInstanceFollowRedirects(true);
+            conn.setRequestProperty("Accept", acceptHeader);
+            conn.setRequestProperty("User-Agent", "PiDev/1.0");
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(60000);
+
+            int code = conn.getResponseCode();
+            if (code < 200 || code >= 300) {
+                return null;
+            }
+
+            stream = conn.getInputStream();
+            Image image = new Image(stream);
+            return image.isError() ? null : image;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (stream != null) {
+                try { stream.close(); } catch (IOException ignored) {}
+            }
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
     }
 
     // ==================== SNAPSHOT AFFICHE ====================
@@ -681,8 +895,8 @@ public class EventFormController {
 
         if (!validateForm()) return;
 
-        String title = titleField.getText().trim();
-        String description = descriptionArea.getText().trim();
+        String title = titleField != null && titleField.getText() != null ? titleField.getText().trim() : "";
+        String description = descriptionArea != null && descriptionArea.getText() != null ? descriptionArea.getText().trim() : "";
         String gouvernorat = gouvernoratCombo.getValue();
 
         // ✅ ville = gouvernorat (on garde la compatibilité avec le modèle)
@@ -690,12 +904,15 @@ public class EventFormController {
 
         String location = locationCombo.getValue();
         if (location == null || location.isEmpty()) {
-            location = locationCombo.getEditor().getText().trim();
+            String editorText = locationCombo.getEditor() != null && locationCombo.getEditor().getText() != null
+                    ? locationCombo.getEditor().getText()
+                    : "";
+            location = editorText.trim();
             if (location.isEmpty()) { showError("Erreur", "Veuillez selectionner ou saisir un lieu"); return; }
         }
 
         int capacity = Integer.parseInt(capacityField.getText());
-        String imageUrl = imageUrlField.getText().trim();
+        String imageUrl = imageUrlField != null && imageUrlField.getText() != null ? imageUrlField.getText().trim() : "";
 
         String afficheUrl = saveAfficheToFile();
         if (afficheUrl != null) { imageUrl = afficheUrl; System.out.println("✅ Affiche utilisée comme image"); }
@@ -704,7 +921,8 @@ public class EventFormController {
         int categoryId = selectedCat != null ? selectedCat.getId() : 1;
 
         boolean isFree = freeCheckbox.isSelected();
-        double price = isFree ? 0 : Double.parseDouble(priceField.getText());
+        String priceText = priceField != null && priceField.getText() != null ? priceField.getText().trim() : "";
+        double price = isFree ? 0 : Double.parseDouble(priceText.isEmpty() ? "0" : priceText);
 
         LocalDateTime startDate = LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(startHourSpinner.getValue(), startMinuteSpinner.getValue()));
         LocalDateTime endDate = LocalDateTime.of(endDatePicker.getValue(), LocalTime.of(endHourSpinner.getValue(), endMinuteSpinner.getValue()));

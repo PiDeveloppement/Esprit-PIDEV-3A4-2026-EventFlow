@@ -12,12 +12,14 @@ import com.example.pidev.model.event.Event;
 import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.model.event.EventTicket;
 import com.example.pidev.model.role.Role;
+import com.example.pidev.service.chat.ChatbotService;
 import com.example.pidev.service.event.EventCategoryService;
 import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.event.EventTicketService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -39,6 +41,8 @@ import javafx.stage.Stage;
 import com.example.pidev.utils.UserSession;
 import com.example.pidev.model.user.UserModel;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -88,6 +92,7 @@ public class MainController {
     @FXML private Label userRoleLabel;
     @FXML private Text userInitialsText;
     @FXML private ImageView profileImageView;
+    @FXML private ImageView sidebarLogoImageView;
     @FXML private StackPane initialsContainer;
     @FXML private StackPane avatarContainer;
     @FXML private MenuButton profileMenu;
@@ -140,6 +145,14 @@ public class MainController {
 
     @FXML private TextField globalSearchField;
 
+    // Chat panel
+    @FXML private VBox chatPanel;
+    @FXML private Button chatFloatingButton;
+    @FXML private ScrollPane chatScrollPane;
+    @FXML private VBox chatBox;
+    @FXML private TextField inputField;
+    @FXML private Label statusIndicator;
+
     private final Map<String, PageInfo> pageInfoMap = new HashMap<>();
     private Button activeButton;
     private DashboardController dashboardController;
@@ -148,6 +161,7 @@ public class MainController {
     private EventService eventService;
     private EventCategoryService categoryService;
     private EventTicketService ticketService;
+    private ChatbotService chatbotService;
 
     private static class PageInfo {
         String title;
@@ -168,6 +182,7 @@ public class MainController {
         eventService = new EventService();
         categoryService = new EventCategoryService();
         ticketService = new EventTicketService();
+        chatbotService = new ChatbotService();
 
         UserSession session = UserSession.getInstance();
         System.out.println("👤 Rôle connecté dans MainController: " + session.getRole());
@@ -175,9 +190,10 @@ public class MainController {
         initializePageInfo();
         configureSidebarButtons();
         hideAllButtons();
-        configureSidebarByRole();
+        configureSidebarByRoleSafe();
         configureDateTime();
         loadUserProfileInHeader();
+        initializeSidebarLogo();
         setupGlobalSearch();
 
         // Initialiser les KPI (cachés par défaut)
@@ -256,6 +272,37 @@ public class MainController {
 
     public void refreshHeaderProfile() {
         loadUserProfileInHeader();
+    }
+
+    private void initializeSidebarLogo() {
+        if (sidebarLogoImageView == null) {
+            return;
+        }
+
+        File devLogoFile = new File("src/main/resources/com/example/pidev/icons/logo.png");
+        if (devLogoFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(devLogoFile)) {
+                sidebarLogoImageView.setImage(new Image(fis));
+                return;
+            } catch (IOException ignored) {
+                // Fallback classpath below
+            }
+        }
+
+        String[] candidates = {
+                "/com/example/pidev/icons/logo.png",
+                "/com/example/pidev/fxml/images/logo.png",
+                "/com/example/pidev/fxml/auth/images/logo.png"
+        };
+        for (String path : candidates) {
+            URL logoUrl = getClass().getResource(path);
+            if (logoUrl != null) {
+                sidebarLogoImageView.setImage(new Image(logoUrl.toExternalForm(), false));
+                return;
+            }
+        }
+
+        System.err.println("⚠ Logo EventFlow introuvable pour la sidebar.");
     }
 
     private void showInitials(String initials) {
@@ -608,6 +655,38 @@ public class MainController {
 
         hideAllButtons();
 
+        boolean isAdmin = role.contains("admin");
+        boolean isOrganizer = role.contains("organisateur");
+        boolean isSponsor = role.contains("sponsor");
+        boolean isPureSponsor = isSponsor && !isAdmin;
+        boolean handled = false;
+
+        if (isAdmin || isOrganizer) {
+            showAllButtons();
+            hideNode(sponsorPortalBtn);
+            hideNode(settingsBtn);
+            if (isOrganizer) {
+                hideNode(usersToggleBtn);
+                hideNode(usersSubmenu);
+                System.out.println("âœ… Organisateur: tous sauf gestion utilisateurs");
+            } else {
+                System.out.println("âœ… Admin: tous les boutons utiles affichÃ©s");
+            }
+            handled = true;
+        } else if (isPureSponsor) {
+            showOnlySponsorButtons();
+            System.out.println("âœ… Sponsor: dashboard + portail sponsor + budget");
+            handled = true;
+        } else if (role.contains("participant") || role.contains("default") || role.contains("invit")) {
+            showOnlyParticipantButtons();
+            System.out.println("âœ… Participant/Default: uniquement dashboard");
+            handled = true;
+        }
+
+        if (handled) {
+            return;
+        }
+
         switch (role) {
             case "admin":
             case "admin2":
@@ -646,11 +725,98 @@ public class MainController {
         }
     }
 
+    private void configureSidebarByRoleSafe() {
+        UserSession session = UserSession.getInstance();
+        String role = session.getRole();
+
+        if (role == null) {
+            hideAllButtons();
+            return;
+        }
+
+        role = role.trim().toLowerCase();
+        System.out.println("[Sidebar] Configuration for role: " + role);
+
+        hideAllButtons();
+
+        boolean isAdmin = role.contains("admin");
+        boolean isOrganizer = role.contains("organisateur");
+        boolean isSponsor = role.contains("sponsor");
+        boolean isPureSponsor = isSponsor && !isAdmin;
+        boolean handled = false;
+
+        if (isAdmin || isOrganizer) {
+            showAllButtons();
+            hideNode(sponsorPortalBtn);
+            hideNode(settingsBtn);
+            if (isOrganizer) {
+                hideNode(usersToggleBtn);
+                hideNode(usersSubmenu);
+                System.out.println("[Sidebar] Organizer: all sections except user management");
+            } else {
+                System.out.println("[Sidebar] Admin: all useful buttons displayed");
+            }
+            handled = true;
+        } else if (isPureSponsor) {
+            showOnlySponsorButtons();
+            System.out.println("[Sidebar] Sponsor: dashboard + sponsor portal + budget");
+            handled = true;
+        } else if (role.contains("participant") || role.contains("default") || role.contains("invit")) {
+            showOnlyParticipantButtons();
+            System.out.println("[Sidebar] Participant/default: dashboard only");
+            handled = true;
+        }
+
+        if (handled) {
+            return;
+        }
+
+        switch (role) {
+            case "admin":
+            case "admin2":
+            case "admin3":
+            case "admin4":
+                showAllButtons();
+                System.out.println("[Sidebar] Admin: all buttons displayed");
+                break;
+
+            case "organisateur":
+            case "organisateur2":
+                showAllButtons();
+                hideNode(usersToggleBtn);
+                hideNode(usersSubmenu);
+                System.out.println("[Sidebar] Organizer: all sections except user management");
+                break;
+
+            case "sponsor":
+            case "sponsor2":
+            case "sponsor3":
+                showOnlySponsorButtons();
+                System.out.println("[Sidebar] Sponsor: dashboard, sponsors, budget");
+                break;
+
+            case "participant":
+            case "default":
+            case "invite":
+            case "invité":
+                showOnlyParticipantButtons();
+                System.out.println("[Sidebar] Participant/default: dashboard only");
+                break;
+
+            default:
+                hideAllButtons();
+                System.out.println("[Sidebar] Unknown role: " + role);
+                break;
+        }
+    }
+
     private void showOnlyParticipantButtons() {
         showNode(dashboardBtn);
         hideNode(eventsToggleBtn);
         hideNode(usersToggleBtn);
         hideNode(sponsorsBtn);
+        hideNode(sponsorsListBtn);
+        hideNode(sponsorPortalBtn);
         hideNode(resourcesToggleBtn);
         hideNode(questionnairesToggleBtn);
         hideNode(settingsBtn);
@@ -661,7 +827,9 @@ public class MainController {
     private void showOnlySponsorButtons() {
         showNode(dashboardBtn);
         showNode(sponsorsBtn);
+        showNode(sponsorPortalBtn);
         showNode(budgetBtn);
+        hideNode(sponsorsListBtn);
         hideNode(eventsToggleBtn);
         hideNode(usersToggleBtn);
         hideNode(resourcesToggleBtn);
@@ -673,6 +841,8 @@ public class MainController {
     private void hideAllButtons() {
         hideNode(dashboardBtn);
         hideNode(sponsorsBtn);
+        hideNode(sponsorsListBtn);
+        hideNode(sponsorPortalBtn);
         hideNode(eventsToggleBtn);
         hideNode(usersToggleBtn);
         hideNode(resourcesToggleBtn);
@@ -685,9 +855,10 @@ public class MainController {
         Node[] main = {
                 dashboardBtn, eventsToggleBtn, usersToggleBtn, sponsorsBtn,
                 resourcesToggleBtn, questionnairesToggleBtn,
-                settingsBtn, budgetBtn
+                budgetBtn
         };
         for (Node n : main) showNode(n);
+        showNode(sponsorsListBtn);
         collapseAllSubmenus();
     }
 
@@ -735,6 +906,118 @@ public class MainController {
                     globalSearchField.clear();
                 }
             });
+        }
+    }
+
+    @FXML
+    private void onSearchClick() {
+        if (globalSearchField == null) {
+            return;
+        }
+        String query = globalSearchField.getText().trim();
+        if (!query.isEmpty()) {
+            performSimpleSearch(query);
+        }
+    }
+
+    @FXML
+    private void toggleChatPanel() {
+        if (chatPanel == null) {
+            return;
+        }
+        boolean isVisible = chatPanel.isVisible();
+        chatPanel.setVisible(!isVisible);
+        chatPanel.setManaged(!isVisible);
+    }
+
+    @FXML
+    private void handleSuggestion(ActionEvent event) {
+        if (inputField == null) {
+            return;
+        }
+
+        String suggestion = null;
+        if (event != null && event.getSource() instanceof Button suggestionButton) {
+            // Always prioritize the exact clicked question text.
+            if (suggestionButton.getText() != null && !suggestionButton.getText().isBlank()) {
+                suggestion = sanitizeSuggestion(suggestionButton.getText());
+            }
+            if ((suggestion == null || suggestion.isBlank()) && suggestionButton.getUserData() != null) {
+                String userData = suggestionButton.getUserData().toString();
+                if (!userData.isBlank()) {
+                    suggestion = sanitizeSuggestion(userData);
+                }
+            }
+        }
+
+        if (suggestion == null || suggestion.isBlank()) {
+            suggestion = "Montre-moi les statistiques";
+        }
+
+        inputField.setText(suggestion);
+        handleSendMessage();
+    }
+
+    private String sanitizeSuggestion(String rawValue) {
+        if (rawValue == null) {
+            return "";
+        }
+        return rawValue
+                .replaceAll("^[^\\p{L}\\p{N}]+", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
+    private String buildChatbotReply(String message) {
+        try {
+            if (chatbotService == null) {
+                return "Le service chatbot n'est pas disponible pour le moment.";
+            }
+            return chatbotService.processQuestion(message);
+        } catch (Exception e) {
+            return "Erreur chatbot: " + e.getMessage();
+        }
+    }
+
+    @FXML
+    private void handleSendMessage() {
+        if (inputField == null) {
+            return;
+        }
+        String message = inputField.getText() == null ? "" : inputField.getText().trim();
+        if (message.isEmpty()) {
+            return;
+        }
+
+        if (chatBox != null) {
+            Label userMessage = new Label("Vous: " + message);
+            userMessage.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 13px; -fx-padding: 4 0;");
+            userMessage.setWrapText(true);
+            userMessage.setMaxWidth(360);
+            chatBox.getChildren().add(userMessage);
+
+            Label botMessage = new Label("Assistant: Message reçu.");
+            botMessage.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-padding: 0 0 8 0;");
+            botMessage.setText("Assistant: " + buildChatbotReply(message));
+            botMessage.setWrapText(true);
+            botMessage.setMaxWidth(360);
+            chatBox.getChildren().add(botMessage);
+        }
+
+        if (statusIndicator != null) {
+            statusIndicator.setText("● Connecte");
+        }
+
+        inputField.clear();
+        if (chatScrollPane != null) {
+            Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
+        }
+    }
+
+    @FXML
+    private void handleClearChat() {
+        if (chatBox != null) {
+            chatBox.getChildren().clear();
         }
     }
 
@@ -855,6 +1138,7 @@ public class MainController {
     public void showSponsorsAdmin() {
         openSponsorsSubmenu();
         setActiveButton(sponsorsListBtn);
+        hideKPIs();
         loadIntoCenter(SPONSOR_ADMIN_FXML, (SponsorAdminController ctrl) -> {
             // Initialisation si nécessaire
         });
@@ -865,6 +1149,7 @@ public class MainController {
     public void showSponsorPortal(String email) {
         openSponsorsSubmenu();
         setActiveButton(sponsorPortalBtn);
+        hideKPIs();
         if (email != null && !email.isBlank()) setLastSponsorPortalEmail(email);
 
         loadIntoCenter(SPONSOR_PORTAL_FXML, (SponsorPortalController ctrl) -> {
@@ -883,6 +1168,7 @@ public class MainController {
     public void showBudget() {
         openSponsorsSubmenu();
         setActiveButton(budgetBtn);
+        hideKPIs();
         loadIntoCenter(BUDGET_LIST_FXML, null);
         updatePageHeader("budget");
     }
@@ -891,6 +1177,7 @@ public class MainController {
     public void showDepenses() {
         openSponsorsSubmenu();
         setActiveButton(contratsBtn);
+        hideKPIs();
         loadIntoCenter(DEPENSE_LIST_FXML, null);
         updatePageHeader("depenses");
     }
@@ -982,6 +1269,14 @@ public class MainController {
         if (pageInfo != null) {
             if (pageTitle != null) pageTitle.setText(pageInfo.title);
             if (pageSubtitle != null) pageSubtitle.setText(pageInfo.subtitle);
+        }
+
+        // Ensure sponsor pages never keep KPI cards from events/tickets pages.
+        if ("sponsorsList".equals(pageKey)
+                || "sponsorPortal".equals(pageKey)
+                || "budget".equals(pageKey)
+                || "depenses".equals(pageKey)) {
+            hideKPIs();
         }
     }
 
@@ -1568,7 +1863,7 @@ public class MainController {
 
     public void refreshSidebarForRole() {
         System.out.println("🔄 Rafraîchissement de la sidebar");
-        configureSidebarByRole();
+        configureSidebarByRoleSafe();
         collapseAllSubmenus();
     }
 
@@ -1877,8 +2172,4 @@ public class MainController {
     /**
      * Retourne le conteneur principal du contenu pour navigation depuis d'autres contrôleurs
      */
-    public VBox getPageContentContainer() {
-        return pageContentContainer;
-    }
-
 }

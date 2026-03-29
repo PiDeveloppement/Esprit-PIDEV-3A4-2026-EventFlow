@@ -65,14 +65,16 @@ public class EquipementController implements Initializable {
                 } else {
                     try {
                         // Nettoyage du chemin stocké en base
-                        String cleanPath = path.replace("file:/", "").replace("%20", " ");
+                        String cleanPath = path.replace("file:/", "").replace("%20", " ").replace("\\", "/");
+                        String fileName = new File(cleanPath).getName();
                         File file = new File(cleanPath);
 
-                        // FALLBACK : Si le chemin complet src/uploads ne marche pas,
-                        // on cherche dans le dossier uploads à la racine du projet
+                        // FALLBACKS pour les chemins d'autres machines
                         if (!file.exists()) {
-                            String fileName = new File(path).getName();
                             file = new File("uploads/" + fileName);
+                        }
+                        if (!file.exists()) {
+                            file = new File("src/uploads/" + fileName);
                         }
 
                         if (file.exists()) {

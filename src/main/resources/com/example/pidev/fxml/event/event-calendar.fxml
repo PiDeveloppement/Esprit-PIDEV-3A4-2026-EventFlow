@@ -55,6 +55,15 @@
                         style="-fx-padding: 8 12; -fx-background-color: #ccc; -fx-text-fill: #666; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
                         onAction="#handleViewListe"/>
             </HBox>
+
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <Button fx:id="addEventBtn" text="+ Evenement" prefHeight="40"
+                        style="-fx-padding: 8 12; -fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
+                        onAction="#handleAddEvent"/>
+                <Button fx:id="addNoteBtn" text="+ Note" prefHeight="40"
+                        style="-fx-padding: 8 12; -fx-background-color: #0f766e; -fx-text-fill: white; -fx-font-size: 11px; -fx-border-radius: 4; -fx-cursor: hand;"
+                        onAction="#handleAddNote"/>
+            </HBox>
         </HBox>
 
         <!-- LÉGENDES : Catégories + Statuts (DYNAMIQUES depuis DB) -->

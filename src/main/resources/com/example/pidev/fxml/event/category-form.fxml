@@ -11,9 +11,6 @@
       styleClass="page-background"
       stylesheets="@../../css/atlantafx-custom.css">
 
-    <!-- ===================== NAVBAR DYNAMIQUE ===================== -->
-
-    <!-- ===================== SCROLLPANE ===================== -->
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
                 hbarPolicy="AS_NEEDED"
                 vbarPolicy="AS_NEEDED"
@@ -21,7 +18,6 @@
 
         <VBox spacing="0">
 
-            <!-- ===================== HEADER FORMULAIRE ===================== -->
             <HBox style="-fx-background-color: white; -fx-padding: 15 40; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
                   alignment="CENTER_LEFT" spacing="20">
 
@@ -31,7 +27,7 @@
                                -fx-border-width: 1; -fx-cursor: hand;"/>
 
                 <VBox spacing="5">
-                    <Label fx:id="titleLabel" text="Nouvelle Catégorie"
+                    <Label fx:id="titleLabel" text="Nouvelle catégorie"
                            style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
                     <Label text="Créez une nouvelle catégorie"
                            style="-fx-text-fill: #6c757d; -fx-font-size: 13px;"/>
@@ -51,15 +47,12 @@
                 </HBox>
             </HBox>
 
-            <!-- ===================== FORMULAIRE ===================== -->
             <VBox style="-fx-padding: 30; -fx-spacing: 25;">
 
-                <!-- CARD PRINCIPALE -->
                 <VBox spacing="25" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 16;
                                           -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 16;
                                           -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 10, 0, 0, 2);">
 
-                    <!-- SECTION 1: INFORMATIONS -->
                     <VBox spacing="15">
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="🧾" style="-fx-font-size: 18px;"/>
@@ -68,7 +61,6 @@
                                           -fx-letter-spacing: 0.5px;"/>
                         </HBox>
 
-                        <!-- Nom -->
                         <VBox spacing="6">
                             <HBox spacing="5" alignment="CENTER_LEFT">
                                 <Label text="Nom"
@@ -85,7 +77,6 @@
                                    style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                         </VBox>
 
-                        <!-- Description avec largeur identique au Nom -->
                         <VBox spacing="6">
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <Label text="Description"
@@ -106,10 +97,8 @@
                         </VBox>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
-                    <!-- SECTION 2: APPARENCE avec aperçu dynamique -->
                     <VBox spacing="15">
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="🎨" style="-fx-font-size: 18px;"/>
@@ -118,9 +107,7 @@
                                           -fx-letter-spacing: 0.5px;"/>
                         </HBox>
 
-                        <!-- Ligne Icône + Couleur avec aperçus -->
                         <HBox spacing="20">
-                            <!-- Icône avec aperçu -->
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
                                 <Label text="Icône"
                                        style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
@@ -129,7 +116,6 @@
                                               style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
                                                      -fx-border-radius: 8; -fx-padding: 8 12;"
                                               promptText="Choisir"/>
-                                    <!-- Aperçu icône dynamique -->
                                     <Label fx:id="iconPreview" text="⭐"
                                            style="-fx-font-size: 24px; -fx-min-width: 40; -fx-alignment: CENTER;
                                                   -fx-background-color: #f8f9fa; -fx-padding: 6; -fx-background-radius: 8;
@@ -137,7 +123,6 @@
                                 </HBox>
                             </VBox>
 
-                            <!-- Couleur avec aperçu -->
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
                                 <Label text="Couleur"
                                        style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
@@ -148,7 +133,6 @@
                                                editable="false"
                                                style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
                                                       -fx-border-radius: 8; -fx-padding: 8 12; -fx-font-family: monospace;"/>
-                                    <!-- Aperçu couleur dynamique -->
                                     <Region fx:id="colorPreview"
                                             style="-fx-min-width: 30; -fx-min-height: 30; -fx-background-radius: 6;
                                                    -fx-background-color: #2196F3; -fx-border-color: #ced4da;
@@ -158,10 +142,8 @@
                         </HBox>
                     </VBox>
 
-                    <!-- SÉPARATEUR -->
                     <Separator style="-fx-background-color: transparent;"/>
 
-                    <!-- SECTION 3: STATUT -->
                     <VBox spacing="15">
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="🛠️" style="-fx-font-size: 18px;"/>
@@ -182,15 +164,14 @@
                                style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                     </VBox>
 
-                </VBox> <!-- Fin VBox CARD PRINCIPALE -->
+                </VBox>
 
-                <!-- Footer -->
                 <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
                     <Label text="© 2026 EventFlow - Gestion des catégories"
                            style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
                 </HBox>
 
-            </VBox> <!-- Fin VBox FORMULAIRE -->
-        </VBox> <!-- Fin VBox SCROLLPANE CONTENT -->
-    </ScrollPane> <!-- Fin ScrollPane -->
-</VBox> <!-- Fin VBox PRINCIPAL -->
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -23,6 +23,9 @@ import javafx.stage.StageStyle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 
 public class HelloApplication extends Application {
 
@@ -831,6 +834,101 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
+        ConsoleLogSanitizer.install();
         launch(args);
+    }
+
+    private static final class ConsoleLogSanitizer {
+        private static final String[][] TOKENS = new String[][]{
+                {"✅", "[OK] "},
+                {"✔", "[OK] "},
+                {"❌", "[ERROR] "},
+                {"⚠", "[WARN] "},
+                {"🔄", "[REFRESH] "},
+                {"➕", "[ADD] "},
+                {"📊", "[REPORT] "},
+                {"📋", "[LIST] "},
+                {"👤", "[USER] "},
+                {"🚪", "[LOGOUT] "},
+                {"🔧", "[CONFIG] "},
+                {"🎫", "[TICKET] "},
+                {"📄", "[PDF] "},
+                {"👁", "[VIEW] "},
+                {"🤖", "[BOT] "}
+        };
+
+        private ConsoleLogSanitizer() {
+        }
+
+        static void install() {
+            System.setOut(new SanitizingPrintStream(System.out));
+            System.setErr(new SanitizingPrintStream(System.err));
+        }
+
+        private static String sanitize(String value) {
+            if (value == null || value.isEmpty()) {
+                return value;
+            }
+
+            String text = value;
+            for (String[] token : TOKENS) {
+                text = text.replace(token[0], token[1]);
+            }
+
+            text = repairMojibake(text);
+            text = text.replace('\u00A0', ' ');
+            text = Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("\\p{M}+", "");
+            text = text.replaceAll("[^\\x09\\x0A\\x0D\\x20-\\x7E]", "");
+
+            return text;
+        }
+
+        private static String repairMojibake(String input) {
+            String current = input;
+            for (int i = 0; i < 2; i++) {
+                if (!looksBroken(current)) {
+                    break;
+                }
+                String repaired = new String(current.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+                if (repaired.equals(current)) {
+                    break;
+                }
+                current = repaired;
+            }
+            return current;
+        }
+
+        private static boolean looksBroken(String value) {
+            return value.contains("Ã") || value.contains("â") || value.contains("Å") || value.contains("Â");
+        }
+    }
+
+    private static final class SanitizingPrintStream extends PrintStream {
+        private final PrintStream delegate;
+
+        private SanitizingPrintStream(PrintStream delegate) {
+            super(delegate);
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void println(String x) {
+            delegate.println(ConsoleLogSanitizer.sanitize(x));
+        }
+
+        @Override
+        public void print(String s) {
+            delegate.print(ConsoleLogSanitizer.sanitize(s));
+        }
+
+        @Override
+        public void println(Object x) {
+            delegate.println(ConsoleLogSanitizer.sanitize(String.valueOf(x)));
+        }
+
+        @Override
+        public void print(Object obj) {
+            delegate.print(ConsoleLogSanitizer.sanitize(String.valueOf(obj)));
+        }
     }
 }

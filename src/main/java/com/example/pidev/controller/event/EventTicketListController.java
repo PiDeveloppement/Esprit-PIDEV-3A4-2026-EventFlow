@@ -17,10 +17,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Controller pour la liste des tickets
@@ -343,8 +346,12 @@ public class EventTicketListController {
         if (allTickets == null) return;
         int total = allTickets.size();
         long used = allTickets.stream().filter(EventTicket::isUsed).count();
-        totalLabel.setText(String.valueOf(total));
-        usedLabel.setText(String.valueOf(used));
+        if (totalLabel != null) {
+            totalLabel.setText(String.valueOf(total));
+        }
+        if (usedLabel != null) {
+            usedLabel.setText(String.valueOf(used));
+        }
     }
 
     private void applyFilters() {
@@ -376,13 +383,47 @@ public class EventTicketListController {
 
         filteredTickets = filtered;
         currentPage = 1;
-        resultLabel.setText(filtered.size() + " résultat(s) trouvé(s)");
+        if (resultLabel != null) {
+            resultLabel.setText(filtered.size() + " résultat(s) trouvé(s)");
+        }
         setupPagination();
     }
 
 
     @FXML
     private void handleScan() {
+        if (ticketService != null) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Scanner un billet");
+            dialog.setHeaderText("Scannez (ou collez) le QR/code ticket");
+            dialog.setContentText("Code scanné :");
+
+            Optional<String> result = dialog.showAndWait();
+            if (result.isEmpty()) {
+                return;
+            }
+
+            String rawScan = result.get() != null ? result.get().trim() : "";
+            if (rawScan.isEmpty()) {
+                showError("Code invalide", "Aucune valeur scannée");
+                return;
+            }
+
+            String ticketCode = extractTicketCodeFromScanInput(rawScan);
+            if (ticketCode == null || ticketCode.isBlank()) {
+                showError("Code invalide", "Impossible d'extraire un code ticket valide");
+                return;
+            }
+
+            EventTicket ticket = ticketService.getTicketByCode(ticketCode);
+            if (ticket == null) {
+                showError("Ticket introuvable", "Aucun ticket trouvé pour le code: " + ticketCode);
+                return;
+            }
+
+            handleScan(ticket);
+            return;
+        }
         // Ouvrir la vue de scan QR code
         System.out.println("📱 Ouverture du scanner QR code");
         // TODO: Implémenter le scan
@@ -409,6 +450,43 @@ public class EventTicketListController {
         } else {
             showError("Erreur", "Ce ticket a déjà été utilisé");
         }
+    }
+
+    private String extractTicketCodeFromScanInput(String scannedValue) {
+        String trimmed = scannedValue.trim();
+
+        if (trimmed.contains("/ticket/") && trimmed.contains("/pdf")) {
+            int start = trimmed.indexOf("/ticket/") + "/ticket/".length();
+            int end = trimmed.indexOf("/pdf", start);
+            if (start >= "/ticket/".length() && end > start) {
+                String encodedCode = trimmed.substring(start, end);
+                try {
+                    return URLDecoder.decode(encodedCode, StandardCharsets.UTF_8).trim();
+                } catch (Exception ignored) {
+                    return encodedCode.trim();
+                }
+            }
+        }
+
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            int queryIndex = trimmed.indexOf("text=");
+            if (queryIndex >= 0) {
+                String encodedText = trimmed.substring(queryIndex + 5);
+                int amp = encodedText.indexOf('&');
+                if (amp >= 0) {
+                    encodedText = encodedText.substring(0, amp);
+                }
+
+                try {
+                    String decodedText = URLDecoder.decode(encodedText, StandardCharsets.UTF_8);
+                    return extractTicketCodeFromScanInput(decodedText);
+                } catch (Exception ignored) {
+                    // fallback sur la valeur brute ci-dessous
+                }
+            }
+        }
+
+        return trimmed;
     }
 
     private void handleDelete(EventTicket ticket) {

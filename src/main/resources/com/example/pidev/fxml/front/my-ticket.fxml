@@ -8,7 +8,7 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pidev.controller.front.MyTicketController"
       spacing="0"
-      style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
+      style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #667eea 0%, #764ba2 100%);"
       alignment="TOP_CENTER">
 
     <!-- Header -->
@@ -45,7 +45,7 @@
                   maxWidth="600" alignment="CENTER">
 
                 <!-- En-tête coloré -->
-                <VBox spacing="15" style="-fx-padding: 30; -fx-background-color: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
+                <VBox spacing="15" style="-fx-padding: 30; -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0D47A1 0%, #1976D2 100%);
                                           -fx-background-radius: 20 20 0 0;" alignment="CENTER">
                     <Label text="🎉" style="-fx-font-size: 48px;"/>
                     <Label fx:id="eventTitleLabel" text="Nom de l'événement"
@@ -144,4 +144,3 @@
     </ScrollPane>
 
 </VBox>
-

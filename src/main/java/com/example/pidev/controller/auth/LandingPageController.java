@@ -2,6 +2,7 @@ package com.example.pidev.controller.auth;
 
 import com.example.pidev.HelloApplication;
 import com.example.pidev.service.questionnaire.FeedbackService;
+import com.example.pidev.utils.UserSession;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -30,13 +31,44 @@ public class LandingPageController implements Initializable {
     @FXML private VBox homeSection;
     @FXML private VBox featuresSection;
     @FXML private VBox contactSection;
+    @FXML private HBox authButtonsBox;
+    @FXML private MenuButton profileMenuButton;
+    @FXML private Button sponsorRecoBtn;
 
     private Scene currentScene;
     private final FeedbackService feedbackService = new FeedbackService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        applyRoleUi();
         System.out.println("✅ LandingPageController initialisé");
+    }
+
+    private void applyRoleUi() {
+        UserSession session = UserSession.getInstance();
+        String role = session.getRole() != null ? session.getRole().trim().toLowerCase() : "";
+
+        boolean isLoggedIn = session.isLoggedIn();
+        boolean isAdmin = role.contains("admin");
+        boolean isSponsor = role.contains("sponsor") && !isAdmin;
+
+        if (authButtonsBox != null) {
+            authButtonsBox.setVisible(!isLoggedIn);
+            authButtonsBox.setManaged(!isLoggedIn);
+        }
+
+        if (profileMenuButton != null) {
+            profileMenuButton.setVisible(isLoggedIn);
+            profileMenuButton.setManaged(isLoggedIn);
+            if (isLoggedIn && session.getFullName() != null && !session.getFullName().isBlank()) {
+                profileMenuButton.setText(session.getFullName());
+            }
+        }
+
+        if (sponsorRecoBtn != null) {
+            sponsorRecoBtn.setVisible(isSponsor);
+            sponsorRecoBtn.setManaged(isSponsor);
+        }
     }
 
     // ==================== NAVIGATION ====================
@@ -57,6 +89,30 @@ public class LandingPageController implements Initializable {
     private void handleGoToEvents() {
         System.out.println("📂 Redirection vers la page des événements");
         HelloApplication.loadPublicEventsPage();
+    }
+
+    @FXML
+    private void handleSponsorPortal() {
+        System.out.println("ðŸ“‚ Redirection vers recommandations sponsor");
+        String role = UserSession.getInstance().getRole() != null
+                ? UserSession.getInstance().getRole().trim().toLowerCase()
+                : "";
+        if (role.contains("sponsor") && !role.contains("admin")) {
+            HelloApplication.showSponsorPortalInLanding();
+        }
+    }
+
+    @FXML
+    private void handleProfile() {
+        System.out.println("ðŸ“‚ Redirection vers le profil");
+        HelloApplication.loadProfilePage();
+    }
+
+    @FXML
+    private void handleLogout() {
+        System.out.println("ðŸ“‚ Deconnexion utilisateur");
+        UserSession.getInstance().clearSession();
+        HelloApplication.loadLandingPage();
     }
 
     // ==================== SCROLL ====================
@@ -108,12 +164,12 @@ public class LandingPageController implements Initializable {
     @FXML
     private void handleDemo() {
         System.out.println("▶️ Ouverture de la vidéo de démonstration...");
-        playVideo("/com/example/pidev/videos/Média1.mp4");
+        playVideo("/com/example/pidev/videos/Media1.mp4");
     }
 
     private void playVideo(String videoPath) {
         try {
-            URL videoUrl = getClass().getResource(videoPath);
+            URL videoUrl = resolveVideoResource(videoPath);
             if (videoUrl == null) {
                 showAlert("Erreur", "Vidéo non trouvée: " + videoPath);
                 return;
@@ -139,6 +195,22 @@ public class LandingPageController implements Initializable {
             e.printStackTrace();
             showAlert("Erreur", "Impossible de lire la vidéo: " + e.getMessage());
         }
+    }
+
+    private URL resolveVideoResource(String preferredPath) {
+        String[] candidates = {
+                preferredPath,
+                "/com/example/pidev/videos/M\u00E9dia1.mp4",
+                "/com/example/pidev/videos/Media1.mp4"
+        };
+
+        for (String candidate : candidates) {
+            URL resource = getClass().getResource(candidate);
+            if (resource != null) {
+                return resource;
+            }
+        }
+        return null;
     }
 
     private VBox createVideoPlayer(String videoUrl) {

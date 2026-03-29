@@ -8,8 +8,11 @@ import com.example.pidev.service.event.EventCategoryService;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
 public class EventCalendarController {
 
     @FXML private Button prevMonthBtn, nextMonthBtn, todayBtn;
+    @FXML private Button addEventBtn, addNoteBtn;
     @FXML private Label monthYearLabel;
     @FXML private Button viewMoisBtn, viewSemaineBtn, viewJourBtn, viewListeBtn;
     @FXML private HBox legendeContainer, statusLegendContainer;
@@ -44,10 +48,13 @@ public class EventCalendarController {
     private EventCategoryService categoryService;
 
     private YearMonth currentMonth;
+    private LocalDate currentDate;
     private Map<LocalDate, List<Event>> eventsByDate;
     private Map<Integer, EventCategory> categoriesById;
     private String currentView = "MOIS";
     private Set<EventStatus> activeStatusFilters = new HashSet<>();
+    private final Map<LocalDate, List<String>> notesByDate = new HashMap<>();
+    private LocalDate selectedDate;
 
     private enum EventStatus {
         A_VENIR("À venir", "#E3F2FD", "#1976D2"),
@@ -74,7 +81,9 @@ public class EventCalendarController {
             eventService = new EventService();
             categoryService = new EventCategoryService();
 
-            currentMonth = YearMonth.now();
+            currentDate = LocalDate.now();
+            currentMonth = YearMonth.from(currentDate);
+            selectedDate = currentDate;
             eventsByDate = new HashMap<>();
             categoriesById = new HashMap<>();
 
@@ -85,7 +94,7 @@ public class EventCalendarController {
             updateViewButtons();
             updateCategoryLegend();
             updateStatusLegend();
-            buildCalendar();
+            refreshCurrentView();
 
         } catch (Exception e) {
             System.err.println("❌ Erreur: " + e.getMessage());
@@ -96,6 +105,7 @@ public class EventCalendarController {
         try {
             List<Event> allEvents = eventService.getAllEvents();
             eventsByDate = allEvents.stream()
+                    .filter(event -> event.getStartDate() != null)
                     .collect(Collectors.groupingBy(event -> event.getStartDate().toLocalDate()));
 
             List<EventCategory> categories = categoryService.getAllCategories();
@@ -114,9 +124,15 @@ public class EventCalendarController {
         LocalDateTime start = event.getStartDate();
         LocalDateTime end = event.getEndDate();
 
+        if (start == null) {
+            return EventStatus.A_VENIR;
+        }
+        if (end == null) {
+            return now.isBefore(start) ? EventStatus.A_VENIR : EventStatus.EN_COURS;
+        }
         if (now.isBefore(start)) return EventStatus.A_VENIR;
-        else if (now.isAfter(end)) return EventStatus.TERMINE;
-        else return EventStatus.EN_COURS;
+        if (now.isAfter(end)) return EventStatus.TERMINE;
+        return EventStatus.EN_COURS;
     }
 
     private void updateCategoryLegend() {
@@ -185,7 +201,7 @@ public class EventCalendarController {
                 activeStatusFilters.add(status);
             }
             updateStatusBadgeStyle(badge, status);
-            buildCalendar();
+            refreshCurrentView();
         });
 
         return badge;
@@ -273,7 +289,9 @@ public class EventCalendarController {
     private VBox createDayCell(LocalDate date) {
         VBox cell = new VBox(4);
         cell.setPadding(new Insets(8));
-        cell.setStyle("-fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0; -fx-background-color: white;");
+        boolean isSelected = date.equals(selectedDate);
+        cell.setStyle("-fx-border-color: #e2e8f0; -fx-border-width: 0 1 1 0; -fx-background-color: "
+                + (isSelected ? "#eef6ff" : "white") + ";");
         cell.setMinWidth(140);
         cell.setPrefHeight(120);
         HBox.setHgrow(cell, Priority.ALWAYS);
@@ -306,6 +324,26 @@ public class EventCalendarController {
             cell.getChildren().add(moreLabel);
         }
 
+        List<String> notes = notesByDate.getOrDefault(date, Collections.emptyList());
+        if (!notes.isEmpty()) {
+            String noteText = notes.get(0);
+            if (noteText.length() > 18) {
+                noteText = noteText.substring(0, 18) + "...";
+            }
+            Label noteLabel = new Label("📝 " + noteText + (notes.size() > 1 ? " (+" + (notes.size() - 1) + ")" : ""));
+            noteLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #0f766e; -fx-background-color: #ecfeff; -fx-padding: 2 4; -fx-background-radius: 4;");
+            cell.getChildren().add(noteLabel);
+        }
+
+        cell.setOnMouseClicked(event -> {
+            selectedDate = date;
+            if (event.getClickCount() == 2) {
+                handleAddNote();
+            } else {
+                refreshCurrentView();
+            }
+        });
+
         return cell;
     }
 
@@ -326,7 +364,9 @@ public class EventCalendarController {
         Label iconLabel = new Label(emoji);
         iconLabel.setStyle("-fx-font-size: 11px;");
 
-        String timeStr = event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm"));
+        String timeStr = event.getStartDate() != null
+                ? event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm"))
+                : "--:--";
         String titleStr = event.getTitle();
         if (titleStr.length() > 15) {
             titleStr = titleStr.substring(0, 15) + "...";
@@ -353,7 +393,8 @@ public class EventCalendarController {
     private void buildWeekView() {
         calendarContainer.getChildren().clear();
 
-        LocalDate weekStart = LocalDate.now().minusDays(LocalDate.now().getDayOfWeek().getValue() % 7);
+        LocalDate weekStart = getWeekStart(currentDate != null ? currentDate : LocalDate.now());
+        monthYearLabel.setText("Semaine du " + weekStart.format(DateTimeFormatter.ofPattern("dd MMM", Locale.FRENCH)));
 
         Label titleLabel = new Label("📆 Semaine du " + weekStart.format(DateTimeFormatter.ofPattern("dd MMM")) +
                 " au " + weekStart.plusDays(6).format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
@@ -416,8 +457,13 @@ public class EventCalendarController {
         Label titleLabel = new Label(event.getTitle());
         titleLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
-        String timeStr = event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm")) + " - " +
-                event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"));
+        String startStr = event.getStartDate() != null
+                ? event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm"))
+                : "--:--";
+        String endStr = event.getEndDate() != null
+                ? event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"))
+                : "--:--";
+        String timeStr = startStr + " - " + endStr;
         Label timeLabel = new Label("🕐 " + timeStr);
         timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #64748b;");
 
@@ -436,7 +482,8 @@ public class EventCalendarController {
     private void buildDayView() {
         calendarContainer.getChildren().clear();
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = currentDate != null ? currentDate : LocalDate.now();
+        monthYearLabel.setText(today.format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH)));
         Label titleLabel = new Label("📄 " + today.format(DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy", Locale.FRENCH)));
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 15; -fx-text-fill: #1e293b;");
         calendarContainer.getChildren().add(titleLabel);
@@ -455,6 +502,19 @@ public class EventCalendarController {
             for (Event event : dayEvents) {
                 VBox eventBox = createDayEventBox(event);
                 calendarContainer.getChildren().add(eventBox);
+            }
+        }
+
+        List<String> notes = notesByDate.getOrDefault(today, Collections.emptyList());
+        if (!notes.isEmpty()) {
+            Label notesTitle = new Label("📝 Notes");
+            notesTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 15 0 5 0; -fx-text-fill: #0f172a;");
+            calendarContainer.getChildren().add(notesTitle);
+            for (String note : notes) {
+                Label noteLabel = new Label("• " + note);
+                noteLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #334155; -fx-padding: 3 0 3 8;");
+                noteLabel.setWrapText(true);
+                calendarContainer.getChildren().add(noteLabel);
             }
         }
     }
@@ -490,8 +550,13 @@ public class EventCalendarController {
         headerBox.getChildren().addAll(emojiLabel, titleLabel, spacer, statusBadge);
         box.getChildren().add(headerBox);
 
-        String timeStr = event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm")) + " - " +
-                event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"));
+        String startStr = event.getStartDate() != null
+                ? event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm"))
+                : "--:--";
+        String endStr = event.getEndDate() != null
+                ? event.getEndDate().format(DateTimeFormatter.ofPattern("HH:mm"))
+                : "--:--";
+        String timeStr = startStr + " - " + endStr;
         Label timeLabel = new Label("🕐 " + timeStr);
         timeLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
         box.getChildren().add(timeLabel);
@@ -513,6 +578,8 @@ public class EventCalendarController {
 
     private void buildListView() {
         calendarContainer.getChildren().clear();
+        String monthYear = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.FRENCH));
+        monthYearLabel.setText(monthYear.substring(0, 1).toUpperCase() + monthYear.substring(1));
 
         Label titleLabel = new Label("📋 Tous les événements - " + monthYearLabel.getText());
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 15; -fx-text-fill: #1e293b;");
@@ -568,7 +635,9 @@ public class EventCalendarController {
         Label titleLabel = new Label(event.getTitle());
         titleLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
-        String timeStr = event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm"));
+        String timeStr = event.getStartDate() != null
+                ? event.getStartDate().format(DateTimeFormatter.ofPattern("HH:mm"))
+                : "--:--";
         Label timeLabel = new Label("🕐 " + timeStr);
         timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #64748b;");
 
@@ -593,44 +662,133 @@ public class EventCalendarController {
     }
 
     @FXML private void handlePrevMonth() {
-        currentMonth = currentMonth.minusMonths(1);
-        if ("MOIS".equals(currentView)) buildCalendar();
-        else if ("LISTE".equals(currentView)) buildListView();
+        if ("SEMAINE".equals(currentView)) {
+            currentDate = (currentDate != null ? currentDate : LocalDate.now()).minusWeeks(1);
+            currentMonth = YearMonth.from(currentDate);
+        } else if ("JOUR".equals(currentView)) {
+            currentDate = (currentDate != null ? currentDate : LocalDate.now()).minusDays(1);
+            currentMonth = YearMonth.from(currentDate);
+        } else {
+            currentMonth = currentMonth.minusMonths(1);
+            currentDate = currentMonth.atDay(1);
+        }
+        refreshCurrentView();
     }
 
     @FXML private void handleNextMonth() {
-        currentMonth = currentMonth.plusMonths(1);
-        if ("MOIS".equals(currentView)) buildCalendar();
-        else if ("LISTE".equals(currentView)) buildListView();
+        if ("SEMAINE".equals(currentView)) {
+            currentDate = (currentDate != null ? currentDate : LocalDate.now()).plusWeeks(1);
+            currentMonth = YearMonth.from(currentDate);
+        } else if ("JOUR".equals(currentView)) {
+            currentDate = (currentDate != null ? currentDate : LocalDate.now()).plusDays(1);
+            currentMonth = YearMonth.from(currentDate);
+        } else {
+            currentMonth = currentMonth.plusMonths(1);
+            currentDate = currentMonth.atDay(1);
+        }
+        refreshCurrentView();
     }
 
     @FXML private void handleToday() {
-        currentMonth = YearMonth.now();
-        buildCalendar();
+        currentDate = LocalDate.now();
+        selectedDate = currentDate;
+        currentMonth = YearMonth.from(currentDate);
+        refreshCurrentView();
     }
 
     @FXML private void handleViewMois() {
         currentView = "MOIS";
         updateViewButtons();
-        buildCalendar();
+        if (currentDate == null) {
+            currentDate = LocalDate.now();
+        }
+        if (selectedDate == null) {
+            selectedDate = currentDate;
+        }
+        currentMonth = YearMonth.from(currentDate);
+        refreshCurrentView();
     }
 
     @FXML private void handleViewSemaine() {
         currentView = "SEMAINE";
         updateViewButtons();
-        buildWeekView();
+        if (currentDate == null) {
+            currentDate = LocalDate.now();
+        }
+        if (selectedDate == null) {
+            selectedDate = currentDate;
+        }
+        refreshCurrentView();
     }
 
     @FXML private void handleViewJour() {
         currentView = "JOUR";
         updateViewButtons();
-        buildDayView();
+        if (currentDate == null) {
+            currentDate = LocalDate.now();
+        }
+        if (selectedDate == null) {
+            selectedDate = currentDate;
+        }
+        refreshCurrentView();
     }
 
     @FXML private void handleViewListe() {
         currentView = "LISTE";
         updateViewButtons();
-        buildListView();
+        if (currentDate == null) {
+            currentDate = LocalDate.now();
+        }
+        if (selectedDate == null) {
+            selectedDate = currentDate;
+        }
+        currentMonth = YearMonth.from(currentDate);
+        refreshCurrentView();
+    }
+
+    @FXML
+    private void handleAddEvent() {
+        if (mainController != null) {
+            mainController.showEventForm(null);
+            return;
+        }
+        new Alert(Alert.AlertType.WARNING, "Navigation indisponible pour ajouter un événement.", ButtonType.OK).showAndWait();
+    }
+
+    @FXML
+    private void handleAddNote() {
+        LocalDate targetDate = selectedDate != null ? selectedDate : (currentDate != null ? currentDate : LocalDate.now());
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Ajouter une note");
+        dialog.setHeaderText("Note pour le " + targetDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        dialog.setContentText("Votre note:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String note = result.get().trim();
+            if (!note.isEmpty()) {
+                notesByDate.computeIfAbsent(targetDate, k -> new ArrayList<>()).add(note);
+                refreshCurrentView();
+            }
+        }
+    }
+
+    private void refreshCurrentView() {
+        loadData();
+        if ("SEMAINE".equals(currentView)) {
+            buildWeekView();
+        } else if ("JOUR".equals(currentView)) {
+            buildDayView();
+        } else if ("LISTE".equals(currentView)) {
+            buildListView();
+        } else {
+            buildCalendar();
+        }
+    }
+
+    private LocalDate getWeekStart(LocalDate date) {
+        int dayOfWeek = date.getDayOfWeek().getValue() % 7;
+        return date.minusDays(dayOfWeek);
     }
 
     public void setMainController(MainController mainController) {
