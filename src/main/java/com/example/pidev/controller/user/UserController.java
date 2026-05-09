@@ -7,7 +7,9 @@ import com.example.pidev.model.user.UserModel;
 import com.example.pidev.service.role.RoleService;
 import com.example.pidev.service.user.PasswordResetService;
 import com.example.pidev.service.user.UserService;
-
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -83,7 +85,14 @@ public class UserController implements Initializable {
 
             // La mise à jour du KPI est maintenant gérée par MainController
             // via showParticipantKPIs()
-
+            Timeline autoRefresh = new Timeline(
+                    new KeyFrame(Duration.seconds(10), event -> {
+                        System.out.println("🔄 Auto-refresh utilisateurs...");
+                        loadUsers();
+                    })
+            );
+            autoRefresh.setCycleCount(Timeline.INDEFINITE);
+            autoRefresh.play();
         } catch (SQLException e) {
             showAlert("Erreur", e.getMessage());
         }
@@ -114,8 +123,13 @@ public class UserController implements Initializable {
             System.out.println("Nombre d'utilisateurs chargés: " + usersList.size());
 
             filteredData = new FilteredList<>(usersList, p -> true);
-            currentPage = 1;
+// Keep current page on auto-refresh, reset only if page is out of bounds
+            int savedPage = currentPage;
             updateTableWithPagination();
+            if (savedPage <= totalPages) {
+                currentPage = savedPage;
+                updateTableWithPagination();
+            }
 
             // Mettre à jour le KPI dans le header via MainController
             if (mainController != null) {

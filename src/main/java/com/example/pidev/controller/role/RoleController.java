@@ -13,7 +13,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
@@ -63,7 +65,20 @@ public class RoleController implements Initializable {
             setupActionsColumn();
             setupSearch();
             setupPaginationControls();
-
+// Auto-refresh every 10 seconds
+            Timeline autoRefresh = new Timeline(
+                    new KeyFrame(Duration.seconds(10), event -> {
+                        System.out.println("🔄 Auto-refresh rôles...");
+                        int savedPage = currentPage;
+                        loadRoles();
+                        if (savedPage <= totalPages) {
+                            currentPage = savedPage;
+                            updateTableWithPagination();
+                        }
+                    })
+            );
+            autoRefresh.setCycleCount(Timeline.INDEFINITE);
+            autoRefresh.play();
         } catch (SQLException e) {
             showAlert("Erreur", e.getMessage());
         }

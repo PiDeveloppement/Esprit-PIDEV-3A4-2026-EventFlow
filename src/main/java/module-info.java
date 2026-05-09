@@ -38,6 +38,7 @@ module com.example.pidev {
 
     requires org.json;
     requires vosk;
+    requires jbcrypt;
 
     // --- ACCÈS AUX RESSOURCES JS ---
     // Cette ligne permet à la WebView de lire ton fichier apexcharts.min.js
