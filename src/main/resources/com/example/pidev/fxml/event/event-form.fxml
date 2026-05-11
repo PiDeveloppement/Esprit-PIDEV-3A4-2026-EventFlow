@@ -246,15 +246,8 @@
                                        style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
                             </VBox>
 
-                            <!-- Image URL (optionnel) -->
-                            <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
-                                <Label text="URL de l'image (optionnel)"
-                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
-                                <TextField fx:id="imageUrlField" promptText="https://..."
-                                           style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
-                                                  -fx-border-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"
-                                           prefHeight="42"/>
-                            </VBox>
+                            <!-- ✅ SUPPRIMÉ : champ URL de l'image -->
+
                         </GridPane>
                     </VBox>
 

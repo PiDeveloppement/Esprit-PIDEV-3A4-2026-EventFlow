@@ -8,12 +8,17 @@ import com.example.pidev.service.event.EventCategoryService;
 import com.example.pidev.service.weather.WeatherService;
 import com.example.pidev.utils.UserSession;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -149,20 +154,112 @@ public class EventDetailController {
         // Organisateur (par défaut)
         organizerLabel.setText("EventFlow");
 
-        // Image hero
+        // ========== VERSION AMÉLIORÉE DE L'AFFICHAGE DE L'IMAGE ==========
         if (currentEvent.getImageUrl() != null && !currentEvent.getImageUrl().isEmpty()) {
             try {
-                ImageView imageView = new ImageView(new Image(currentEvent.getImageUrl()));
-                imageView.setFitWidth(1400);
-                imageView.setFitHeight(400);
-                imageView.setPreserveRatio(false);
-                heroImage.getChildren().clear();
-                heroImage.getChildren().add(imageView);
+                String imageUrl = currentEvent.getImageUrl();
+                System.out.println("🖼️ ==================== DIAGNOSTIC IMAGE ====================");
+                System.out.println("📍 URL stockée en DB: " + imageUrl);
+
+                Image image = null;
+
+                // Vérifier si c'est une URL distante ou un chemin local
+                if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+                    // URL distante
+                    System.out.println("📡 Type: URL distante");
+                    image = new Image(imageUrl, 600, 300, false, true);
+                    System.out.println("✅ Chargement depuis URL");
+                } else {
+                    // Chemin local
+                    System.out.println("📁 Type: Chemin local");
+
+                    // Essayer le chemin absolu en premier lieu
+                    String userDir = System.getProperty("user.dir");
+                    String absolutePath = userDir + "/" + imageUrl;
+
+                    System.out.println("📂 Working directory: " + userDir);
+                    System.out.println("📂 Chemin absolu: " + absolutePath);
+
+                    File file = new File(absolutePath);
+                    System.out.println("📂 Fichier existe ? " + file.exists());
+                    System.out.println("📂 Chemin canonique: " + (file.exists() ? file.getCanonicalPath() : "N/A"));
+
+                    if (file.exists()) {
+                        try {
+                            // Utiliser le chemin canonique avec le préfixe file:/
+                            String canonicalPath = file.getCanonicalPath();
+                            String fileUrl = "file:/" + canonicalPath.replace("\\", "/");
+                            System.out.println("📂 Tentative 1 - file:// URL: " + fileUrl);
+
+                            image = new Image(fileUrl, 600, 300, false, true);
+                            System.out.println("✅ Image chargée avec succès via file:// URL");
+                        } catch (Exception ex) {
+                            System.out.println("❌ Erreur avec file:// URL: " + ex.getMessage());
+                            // Essayer depuis le classpath
+                            System.out.println("🔄 Tentative 2 - classpath");
+                            String resourcePath = "/com/example/pidev/" + imageUrl;
+                            System.out.println("📂 Resource path: " + resourcePath);
+                            try {
+                                InputStream is = getClass().getResourceAsStream(resourcePath);
+                                if (is != null) {
+                                    image = new Image(is, 600, 300, false, true);
+                                    System.out.println("✅ Image chargée depuis classpath");
+                                } else {
+                                    System.out.println("❌ Resource stream null");
+                                }
+                            } catch (Exception ex2) {
+                                System.out.println("❌ Erreur classpath: " + ex2.getMessage());
+                            }
+                        }
+                    } else {
+                        System.out.println("❌ Fichier n'existe pas à: " + absolutePath);
+                        // Vérifier les emplacements alternatifs
+                        String[] alternativePaths = {
+                                "target/classes/" + imageUrl,
+                                "src/main/resources/" + imageUrl,
+                                imageUrl
+                        };
+
+                        for (String altPath : alternativePaths) {
+                            File altFile = new File(altPath);
+                            System.out.println("🔍 Vérification alternative: " + altPath + " ? " + altFile.exists());
+                            if (altFile.exists()) {
+                                System.out.println("✅ Trouvé à: " + altFile.getCanonicalPath());
+                                try {
+                                    String canonicalPath = altFile.getCanonicalPath();
+                                    String altFileUrl = "file:/" + canonicalPath.replace("\\", "/");
+                                    image = new Image(altFileUrl, 600, 300, false, true);
+                                    System.out.println("✅ Image chargée depuis chemin alternatif");
+                                    break;
+                                } catch (Exception ex) {
+                                    System.out.println("❌ Erreur avec chemin alternatif: " + ex.getMessage());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                System.out.println("🖼️ ==================== FIN DIAGNOSTIC ====================");
+
+                if (image != null && !image.isError()) {
+                    ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(600);
+                    imageView.setFitHeight(300);
+                    imageView.setPreserveRatio(false);
+                    heroImage.getChildren().clear();
+                    heroImage.getChildren().add(imageView);
+                    System.out.println("✅ Affiche affichée avec succès");
+                } else {
+                    System.err.println("❌ Erreur: L'image n'a pas pu être chargée (image null ou error)");
+                    setDefaultHeroImage();
+                }
             } catch (Exception e) {
-                System.err.println("❌ Erreur chargement image: " + e.getMessage());
+                System.err.println("❌ Exception générale: " + e.getMessage());
+                e.printStackTrace();
                 setDefaultHeroImage();
             }
         } else {
+            System.out.println("⚠️ Pas d'affiche disponible pour cet événement");
             setDefaultHeroImage();
         }
 
@@ -384,5 +481,43 @@ public class EventDetailController {
     private void handleSignup() {
         HelloApplication.loadSignupPage();
     }
-}
 
+    @FXML
+    private void handleGetCertificate() {
+        if (currentEvent == null) return;
+
+        try {
+            System.out.println("🎓 Chargement du certificat pour : " + currentEvent.getTitle());
+
+            // Charger le FXML du participant/certificat
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/pidev/fxml/questionnaire/Participant.fxml")
+            );
+
+            Parent root = loader.load();
+
+            // On récupère la scène actuelle à partir d'un élément existant (ex: titleLabel)
+            VBox mainRoot = (VBox) titleLabel.getScene().getRoot();
+
+            // On remplace le contenu principal (généralement l'index 1 si l'index 0 est la Navbar)
+            if (mainRoot.getChildren().size() > 1) {
+                mainRoot.getChildren().set(1, root);
+            } else {
+                mainRoot.getChildren().add(root);
+            }
+
+        } catch (IOException e) {
+            System.err.println("❌ Erreur lors du chargement du certificat :");
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger le module de certificat : " + e.getMessage());
+        }
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+}

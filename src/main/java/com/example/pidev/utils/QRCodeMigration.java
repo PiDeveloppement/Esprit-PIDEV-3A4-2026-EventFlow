@@ -4,7 +4,7 @@ import com.example.pidev.service.event.EventTicketService;
 
 /**
  * Utilitaire pour migrer les tickets avec QR codes manquants
- * Utilise QuickChart.io pour générer les QR codes dynamiques
+ * Utilise QuickChart.io pour générer les QR codes dynamiques &
  * @author Ons Abdesslem
  */
 public class QRCodeMigration {

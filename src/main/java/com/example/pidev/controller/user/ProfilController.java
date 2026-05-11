@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-
+import org.mindrot.jbcrypt.BCrypt;
 public class ProfilController implements Initializable {
 
     // Champs du profil
@@ -144,7 +144,6 @@ public class ProfilController implements Initializable {
      */
     private void validateCurrentPassword(String enteredPassword) {
         if (enteredPassword == null || enteredPassword.isEmpty()) {
-            // Champ vide - style normal
             currentPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
             newPasswordField.setDisable(true);
             confirmPasswordField.setDisable(true);
@@ -153,40 +152,37 @@ public class ProfilController implements Initializable {
         }
 
         String actualPassword = currentUser.getPassword();
+        boolean isValid = false;
 
-        if (enteredPassword.equals(actualPassword)) {
-            // Mot de passe correct
+        try {
+            if (actualPassword != null && actualPassword.startsWith("$2")) {
+                // Bcrypt hash — fix PHP format
+                String compatibleHash = actualPassword.replace("$2y$", "$2a$");
+                isValid = BCrypt.checkpw(enteredPassword, compatibleHash);
+            } else {
+                // Plain text comparison (old users)
+                isValid = enteredPassword.equals(actualPassword);
+            }
+        } catch (Exception e) {
+            isValid = enteredPassword.equals(actualPassword);
+        }
+
+        if (isValid) {
             currentPasswordField.setStyle("-fx-background-color: #f0fdf4; -fx-border-color: #4caf50; -fx-border-width: 2; -fx-padding: 10 15; -fx-pref-height: 40;");
-
-            // Activer les champs pour le nouveau mot de passe
             newPasswordField.setDisable(false);
             confirmPasswordField.setDisable(false);
-
-            // Restaurer le style normal pour les nouveaux champs
             newPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
             confirmPasswordField.setStyle("-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-padding: 10 15; -fx-pref-height: 40;");
-
             isCurrentPasswordValid = true;
-
-            // Ajouter un tooltip de succès
-            Tooltip tooltip = new Tooltip("✓ Mot de passe correct");
-            Tooltip.install(currentPasswordField, tooltip);
-
+            Tooltip.install(currentPasswordField, new Tooltip("✓ Mot de passe correct"));
         } else {
-            // Mot de passe incorrect
             currentPasswordField.setStyle("-fx-background-color: #fff5f5; -fx-border-color: #f44336; -fx-border-width: 2; -fx-padding: 10 15; -fx-pref-height: 40;");
-
-            // Désactiver les champs pour le nouveau mot de passe
             newPasswordField.setDisable(true);
             confirmPasswordField.setDisable(true);
             newPasswordField.clear();
             confirmPasswordField.clear();
-
             isCurrentPasswordValid = false;
-
-            // Ajouter un tooltip d'erreur
-            Tooltip tooltip = new Tooltip("✗ Mot de passe incorrect");
-            Tooltip.install(currentPasswordField, tooltip);
+            Tooltip.install(currentPasswordField, new Tooltip("✗ Mot de passe incorrect"));
         }
     }
 
@@ -493,7 +489,8 @@ public class ProfilController implements Initializable {
         }
 
         try {
-            currentUser.setPassword(newPass);
+            String hashedNewPassword = BCrypt.hashpw(newPass, BCrypt.gensalt(13));
+            currentUser.setPassword(hashedNewPassword);
             if (userService.updateUser(currentUser)) {
                 showSuccessAlert("Succès", "Mot de passe changé avec succès");
 

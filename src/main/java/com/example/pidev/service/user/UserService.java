@@ -5,7 +5,8 @@ import com.example.pidev.model.user.UserModel;
 import com.example.pidev.utils.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
+// Add import at the top of the file
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,7 +44,8 @@ public class UserService {
             stmt.setString(2, user.getLast_Name());
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getFaculte());
-            stmt.setString(5, user.getPassword());
+            String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(13));
+            stmt.setString(5, hashedPassword);
             stmt.setInt(6, 1); // Role_Id par défaut
 
             if (user.getPhone() != null) {
@@ -93,7 +95,7 @@ public class UserService {
         }
         return false;
     }
-    // 🔹 Supprimer un utilisateur
+
     public boolean deleteUser(long id) {
         if (connection == null) return false;
 
@@ -101,26 +103,50 @@ public class UserService {
             connection.setAutoCommit(false);
             System.out.println("🔄 Suppression utilisateur ID: " + id);
 
-            // Étape 1: Supprimer les tokens (cause principale de l'erreur)
-            try {
-                String deleteTokens = "DELETE FROM password_reset_tokens WHERE user_id = ?";
-                try (PreparedStatement stmt = connection.prepareStatement(deleteTokens)) {
-                    stmt.setLong(1, id);
-                    int tokenRows = stmt.executeUpdate();
-                    if (tokenRows > 0) {
-                        System.out.println("✅ " + tokenRows + " tokens supprimés");
-                    }
-                }
-            } catch (SQLException e) {
-                System.out.println("⚠️ Erreur tokens (non bloquante): " + e.getMessage());
-            }
+            // Étape 1: Supprimer les tokens
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM password_reset_tokens WHERE user_id = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Tokens: " + e.getMessage()); }
 
-            // Étape 2: Supprimer l'utilisateur
-            String deleteUser = "DELETE FROM user_model WHERE Id_User = ?";
-            try (PreparedStatement stmt = connection.prepareStatement(deleteUser)) {
+            // Étape 2: Supprimer les tickets
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM event_ticket WHERE user_id = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Tickets: " + e.getMessage()); }
+
+            // Étape 3: Supprimer les feedbacks
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM feedbacks WHERE id_user = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Feedbacks: " + e.getMessage()); }
+
+            // Étape 4: Supprimer les notifications
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM notification WHERE user_id = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Notifications: " + e.getMessage()); }
+
+            // Étape 5: Supprimer les questions
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM questions WHERE id_user = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Questions: " + e.getMessage()); }
+
+            // Étape 6: Supprimer les quiz sessions
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM quiz_sessions WHERE user_id = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Quiz sessions: " + e.getMessage()); }
+
+            // Étape 7: Supprimer les sponsors
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM sponsor WHERE user_id = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Sponsor: " + e.getMessage()); }
+
+            // Étape 8: Nullifier les événements créés par l'utilisateur
+            try (PreparedStatement stmt = connection.prepareStatement("UPDATE event SET created_by = NULL WHERE created_by = ?")) {
+                stmt.setLong(1, id); stmt.executeUpdate();
+            } catch (SQLException e) { System.out.println("⚠️ Events: " + e.getMessage()); }
+
+            // Étape 9: Supprimer l'utilisateur
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM user_model WHERE Id_User = ?")) {
                 stmt.setLong(1, id);
                 int userRows = stmt.executeUpdate();
-
                 if (userRows > 0) {
                     connection.commit();
                     System.out.println("✅ Utilisateur " + id + " supprimé");
@@ -538,16 +564,34 @@ public class UserService {
 
         String query = "SELECT u.*, r.RoleName FROM user_model u " +
                 "LEFT JOIN role r ON u.Role_Id = r.Id_Role " +
-                "WHERE u.Email = ? AND u.Password = ?";
+                "WHERE u.Email = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, email);
-            stmt.setString(2, password);
-
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return mapResultSetToUser(rs);
+                String storedPassword = rs.getString("Password");
+                boolean passwordMatches = false;
+
+                // Check if it's a bcrypt hash
+                if (storedPassword != null && storedPassword.startsWith("$2")) {
+                    try {
+                        // Fix PHP bcrypt format ($2y$) to Java bcrypt format ($2a$)
+                        String compatibleHash = storedPassword.replace("$2y$", "$2a$");
+                        passwordMatches = BCrypt.checkpw(password, compatibleHash);
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("⚠️ Invalid bcrypt hash for: " + email);
+                        passwordMatches = password.equals(storedPassword);
+                    }
+                } else {
+                    // Plain text — direct comparison (old users)
+                    passwordMatches = password.equals(storedPassword);
+                }
+
+                if (passwordMatches) {
+                    return mapResultSetToUser(rs);
+                }
             }
         } catch (SQLException e) {
             System.err.println("❌ Erreur authenticate: " + e.getMessage());

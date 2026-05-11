@@ -1,6 +1,6 @@
 /* ============================================
    EVENTFLOW - STYLE PROFESSIONNEL FINAL
-   Version 9.0 - Fusion avec styles d'Arij
+   Version 9.0 - Fusion complète avec styles d'Ons et d'Arij
    ============================================ */
 
 /* ==================== PAGE BACKGROUND ==================== */
@@ -88,7 +88,7 @@
     -fx-text-fill: #0056b3;
 }
 
-/* ==================== STAT CARDS (d'Arij) ==================== */
+/* ==================== STAT CARDS (d'Ons) ==================== */
 .stat-card {
     -fx-padding: 16px 28px;
     -fx-background-radius: 10px;
@@ -224,6 +224,21 @@
     -fx-font-size: 14px;
 }
 
+/* Style pour le champ de recherche moderne (d'Ons) */
+.search-field-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 8 15;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+
+.search-field-modern:focused {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;
+}
+
 /* ==================== COMBOBOX (d'Arij) ==================== */
 .combo-box-sponsor {
     -fx-background-color: white;
@@ -241,6 +256,21 @@
 }
 
 .combo-box:focused {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;
+}
+
+/* Style pour les ComboBox dans la barre de filtres (d'Ons) */
+.combo-box-filter {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-padding: 8 15;
+}
+
+.combo-box-filter:focused {
     -fx-border-color: #2196F3;
     -fx-border-width: 2;
 }
@@ -318,6 +348,37 @@
 
 .btn-refresh-icon:hover {
     -fx-background-color: #dee2e6;
+}
+
+/* Bouton Filtrer moderne (d'Ons) */
+.btn-filter-modern {
+    -fx-background-color: #1565C0;
+    -fx-text-fill: white;
+    -fx-padding: 8 25;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(21,101,192,0.2), 6, 0, 0, 2);
+}
+
+.btn-filter-modern:hover {
+    -fx-background-color: #0d47a1;
+    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 8, 0, 0, 3);
+}
+
+/* Style pour le bouton d'export moderne (d'Ons) */
+.btn-export-modern {
+    -fx-background-color: #0D47A1;
+    -fx-text-fill: white;
+    -fx-padding: 8 20;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: 500;
+}
+
+.btn-export-modern:hover {
+    -fx-background-color: #0a3a7a;
+    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 6, 0, 0, 2);
 }
 
 /* ==================== ACTION BUTTONS (d'Arij) ==================== */
@@ -636,6 +697,31 @@
     -fx-text-fill: #664d03;
 }
 
+/* Badges de statut améliorés (d'Ons) */
+.status-badge {
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-alignment: CENTER;
+}
+
+.status-badge-active {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #065f46;
+    -fx-border-color: #a7f3d0;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
+.status-badge-inactive {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+    -fx-border-color: #fecaca;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
 /* ==================== ACTION BUTTONS ==================== */
 .action-btn-icon {
     -fx-cursor: hand;
@@ -646,6 +732,19 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 6, 0, 0, 2);
     -fx-scale-y: 1.08;
     -fx-scale-x: 1.08;
+}
+
+/* Animation pour les boutons d'action (d'Ons) */
+.action-btn-icon {
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.action-btn-icon:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
 }
 
 /* ==================== SCROLLPANE ==================== */
@@ -1006,7 +1105,6 @@
     -fx-text-fill: #334155;
 }
 
-
 /* ==================== STYLES ADDITIONNELS POUR CATEGORY-LIST ==================== */
 
 /* Style pour les boutons de pagination */
@@ -1099,31 +1197,6 @@
     -fx-background-color: #f1f5f9;
 }
 
-/* Badges de statut améliorés */
-.status-badge {
-    -fx-padding: 4 12;
-    -fx-background-radius: 20;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-alignment: CENTER;
-}
-
-.status-badge-active {
-    -fx-background-color: #d1fae5;
-    -fx-text-fill: #065f46;
-    -fx-border-color: #a7f3d0;
-    -fx-border-width: 1;
-    -fx-border-radius: 20;
-}
-
-.status-badge-inactive {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #991b1b;
-    -fx-border-color: #fecaca;
-    -fx-border-width: 1;
-    -fx-border-radius: 20;
-}
-
 /* KPI Cards avec effet hover */
 VBox[style*="-fx-background-color: #f0f9ff"]:hover,
 VBox[style*="-fx-background-color: #f0fdf4"]:hover {
@@ -1143,81 +1216,6 @@ VBox[style*="-fx-background-color: #f0fdf4"]:hover {
     -fx-font-size: 13px;
     -fx-text-fill: #64748b;
 }
-
-/* Bouton Filtrer moderne */
-.btn-filter-modern {
-    -fx-background-color: #1565C0;
-    -fx-text-fill: white;
-    -fx-padding: 8 25;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(21,101,192,0.2), 6, 0, 0, 2);
-}
-
-.btn-filter-modern:hover {
-    -fx-background-color: #0d47a1;
-    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 8, 0, 0, 3);
-}
-
-/* Animation pour les boutons d'action */
-.action-btn-icon {
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
-    -fx-transition: all 0.2s ease-in-out;
-}
-
-.action-btn-icon:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
-    -fx-scale-x: 1.1;
-    -fx-scale-y: 1.1;
-}
-
-/* Style pour le bouton d'export */
-.btn-export-modern {
-    -fx-background-color: #0D47A1;
-    -fx-text-fill: white;
-    -fx-padding: 8 20;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-    -fx-font-weight: 500;
-}
-
-.btn-export-modern:hover {
-    -fx-background-color: #0a3a7a;
-    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 6, 0, 0, 2);
-}
-
-/* Style pour les ComboBox dans la barre de filtres */
-.combo-box-filter {
-    -fx-background-color: white;
-    -fx-background-radius: 8;
-    -fx-border-color: #cbd5e1;
-    -fx-border-width: 1;
-    -fx-border-radius: 8;
-    -fx-padding: 8 15;
-}
-
-.combo-box-filter:focused {
-    -fx-border-color: #2196F3;
-    -fx-border-width: 2;
-}
-
-/* Style pour le champ de recherche */
-.search-field-modern {
-    -fx-background-color: white;
-    -fx-background-radius: 8;
-    -fx-padding: 8 15;
-    -fx-border-color: #cbd5e1;
-    -fx-border-width: 1;
-    -fx-border-radius: 8;
-}
-
-.search-field-modern:focused {
-    -fx-border-color: #2196F3;
-    -fx-border-width: 2;
-}
-
 
 /* Effet hover pour les KPI cards */
 VBox[style*="-fx-background-color: #d1f4e0"]:hover,

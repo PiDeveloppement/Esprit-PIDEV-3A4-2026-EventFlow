@@ -943,4 +943,3 @@ public class EventListController {
         }
     }
 }
-
