@@ -6,17 +6,68 @@
   <component name="ChangeListManager">
     <list default="true" id="646190a1-cc12-4f75-b931-201bde8a2b5e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/role/RoleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/role/RoleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/user/ProfilController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/user/ProfilController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/user/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/user/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/user/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/user/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/HelloApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/auth/LandingPageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/auth/LandingPageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/auth/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/auth/LoginController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/budget/BudgetCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/budget/BudgetCardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/budget/BudgetDetailsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/budget/BudgetDetailsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorAdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorAdminController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorCardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorDetailsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorDetailsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorFormController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorPortalController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/controller/sponsor/SponsorPortalController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/model/budget/Budget.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/model/budget/Budget.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/questionnaire/FeedbackService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/questionnaire/FeedbackService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/sponsor/ContractPdfGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/sponsor/ContractPdfGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/sponsor/SponsorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/sponsor/SponsorService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/whatsapp/WhatsAppService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/service/whatsapp/WhatsAppService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/pidev/utils/DBConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/pidev/utils/DBConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/css/atlantafx-custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/css/atlantafx-custom.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/css/chat_style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/css/chat_style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/css/sponsor-portal.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/css/sponsor-portal.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Budget/budget-card.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Budget/budget-card.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Budget/budget-detail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Budget/budget-detail.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Budget/budget.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Budget/budget.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Depense/depense-modern.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Depense/depense-modern.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor-card.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor-card.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor-detail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor-detail.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor-form.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor-form.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor_admin.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/Sponsor/sponsor_admin.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/auth/landingPage.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/auth/landingPage.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/main_layout.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/pidev/fxml/main_layout.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotChats">
+    <option name="panelChat">
+      <chat>
+        <option name="activeSessionId" value="b433cfcb-0291-43a0-adbd-52d960c771a2" />
+        <option name="sessions">
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="25564cb1-ccd0-4d9e-887b-026baf301ec6" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="status" value="Stopped" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="b433cfcb-0291-43a0-adbd-52d960c771a2" />
+            <option name="modeId" value="Ask" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+        </option>
+        <option name="type" value="PANEL" />
+      </chat>
+    </option>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -35,31 +86,48 @@
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
-        <option name="mavenHome" value="Use Maven wrapper" />
-        <option name="useMavenConfig" value="true" />
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
       </MavenGeneralSettings>
     </option>
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectId" id="3AVQQTMbMJDnlEIHQ0XGZm6kjN9" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "user",
-    "last_opened_file_path": "D:/LearningJava/PiDev/src/main/resources/com/example/pidev/fxml/questionnaire"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.PiDev [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.PiDev [javafx:run].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;integrationsponsor&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/LearningJava/PiDev/src/main/resources/com/example/pidev/fxml/questionnaire&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\LearningJava\PiDev\src\main\resources\com\example\pidev\fxml\questionnaire" />
     </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="javafx:run" />
+      <command value="mvn compile" />
+      <command value="mvn javafx:run" />
+    </option>
   </component>
   <component name="RunManager">
     <configuration name="PiDev" type="Application" factoryName="Application">

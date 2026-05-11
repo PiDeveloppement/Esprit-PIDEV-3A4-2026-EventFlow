@@ -7,7 +7,7 @@
 
 <BorderPane prefHeight="900" prefWidth="1600"
             style="-fx-background-color: #f1f5f9;"
-            stylesheets="@../../css/design-system.css"
+            stylesheets="@../css/atlantafx-custom.css"
             xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pidev.controller.sponsor.SponsorAdminController">
@@ -120,24 +120,21 @@
                       style="-fx-padding: 18 35; -fx-background-color: white;
                              -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
                     <TextField fx:id="searchField" prefWidth="240"
-                               promptText="🔍 Rechercher sponsor..."/>
+                               promptText="🔍 Rechercher sponsor..."
+                               styleClass="search-field-modern"/>
                     <ComboBox fx:id="companyFilter" prefWidth="200"
-                              promptText="🏢 Entreprise"/>
+                              promptText="🏢 Entreprise"
+                              styleClass="combo-box-filter"/>
                     <ComboBox fx:id="eventFilter" prefWidth="200"
-                              promptText="📅 Événement"/>
+                              promptText="📅 Événement"
+                              styleClass="combo-box-filter"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button fx:id="exportExcelBtn" text="📥 Exporter Excel"
                             minHeight="42" minWidth="160"
-                            style="-fx-background-color: #1d4ed8; -fx-text-fill: white;
-                                   -fx-font-weight: 800; -fx-font-size: 13px;
-                                   -fx-background-radius: 10; -fx-padding: 10 20;
-                                   -fx-cursor: hand;"/>
+                            styleClass="btn-export-modern"/>
                     <Button fx:id="addSponsorBtn" text="➕ Nouveau Sponsor"
                             minHeight="42" minWidth="180"
-                            style="-fx-background-color: #10b981; -fx-text-fill: white;
-                                   -fx-font-weight: 800; -fx-font-size: 13px;
-                                   -fx-background-radius: 10; -fx-padding: 10 22;
-                                   -fx-cursor: hand;"/>
+                            styleClass="new-sponsor-button"/>
                 </HBox>
 
                 <!-- ===== LISTE CARDS ===== -->

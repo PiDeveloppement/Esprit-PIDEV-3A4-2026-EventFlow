@@ -13,39 +13,49 @@
       prefWidth="1400">
 
     <!-- ==================== NAVBAR ==================== -->
-    <HBox style="-fx-background-color: white; -fx-padding: 15 60; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
-          alignment="CENTER_LEFT" prefHeight="80">
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <ImageView fitHeight="140" fitWidth="140" preserveRatio="true">
+    <HBox style="-fx-background-color: white; -fx-padding: 10 45; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+          alignment="CENTER_LEFT" prefHeight="112" minHeight="112">
+
+        <HBox spacing="6" alignment="CENTER_LEFT" minWidth="135" prefWidth="135" maxWidth="135">
+            <ImageView fitHeight="105" fitWidth="105" preserveRatio="true">
                 <Image url="@../images/logo.png" />
             </ImageView>
         </HBox>
 
-        <Region HBox.hgrow="ALWAYS"/>
+        <Region HBox.hgrow="ALWAYS" minWidth="15" />
 
-        <HBox spacing="40" alignment="CENTER">
-            <Button text="Accueil" onAction="#scrollToTop"
-                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
-            <Button text="Événements" onAction="#handleGoToEvents"
-                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
-            <Button text="Fonctionnalités" onAction="#scrollToFeatures"
-                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
-            <Button text="Feedback" onAction="#handleFeedback"
-                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
-            <Button text="Contact" onAction="#scrollToContact"
-                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 16px; -fx-font-weight: 500; -fx-cursor: hand;"/>
+        <HBox spacing="18" alignment="CENTER" minWidth="820" prefWidth="820">
+            <Button text="Accueil" onAction="#scrollToTop" minWidth="75" prefWidth="75"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: 500; -fx-cursor: hand; -fx-padding: 8 4;"/>
+
+            <Button text="Événements" onAction="#handleGoToEvents" minWidth="105" prefWidth="105"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: 500; -fx-cursor: hand; -fx-padding: 8 4;"/>
+
+            <Button fx:id="sponsorRecoBtn" text="Recommandations Sponsor" onAction="#handleSponsorPortal"
+                    visible="false" managed="false" minWidth="205" prefWidth="205"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: 500; -fx-cursor: hand; -fx-padding: 8 4;"/>
+
+            <Button text="Fonctionnalités" onAction="#scrollToFeatures" minWidth="135" prefWidth="135"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: 500; -fx-cursor: hand; -fx-padding: 8 4;"/>
+
+            <Button text="Feedback" onAction="#handleFeedback" minWidth="85" prefWidth="85"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: 500; -fx-cursor: hand; -fx-padding: 8 4;"/>
+
+            <Button text="Contact" onAction="#scrollToContact" minWidth="80" prefWidth="80"
+                    style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: 500; -fx-cursor: hand; -fx-padding: 8 4;"/>
         </HBox>
 
-        <Region HBox.hgrow="ALWAYS"/>
+        <Region HBox.hgrow="ALWAYS" minWidth="15" />
 
-        <HBox spacing="15">
-            <Button text="Connexion" onAction="#handleLogin"
+        <HBox fx:id="authButtonsBox" spacing="12" alignment="CENTER_RIGHT" minWidth="240" prefWidth="240">
+            <Button text="Connexion" onAction="#handleLogin" minWidth="110" prefWidth="110"
                     style="-fx-background-color: transparent; -fx-text-fill: #0D47A1; -fx-font-weight: bold;
                            -fx-border-color: #0D47A1; -fx-border-width: 1.5; -fx-border-radius: 8;
-                           -fx-padding: 8 24; -fx-cursor: hand;"/>
-            <Button text="Inscription" onAction="#handleSignup"
+                           -fx-padding: 8 12; -fx-cursor: hand;"/>
+
+            <Button text="Inscription" onAction="#handleSignup" minWidth="110" prefWidth="110"
                     style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-font-weight: bold;
-                           -fx-background-radius: 8; -fx-padding: 8 24; -fx-cursor: hand;
+                           -fx-background-radius: 8; -fx-padding: 8 12; -fx-cursor: hand;
                            -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 8, 0, 0, 2);"/>
         </HBox>
     </HBox>

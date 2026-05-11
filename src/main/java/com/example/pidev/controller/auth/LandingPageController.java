@@ -48,21 +48,17 @@ public class LandingPageController implements Initializable {
         UserSession session = UserSession.getInstance();
         String role = session.getRole() != null ? session.getRole().trim().toLowerCase() : "";
 
-        boolean isLoggedIn = session.isLoggedIn();
         boolean isAdmin = role.contains("admin");
         boolean isSponsor = role.contains("sponsor") && !isAdmin;
 
         if (authButtonsBox != null) {
-            authButtonsBox.setVisible(!isLoggedIn);
-            authButtonsBox.setManaged(!isLoggedIn);
+            authButtonsBox.setVisible(true);
+            authButtonsBox.setManaged(true);
         }
 
         if (profileMenuButton != null) {
-            profileMenuButton.setVisible(isLoggedIn);
-            profileMenuButton.setManaged(isLoggedIn);
-            if (isLoggedIn && session.getFullName() != null && !session.getFullName().isBlank()) {
-                profileMenuButton.setText(session.getFullName());
-            }
+            profileMenuButton.setVisible(false);
+            profileMenuButton.setManaged(false);
         }
 
         if (sponsorRecoBtn != null) {
@@ -93,7 +89,7 @@ public class LandingPageController implements Initializable {
 
     @FXML
     private void handleSponsorPortal() {
-        System.out.println("ðŸ“‚ Redirection vers recommandations sponsor");
+        System.out.println("📂 Redirection vers recommandations sponsor");
         String role = UserSession.getInstance().getRole() != null
                 ? UserSession.getInstance().getRole().trim().toLowerCase()
                 : "";
@@ -104,13 +100,13 @@ public class LandingPageController implements Initializable {
 
     @FXML
     private void handleProfile() {
-        System.out.println("ðŸ“‚ Redirection vers le profil");
+        System.out.println("📂 Redirection vers le profil");
         HelloApplication.loadProfilePage();
     }
 
     @FXML
     private void handleLogout() {
-        System.out.println("ðŸ“‚ Deconnexion utilisateur");
+        System.out.println("📂 Deconnexion utilisateur");
         UserSession.getInstance().clearSession();
         HelloApplication.loadLandingPage();
     }
@@ -200,7 +196,7 @@ public class LandingPageController implements Initializable {
     private URL resolveVideoResource(String preferredPath) {
         String[] candidates = {
                 preferredPath,
-                "/com/example/pidev/videos/M\u00E9dia1.mp4",
+                "/com/example/pidev/videos/Média1.mp4",
                 "/com/example/pidev/videos/Media1.mp4"
         };
 
@@ -568,5 +564,4 @@ public class LandingPageController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }

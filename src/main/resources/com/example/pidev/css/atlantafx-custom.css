@@ -224,6 +224,12 @@
     -fx-font-size: 14px;
 }
 
+.search-field:focused {
+    -fx-border-color: #2196F3;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.15), 4, 0, 0, 0);
+}
+
 /* Style pour le champ de recherche moderne (d'Ons) */
 .search-field-modern {
     -fx-background-color: white;
@@ -1223,4 +1229,48 @@ VBox[style*="-fx-background-color: #cfe2ff"]:hover {
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);
     -fx-translate-y: -2;
     -fx-cursor: hand;
+}
+
+/* ==================== BOUTON FILTRER MODERNE ==================== */
+.btn-filter-modern {
+    -fx-background-color: #1565C0;
+    -fx-text-fill: white;
+    -fx-padding: 8 25;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(21,101,192,0.2), 6, 0, 0, 2);
+}
+
+.btn-filter-modern:hover {
+    -fx-background-color: #0d47a1;
+    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 8, 0, 0, 3);
+}
+
+/* ==================== ANIMATION BOUTONS D'ACTION ==================== */
+.action-btn-icon {
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.action-btn-icon:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* ==================== BOUTON EXPORT MODERNE ==================== */
+.btn-export-modern {
+    -fx-background-color: #0D47A1;
+    -fx-text-fill: white;
+    -fx-padding: 8 20;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: 500;
+}
+
+.btn-export-modern:hover {
+    -fx-background-color: #0a3a7a;
+    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.3), 6, 0, 0, 2);
 }

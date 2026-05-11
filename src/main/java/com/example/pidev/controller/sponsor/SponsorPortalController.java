@@ -74,6 +74,7 @@ public class SponsorPortalController implements Initializable {
     @FXML private ComboBox<String> companyFilter;
     @FXML private ComboBox<String> eventFilter;
     @FXML private Button addSponsorBtn;
+    @FXML private Button recommendSponsorBtn;
     @FXML private Button exportExcelBtn;
     @FXML private Button exportCsvBtn;
     @FXML private Button historyBtn;
@@ -83,6 +84,8 @@ public class SponsorPortalController implements Initializable {
 
     @FXML private FlowPane recommendedEventsGrid;
     @FXML private VBox noRecommendedMessage;
+    @FXML private FlowPane sponsorRecommendationGrid;
+    @FXML private VBox noRecommendedSponsorMessage;
     @FXML private FlowPane allEventsGrid;
     @FXML private VBox noEventsMessage;
 
@@ -154,6 +157,7 @@ public class SponsorPortalController implements Initializable {
         if (allEventsSortFilter != null) allEventsSortFilter.valueProperty().addListener((obs, o, n) -> applyEventSorts());
 
         if (addSponsorBtn != null) addSponsorBtn.setOnAction(e -> onAdd());
+        if (recommendSponsorBtn != null) recommendSponsorBtn.setOnAction(e -> onRecommendSponsor());
         if (exportExcelBtn != null) exportExcelBtn.setOnAction(e -> handleExportExcel());
         if (exportCsvBtn != null) exportCsvBtn.setOnAction(e -> handleExportCsv());
         if (historyBtn != null) historyBtn.setOnAction(e -> openHistoryPage());
@@ -202,6 +206,7 @@ public class SponsorPortalController implements Initializable {
 
     private void setPortalEnabled(boolean enabled) {
         if (addSponsorBtn != null) addSponsorBtn.setDisable(!enabled);
+        if (recommendSponsorBtn != null) recommendSponsorBtn.setDisable(!enabled);
         if (exportExcelBtn != null) exportExcelBtn.setDisable(!enabled);
         if (exportCsvBtn != null) exportCsvBtn.setDisable(!enabled);
         if (historyBtn != null) historyBtn.setDisable(!enabled);
@@ -225,6 +230,7 @@ public class SponsorPortalController implements Initializable {
             configureSortFilters();
             applyEventSorts();
             applySponsorFilters();
+            renderRecommendedSponsors();
         } catch (Exception e) {
             showError("DB", e.getMessage());
         }
@@ -278,7 +284,7 @@ public class SponsorPortalController implements Initializable {
 
             // Priorite: biographie du profil sponsor = secteur.
             if (sessionUser != null) {
-                industry = safe(sessionUser.getBio());
+                industry = safe(sessionUser.getBio()).trim();
             }
 
             // Fallback sur industry du dernier sponsor enregistre.
@@ -288,34 +294,31 @@ public class SponsorPortalController implements Initializable {
                         .map(Sponsor::getIndustry)
                         .filter(value -> value != null && !value.isBlank())
                         .findFirst()
-                        .orElse("");
+                        .orElse("")
+                        .trim();
             }
 
             if (industry != null && !industry.isBlank()) {
                 events = matchingService.findRelevantEvents(industry);
             }
 
-            // Si aucun match IA, proposer quand meme des evenements (evite une page vide).
+            // Important: parfois l'IA retourne des evenements deja termines.
+            // On filtre d'abord les evenements actifs, puis on applique le fallback si la liste devient vide.
+            events = keepOnlyActiveEventsSortedByDate(events);
+
+            // Si aucun match IA actif, proposer quand meme des evenements actifs (evite une page vide).
             if (events == null || events.isEmpty()) {
                 events = pickDefaultRecommendedEvents();
             }
         } catch (Exception ignored) {
             events = pickDefaultRecommendedEvents();
         }
-        return events;
+        return keepOnlyActiveEventsSortedByDate(events);
     }
 
     private List<Event> pickDefaultRecommendedEvents() {
         List<Event> source = (allEvents != null && !allEvents.isEmpty()) ? allEvents : eventService.getAllEvents();
-        List<Event> defaults = new ArrayList<>(source);
-        defaults.sort((a, b) -> {
-            LocalDateTime da = a == null ? null : a.getStartDate();
-            LocalDateTime db = b == null ? null : b.getStartDate();
-            if (da == null && db == null) return 0;
-            if (da == null) return 1;
-            if (db == null) return -1;
-            return da.compareTo(db);
-        });
+        List<Event> defaults = keepOnlyActiveEventsSortedByDate(source);
         if (defaults.size() > 6) {
             return new ArrayList<>(defaults.subList(0, 6));
         }
@@ -446,6 +449,7 @@ public class SponsorPortalController implements Initializable {
         recommendedEvents = keepOnlyActiveEventsSortedByDate(recommendedEvents);
         renderRecommendedCards();
         renderAllEvents();
+        renderRecommendedSponsors();
     }
 
     private List<Event> keepOnlyActiveEventsSortedByDate(List<Event> source) {
@@ -540,6 +544,92 @@ public class SponsorPortalController implements Initializable {
         refreshSearchStatus();
     }
 
+    private void renderRecommendedSponsors() {
+        if (sponsorRecommendationGrid == null) return;
+        try {
+            Platform.runLater(() -> {
+                sponsorRecommendationGrid.getChildren().clear();
+                // Récupération des sponsors recommandés via l'API IA
+                try {
+                    List<Sponsor> allSponsors = sponsorService.getAllSponsors();
+                    List<Sponsor> recommendedSponsors = new ArrayList<>();
+
+                    if (allSponsors != null && !allSponsors.isEmpty()) {
+                        // Utiliser les sponsors actifs comme recommandations
+                        recommendedSponsors = allSponsors.stream()
+                                .limit(6)
+                                .collect(java.util.stream.Collectors.toList());
+                    }
+
+                    if (recommendedSponsors.isEmpty()) {
+                        if (noRecommendedSponsorMessage != null) {
+                            noRecommendedSponsorMessage.setVisible(true);
+                            noRecommendedSponsorMessage.setManaged(true);
+                        }
+                    } else {
+                        if (noRecommendedSponsorMessage != null) {
+                            noRecommendedSponsorMessage.setVisible(false);
+                            noRecommendedSponsorMessage.setManaged(false);
+                        }
+                        for (Sponsor sponsor : recommendedSponsors) {
+                            sponsorRecommendationGrid.getChildren().add(createSponsorCard(sponsor));
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Erreur: " + ex.getMessage());
+                    if (noRecommendedSponsorMessage != null) {
+                        noRecommendedSponsorMessage.setVisible(true);
+                        noRecommendedSponsorMessage.setManaged(true);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Erreur chargement sponsors recommandés: " + e.getMessage());
+        }
+    }
+
+    private VBox createSponsorCard(Sponsor sponsor) {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("sponsor-event-card");
+        card.setPrefWidth(338);
+        card.setMinWidth(338);
+        card.setMaxWidth(338);
+
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_RIGHT);
+        header.setPadding(new Insets(12, 14, 0, 14));
+
+        Label badge = new Label("💼 Sponsor");
+        badge.getStyleClass().add("sponsor-event-category-chip");
+        badge.setStyle("-fx-text-fill: #0D47A1; -fx-border-color: #0D47A1;");
+        header.getChildren().add(badge);
+
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(0, 14, 14, 14));
+
+        Label name = new Label(safe(sponsor.getCompany_name()));
+        name.setWrapText(true);
+        name.getStyleClass().add("sponsor-event-title");
+
+        Label email = new Label("Email: " + safe(sponsor.getContact_email()));
+        email.getStyleClass().add("sponsor-event-meta");
+        email.setWrapText(true);
+
+        Label industry = new Label("Secteur: " + safe(sponsor.getIndustry()));
+        industry.getStyleClass().add("sponsor-event-meta");
+
+        Label contribution = new Label("Contribution: " + String.format("%,.2f DT", sponsor.getContribution_name()));
+        contribution.getStyleClass().add("sponsor-event-meta");
+
+        Button viewBtn = new Button("Voir Détails");
+        viewBtn.getStyleClass().add("sponsor-event-btn");
+        viewBtn.setOnAction(e -> openDetailsAsPage(sponsor));
+
+        content.getChildren().addAll(name, email, industry, contribution, viewBtn);
+        card.getChildren().addAll(header, content);
+        return card;
+    }
+
     private void renderEventCards(FlowPane grid, List<Event> events) {
         if (grid == null) return;
         Platform.runLater(() -> {
@@ -621,19 +711,29 @@ public class SponsorPortalController implements Initializable {
 
         Label title = new Label(safe(event.getTitle()));
         title.setWrapText(true);
+        title.setMaxWidth(310);
+        title.setMinHeight(50);
         title.getStyleClass().add("sponsor-event-title");
 
-        Label date = new Label("Date: " + formatDate(event.getStartDate()));
+        Label date = new Label("📅 " + formatDate(event.getStartDate()));
         date.getStyleClass().add("sponsor-event-meta");
+        date.setWrapText(false);
 
-        Label location = new Label("Lieu: " + safe(event.getLocation()));
+        Label location = new Label("📍 " + safe(event.getLocation()));
         location.getStyleClass().add("sponsor-event-meta");
+        location.setWrapText(true);
+
+        Label description = new Label(safe(event.getDescription()));
+        description.getStyleClass().add("sponsor-event-meta");
+        description.setWrapText(true);
+        description.setMaxWidth(310);
+        description.setMinHeight(40);
 
         Button sponsorBtn = new Button("Sponsoriser");
         sponsorBtn.getStyleClass().add("sponsor-event-btn");
         sponsorBtn.setOnAction(e -> handleSponsorEvent(event));
 
-        content.getChildren().addAll(title, date, location, sponsorBtn);
+        content.getChildren().addAll(title, date, location, description, sponsorBtn);
         card.getChildren().addAll(header, content);
         return card;
     }
@@ -713,6 +813,14 @@ public class SponsorPortalController implements Initializable {
             return;
         }
         openFormAsPage(null, null);
+    }
+
+    private void onRecommendSponsor() {
+        if (currentEmail == null || currentEmail.isBlank()) {
+            showError("Acces", "Session sponsor invalide. Veuillez vous reconnecter.");
+            return;
+        }
+        showInfo("Recommander Sponsor", "Voulez-vous recommander un sponsor? Funcionalité en développement.");
     }
 
     private void onEdit(Sponsor existing) {

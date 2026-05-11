@@ -32,7 +32,7 @@ public class BudgetCardController {
     @FXML private Button deleteBtn;
     @FXML private Label alertLabel;
     @FXML private Label forecastLabel;
-    @FXML private Label adjustedForecastLabel; // nouveau
+    @FXML private Label adjustedForecastLabel;
 
     private final BudgetService budgetService = new BudgetService();
     private final DepenseService depenseService = new DepenseService();
@@ -81,34 +81,38 @@ public class BudgetCardController {
         double totalExpenses = b.getTotal_expenses();
         boolean overBudget = false;
 
-        if (initial > 0) {
-            double usagePercent = (totalExpenses / initial) * 100;
-            String usageText = String.format("%.1f%% utilisé", usagePercent);
+        if (alertLabel != null) {
+            if (initial > 0) {
+                double usagePercent = (totalExpenses / initial) * 100;
+                String usageText = String.format("%.1f%% utilisé", usagePercent);
 
-            if (usagePercent >= 100) {
-                alertLabel.setText("🚨 Budget DÉPASSÉ !");
-                alertLabel.setStyle("-fx-text-fill: #b91c1c; -fx-font-weight: bold; -fx-font-size: 14px;");
-                overBudget = true;
-            } else if (usagePercent >= 80) {
-                alertLabel.setText("⚠️ " + usageText);
-                alertLabel.setStyle("-fx-text-fill: #f97316; -fx-font-weight: bold;");
+                if (usagePercent >= 100) {
+                    alertLabel.setText("🚨 Budget DÉPASSÉ !");
+                    alertLabel.setStyle("-fx-text-fill: #b91c1c; -fx-font-weight: bold; -fx-font-size: 14px;");
+                    overBudget = true;
+                } else if (usagePercent >= 80) {
+                    alertLabel.setText("⚠️ " + usageText);
+                    alertLabel.setStyle("-fx-text-fill: #f97316; -fx-font-weight: bold;");
+                } else {
+                    alertLabel.setText(usageText);
+                    alertLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
+                }
             } else {
-                alertLabel.setText(usageText);
-                alertLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
+                alertLabel.setText("Budget initial nul");
+                alertLabel.setStyle("-fx-text-fill: #64748b; -fx-font-style: italic;");
             }
-        } else {
-            alertLabel.setText("Budget initial nul");
-            alertLabel.setStyle("-fx-text-fill: #64748b; -fx-font-style: italic;");
         }
 
         // Montant restant
         double remaining = initial - totalExpenses;
         String remainingText = String.format("%,.2f DT restants", remaining);
-        forecastLabel.setText(remainingText);
-        if (remaining < 0) {
-            forecastLabel.setStyle("-fx-text-fill: #b91c1c; -fx-font-weight: bold;");
-        } else {
-            forecastLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
+        if (forecastLabel != null) {
+            forecastLabel.setText(remainingText);
+            if (remaining < 0) {
+                forecastLabel.setStyle("-fx-text-fill: #b91c1c; -fx-font-weight: bold;");
+            } else {
+                forecastLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
+            }
         }
 
         // Style de la carte
@@ -142,7 +146,9 @@ public class BudgetCardController {
                     double avgDaily = totalExpenses / daysSpan;
                     if (avgDaily > 0) {
                         daysLeft = (long) (remaining / avgDaily);
-                        forecastLabel.setText(remainingText + "  (~" + daysLeft + " jours)");
+                        if (forecastLabel != null) {
+                            forecastLabel.setText(remainingText + "  (~" + daysLeft + " jours)");
+                        }
                     }
                 }
             }

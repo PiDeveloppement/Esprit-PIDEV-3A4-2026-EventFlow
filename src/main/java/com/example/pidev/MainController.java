@@ -481,6 +481,16 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void onSearchClick() {
+        String query = globalSearchField.getText().trim();
+        if (!query.isEmpty()) {
+            performSimpleSearch(query);
+        } else {
+            showSimpleAlert("Recherche", "Veuillez entrer un terme de recherche");
+        }
+    }
+
     private void performSimpleSearch(String query) {
         String lowerQuery = query.toLowerCase();
         ObservableList<String> results = FXCollections.observableArrayList();
@@ -1553,3 +1563,4 @@ public class MainController {
         }
     }
 }
+
