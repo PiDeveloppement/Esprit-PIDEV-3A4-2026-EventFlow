@@ -302,15 +302,8 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.example.pidev.HelloApplication</mainClass>
+                    <mainClass>com.example.pidev/com.example.pidev.HelloApplication</mainClass>
                     <includePathExceptionsInClasspath>true</includePathExceptionsInClasspath>
-                    <jvmArgs>
-                        <jvmArg>-Xms128m</jvmArg>
-                        <jvmArg>-Xmx512m</jvmArg>
-                        <jvmArg>-XX:+UseSerialGC</jvmArg>
-                        <jvmArg>-XX:MaxMetaspaceSize=192m</jvmArg>
-                        <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
-                    </jvmArgs>
                 </configuration>
             </plugin>
         </plugins>
