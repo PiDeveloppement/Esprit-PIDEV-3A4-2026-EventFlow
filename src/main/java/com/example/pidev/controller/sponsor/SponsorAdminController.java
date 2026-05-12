@@ -4,6 +4,9 @@ import com.example.pidev.MainController;
 import com.example.pidev.model.sponsor.Sponsor;
 import com.example.pidev.service.sponsor.SponsorService;
 import com.example.pidev.service.pdf.LocalSponsorPdfService;
+import com.example.pidev.service.excel.ExcelExportService;
+import com.example.pidev.service.chart.QuickChartService;
+import com.google.gson.JsonObject;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -17,10 +20,13 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
+import javafx.stage.FileChooser;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -30,11 +36,15 @@ public class SponsorAdminController implements Initializable {
     @FXML private Label totalSponsorsLabel;
     @FXML private Label totalContributionLabel;
     @FXML private Label avgContributionLabel;
+    @FXML private Label totalSponsorsSectionLabel;
+    @FXML private Label totalContributionSectionLabel;
+    @FXML private Label avgContributionSectionLabel;
 
     @FXML private TextField searchField;
     @FXML private ComboBox<String> companyFilter;
     @FXML private ComboBox<String> eventFilter;
     @FXML private Button addSponsorBtn;
+    @FXML private Button exportExcelBtn;
 
     @FXML private ScrollPane cardsScroll;
     @FXML private TilePane cardsPane;
@@ -55,10 +65,17 @@ public class SponsorAdminController implements Initializable {
         filtered = new FilteredList<>(baseList, s -> true);
         filtered.addListener((ListChangeListener<Sponsor>) c -> renderCards());
 
-        if (searchField != null) searchField.textProperty().addListener((obs, o, n) -> applyPredicate());
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, o, n) -> {
+                if (n == null || n.trim().isEmpty()) loadData();
+                else searchSponsors(n.trim());
+            });
+        }
+
         if (companyFilter != null) companyFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
-        if (eventFilter != null) eventFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
+        if (eventFilter != null)   eventFilter.valueProperty().addListener((obs, o, n) -> applyPredicate());
         if (addSponsorBtn != null) addSponsorBtn.setOnAction(e -> onAdd());
+        if (exportExcelBtn != null) exportExcelBtn.setOnAction(e -> handleExportExcel());
 
         if (cardsScroll != null && cardsPane != null) {
             cardsPane.setPadding(new Insets(8));
@@ -85,7 +102,7 @@ public class SponsorAdminController implements Initializable {
             baseList.setAll(sponsorService.getAllSponsors());
             updateGlobalStats();
             if (statusLabel != null)
-                statusLabel.setText("📊 " + baseList.size() + " sponsors • Mise à jour: Maintenant");
+                statusLabel.setText("Stats: " + baseList.size() + " sponsors");
             renderCards();
         } catch (Exception e) {
             showError("DB", e.getMessage());
@@ -95,12 +112,11 @@ public class SponsorAdminController implements Initializable {
     private void setupFiltersCombos() {
         try {
             if (companyFilter != null) {
-                companyFilter.getItems().setAll(sponsorService.getCompanyNamesAll());
+                companyFilter.getItems().setAll(sponsorService.getAllCompanyNames());
                 companyFilter.setValue(null);
             }
             if (eventFilter != null) {
-                ObservableList<String> titles = sponsorService.getAllEventTitles();
-                eventFilter.getItems().setAll(titles);
+                eventFilter.getItems().setAll(sponsorService.getAllEventTitles());
                 eventFilter.setValue(null);
             }
         } catch (Exception e) {
@@ -111,15 +127,15 @@ public class SponsorAdminController implements Initializable {
     private void applyPredicate() {
         if (filtered == null) return;
 
-        String q = (searchField == null || searchField.getText() == null) ? "" : searchField.getText().trim().toLowerCase();
+        String q = (searchField == null || searchField.getText() == null)
+                ? "" : searchField.getText().trim().toLowerCase();
         String comp = (companyFilter == null) ? null : companyFilter.getValue();
         String eventTitle = (eventFilter == null) ? null : eventFilter.getValue();
 
         Integer eventId = null;
         if (eventTitle != null && !eventTitle.isBlank()) {
-            try {
-                eventId = sponsorService.getEventIdByTitle(eventTitle);
-            } catch (Exception ignored) {}
+            try { eventId = sponsorService.getEventIdByTitle(eventTitle); }
+            catch (Exception ignored) {}
         }
         Integer finalEventId = eventId;
 
@@ -128,15 +144,13 @@ public class SponsorAdminController implements Initializable {
                     || String.valueOf(s.getId()).contains(q)
                     || (s.getCompany_name() != null && s.getCompany_name().toLowerCase().contains(q))
                     || (s.getContact_email() != null && s.getContact_email().toLowerCase().contains(q));
-
             boolean okComp = (comp == null) || (s.getCompany_name() != null && s.getCompany_name().equalsIgnoreCase(comp));
             boolean okEv = (finalEventId == null) || s.getEvent_id() == finalEventId;
-
             return okQ && okComp && okEv;
         });
 
         if (statusLabel != null)
-            statusLabel.setText("📊 " + filtered.size() + " sponsors filtrés • Mise à jour: Maintenant");
+            statusLabel.setText("Stats: " + filtered.size() + " sponsors");
         renderCards();
     }
 
@@ -152,7 +166,6 @@ public class SponsorAdminController implements Initializable {
                     r.setPrefWidth(440);
                     r.setMaxWidth(Double.MAX_VALUE);
                 }
-
                 SponsorCardController card = loader.getController();
                 card.setData(
                         sponsor,
@@ -161,7 +174,6 @@ public class SponsorAdminController implements Initializable {
                         () -> onEdit(sponsor),
                         () -> onDelete(sponsor)
                 );
-
                 cardsPane.getChildren().add(root);
             } catch (Exception ex) {
                 showError("UI", "Erreur card sponsor: " + ex.getMessage());
@@ -187,16 +199,70 @@ public class SponsorAdminController implements Initializable {
             Map<String, Double> data = sponsorService.getTotalContributionByEvent();
             ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
             for (Map.Entry<String, Double> entry : data.entrySet()) {
-                if (entry.getValue() > 0) {
+                if (entry.getValue() > 0)
                     pieData.add(new PieChart.Data(entry.getKey(), entry.getValue()));
-                }
             }
-            contributionsChart.setData(pieData);
-            contributionsChart.setTitle("Répartition des contributions par événement");
-            contributionsChart.setLabelsVisible(true);
-            contributionsChart.setLegendVisible(true);
+            if (contributionsChart != null) {
+                contributionsChart.setData(pieData);
+                contributionsChart.setTitle("Repartition des contributions par evenement");
+                contributionsChart.setLabelsVisible(true);
+                contributionsChart.setLegendVisible(true);
+            }
         } catch (Exception e) {
             showError("Chart", "Impossible de charger le graphique : " + e.getMessage());
+        }
+    }
+
+    private void searchSponsors(String query) {
+        try {
+            String q = query == null ? "" : query.trim().toLowerCase();
+            List<Sponsor> all = sponsorService.getAllSponsors();
+            List<Sponsor> found = new ArrayList<>();
+            for (Sponsor s : all) {
+                if (s == null) continue;
+                String id = String.valueOf(s.getId());
+                String company = s.getCompany_name() == null ? "" : s.getCompany_name().toLowerCase();
+                String email = s.getContact_email() == null ? "" : s.getContact_email().toLowerCase();
+                if (id.contains(q) || company.contains(q) || email.contains(q)) {
+                    found.add(s);
+                }
+            }
+            baseList.setAll(found);
+            updateGlobalStats();
+            if (statusLabel != null)
+                statusLabel.setText("Recherche: " + found.size() + " resultat(s) pour \"" + query + "\"");
+            renderCards();
+        } catch (Exception e) {
+            showError("Recherche", "Erreur : " + e.getMessage());
+        }
+    }
+
+    private void handleExportExcel() {
+        try {
+            List<Sponsor> sponsorsToExport = new ArrayList<>(filtered);
+            if (sponsorsToExport.isEmpty()) {
+                showError("Export", "Aucun sponsor Ã  exporter.");
+                return;
+            }
+            Map<String, Double> contributions = sponsorService.getTotalContributionByEvent();
+            JsonObject chartConfig = QuickChartService.createPieChart(
+                    "RÃ©partition des contributions",
+                    contributions.keySet().toArray(new String[0]),
+                    contributions.values().stream().mapToDouble(Double::doubleValue).toArray()
+            );
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le fichier Excel");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+            fileChooser.setInitialFileName("sponsors_export.xlsx");
+            File file = fileChooser.showSaveDialog(
+                    exportExcelBtn != null ? exportExcelBtn.getScene().getWindow() : null);
+            if (file != null) {
+                ExcelExportService.exportSponsors(sponsorsToExport, chartConfig, file.getAbsolutePath());
+                showInfo("Export rÃ©ussi", "Le fichier Excel a Ã©tÃ© gÃ©nÃ©rÃ© avec succÃ¨s !");
+            }
+        } catch (Exception e) {
+            showError("Export", "Erreur : " + e.getMessage());
         }
     }
 
@@ -220,10 +286,7 @@ public class SponsorAdminController implements Initializable {
                         loadData();
                         openDetailsAsPage(saved);
                     });
-                    ctrl.setOnFormDone(() -> {
-                        // Annuler ou fermeture sans sauvegarde : retour à la liste
-                        MainController.getInstance().showSponsorsAdmin();
-                    });
+                    ctrl.setOnFormDone(() -> MainController.getInstance().showSponsorsAdmin());
                 }
         );
     }
@@ -232,8 +295,7 @@ public class SponsorAdminController implements Initializable {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Suppression");
         confirm.setHeaderText("Supprimer sponsor");
-        confirm.setContentText("Supprimer: " + s.getCompany_name() + " ?");
-
+        confirm.setContentText("Supprimer : " + s.getCompany_name() + " ?");
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 try {
@@ -253,7 +315,7 @@ public class SponsorAdminController implements Initializable {
             String eventTitle = sponsorService.getEventTitleById(s.getEvent_id());
             File pdf = pdfService.generateSponsorContractPdf(s, eventTitle);
             if (!Desktop.isDesktopSupported()) {
-                showError("PDF", "Desktop non supporté sur cette machine.");
+                showError("PDF", "Desktop non supportÃ©.");
                 return;
             }
             Desktop.getDesktop().open(pdf);
@@ -269,21 +331,26 @@ public class SponsorAdminController implements Initializable {
                     (SponsorDetailsController ctrl) -> {
                         ctrl.setSponsor(sponsor);
                         ctrl.setOnBack(() -> {
-                            // Retour à la liste après OK
+                            setupFiltersCombos();
+                            loadData();
                             MainController.getInstance().showSponsorsAdmin();
                         });
                     }
             );
         } catch (Exception e) {
-            showError("UI", "Impossible d'ouvrir détails: " + e.getMessage());
+            showError("UI", "Impossible d'ouvrir dÃ©tails : " + e.getMessage());
         }
+    }
+
+    private void showInfo(String title, String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(title); a.setHeaderText(null); a.setContentText(msg);
+        a.showAndWait();
     }
 
     private void showError(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(msg);
+        a.setTitle(title); a.setHeaderText(null); a.setContentText(msg);
         a.showAndWait();
     }
 }

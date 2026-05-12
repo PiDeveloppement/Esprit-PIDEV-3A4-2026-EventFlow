@@ -1,0 +1,280 @@
+.sponsor-portal-root {
+    -fx-background-color: linear-gradient(to bottom, #eef5ff 0%, #f5f9ff 45%, #ecf7ff 100%);
+}
+
+.sponsor-header-block {
+    -fx-background-color: linear-gradient(to right, #e8f2ff 0%, #f3f8ff 50%, #e8f7ff 100%);
+    -fx-border-color: #c8dcf7;
+    -fx-border-width: 0 0 1 0;
+}
+
+.sponsor-badge {
+    -fx-background-color: #dbeafe;
+    -fx-background-radius: 12;
+}
+
+.sponsor-badge-text {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #1e3a8a;
+}
+
+.sponsor-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.sponsor-subtitle {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #3b5b93;
+}
+
+.sponsor-date-chip {
+    -fx-text-fill: #1e3a8a;
+    -fx-font-weight: 700;
+    -fx-background-color: #eff6ff;
+    -fx-background-radius: 9;
+    -fx-padding: 6 14;
+    -fx-border-color: #bfdbfe;
+    -fx-border-width: 1;
+    -fx-border-radius: 9;
+}
+
+.sponsor-top-btn {
+    -fx-background-color: linear-gradient(to bottom, #f5f9ff, #e8f1ff);
+    -fx-border-color: #9fc0ea;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-text-fill: #0d47a1;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.sponsor-top-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #e8f1ff, #dbeafe);
+    -fx-border-color: #3b82f6;
+}
+
+.sponsor-filter-row {
+    -fx-background-color: #f6faff;
+    -fx-border-color: #c8dcf7;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 12;
+}
+
+.sponsor-filter-row .text-field,
+.sponsor-filter-row .combo-box {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #bfd7f4;
+}
+
+.sponsor-status-pill {
+    -fx-text-fill: #1e3a8a;
+    -fx-font-weight: 800;
+    -fx-background-color: #dbeafe;
+    -fx-background-radius: 999;
+    -fx-padding: 7 12;
+}
+
+.sponsor-kpi-card {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f3f8ff);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: #cbdff8;
+    -fx-border-width: 1;
+    -fx-padding: 16 18;
+}
+
+.sponsor-kpi-title {
+    -fx-text-fill: #1d4e89;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.sponsor-kpi-value-green {
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.sponsor-kpi-value-blue {
+    -fx-text-fill: #1565c0;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.sponsor-kpi-value-violet {
+    -fx-text-fill: #0288d1;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.sponsor-block-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+.sponsor-info-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #64748b;
+}
+
+.sponsor-info-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+.sponsor-section-banner {
+    -fx-background-color: linear-gradient(to right, #dbeafe, #bfdbfe, #a5f3fc);
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+    -fx-alignment: center;
+}
+
+.sponsor-section-banner-text {
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0d3b78;
+    -fx-alignment: center;
+}
+
+.sponsor-stat-box {
+    -fx-background-color: linear-gradient(to bottom, #f8fbff, #edf4ff);
+    -fx-background-radius: 10;
+    -fx-border-color: #c5daf5;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.2;
+    -fx-padding: 12 14;
+}
+
+.sponsor-leader-value {
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #1e3a8a;
+    -fx-padding: 0 0 6 0;
+    -fx-wrap-text: true;
+}
+
+.sponsor-stats-row {
+    -fx-alignment: center-left;
+}
+
+.sponsor-section-card {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f4f9ff);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #cbdff8;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(13, 71, 161, 0.12), 12, 0, 0, 3);
+    -fx-padding: 12;
+}
+
+.sponsor-chart-container {
+    -fx-padding: 6 4 2 4;
+}
+
+.sponsor-chart-row {
+    -fx-background-color: linear-gradient(to right, #f8fbff, #eef6ff);
+    -fx-background-radius: 10;
+    -fx-border-color: #c9dcf6;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 8 10;
+}
+
+.sponsor-chart-line {
+    -fx-alignment: center-left;
+}
+
+.sponsor-chart-rank {
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0d47a1;
+    -fx-background-color: #bfdbfe;
+    -fx-background-radius: 999;
+    -fx-padding: 2 8;
+    -fx-min-width: 24;
+    -fx-alignment: center;
+}
+
+.sponsor-chart-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+.sponsor-chart-amount {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1e40af;
+}
+
+.sponsor-events-grid {
+    -fx-padding: 2 2 2 2;
+}
+
+.sponsor-event-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: #d4e4fa;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.10), 10, 0, 0, 2);
+}
+
+.sponsor-event-card:hover {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(13,71,161,0.18), 14, 0, 0, 4);
+}
+
+.sponsor-event-category-chip {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-background-color: #f8fbff;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-padding: 4 10;
+}
+
+.sponsor-event-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 2 0 2 0;
+}
+
+.sponsor-event-meta {
+    -fx-font-size: 13px;
+    -fx-text-fill: #3b5b93;
+}
+
+.sponsor-event-btn {
+    -fx-background-color: linear-gradient(to right, #1e88e5, #1565c0);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 9 20;
+    -fx-cursor: hand;
+}
+
+.sponsor-event-btn:hover {
+    -fx-background-color: linear-gradient(to right, #1565c0, #0d47a1);
+}
+
+.sponsor-mini-progress {
+    -fx-accent: linear-gradient(to right, #1e88e5, #26c6da);
+    -fx-control-inner-background: #dcecff;
+    -fx-pref-height: 12;
+    -fx-background-radius: 999;
+}

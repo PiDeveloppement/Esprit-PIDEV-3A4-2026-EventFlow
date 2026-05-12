@@ -1,13 +1,16 @@
 package com.example.pidev.service.depense;
 
 import com.example.pidev.model.depense.Depense;
+import com.example.pidev.model.event.EventCategory;
 import com.example.pidev.utils.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DepenseService {
@@ -16,7 +19,6 @@ public class DepenseService {
         return DBConnection.getInstance().getConnection();
     }
 
-    // ---------- validations ----------
     public boolean budgetExists(int budgetId) {
         String sql = "SELECT 1 FROM budget WHERE id=? LIMIT 1";
         try (PreparedStatement ps = cnx().prepareStatement(sql)) {
@@ -29,7 +31,6 @@ public class DepenseService {
         }
     }
 
-    // ---------- list ----------
     public ObservableList<Depense> getAllDepenses() {
         ObservableList<Depense> list = FXCollections.observableArrayList();
         String sql = "SELECT id, budget_id, description, amount, category, expense_date " +
@@ -58,7 +59,6 @@ public class DepenseService {
         }
     }
 
-    // ---------- filtres (combobox) ----------
     public ObservableList<Integer> getBudgetIdsFromDepenses() {
         ObservableList<Integer> list = FXCollections.observableArrayList();
         String sql = "SELECT DISTINCT budget_id FROM depense ORDER BY budget_id";
@@ -73,18 +73,18 @@ public class DepenseService {
 
     public ObservableList<String> getCategories() {
         ObservableList<String> list = FXCollections.observableArrayList();
-        String sql = "SELECT DISTINCT category FROM depense " +
-                "WHERE category IS NOT NULL AND category <> '' ORDER BY category";
+        String sql = "SELECT name FROM event_category ORDER BY name";
         try (PreparedStatement ps = cnx().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(rs.getString(1));
+            while (rs.next()) {
+                list.add(rs.getString("name"));
+            }
             return list;
         } catch (SQLException e) {
-            throw new RuntimeException("getCategories failed", e);
+            throw new RuntimeException("getCategories from event_category failed", e);
         }
     }
 
-    // ---------- KPI ----------
     public int countDepenses() {
         String sql = "SELECT COUNT(*) FROM depense";
         try (PreparedStatement ps = cnx().prepareStatement(sql);
@@ -134,7 +134,6 @@ public class DepenseService {
         }
     }
 
-    // ---------- CHART DATA ----------
     public Map<String, Double> getSumByCategory() {
         Map<String, Double> map = new LinkedHashMap<>();
         String sql = "SELECT category, COALESCE(SUM(amount),0) FROM depense GROUP BY category ORDER BY category";
@@ -149,7 +148,6 @@ public class DepenseService {
         return map;
     }
 
-    // ---------- CRUD ----------
     public void addDepense(Depense d) {
         if (!budgetExists(d.getBudget_id())) {
             throw new IllegalArgumentException("budget_id n'existe pas: " + d.getBudget_id());
@@ -215,7 +213,6 @@ public class DepenseService {
         }
     }
 
-    // ---------- recalcul Budget ----------
     private void recomputeBudget(int budgetId) {
         String sumSql = "SELECT COALESCE(SUM(amount),0) FROM depense WHERE budget_id=?";
         String revSql = "SELECT COALESCE(total_revenue,0) FROM budget WHERE id=?";
@@ -252,5 +249,58 @@ public class DepenseService {
         } catch (SQLException e) {
             throw new RuntimeException("recomputeBudget failed", e);
         }
+    }
+
+    public List<Depense> getDepensesByBudgetId(int budgetId) {
+        List<Depense> list = new ArrayList<>();
+        String sql = "SELECT id, budget_id, description, amount, category, expense_date " +
+                "FROM depense WHERE budget_id = ? ORDER BY expense_date";
+        try (PreparedStatement ps = cnx().prepareStatement(sql)) {
+            ps.setInt(1, budgetId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Date d = rs.getDate("expense_date");
+                    LocalDate ld = (d == null) ? null : d.toLocalDate();
+                    Depense dep = new Depense(
+                            rs.getInt("id"),
+                            rs.getInt("budget_id"),
+                            rs.getString("description"),
+                            rs.getDouble("amount"),
+                            rs.getString("category"),
+                            ld
+                    );
+                    list.add(dep);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("getDepensesByBudgetId failed", e);
+        }
+        return list;
+    }
+
+    public ObservableList<EventCategory> getEventCategories() {
+        ObservableList<EventCategory> list = FXCollections.observableArrayList();
+        String sql = "SELECT id, name, description, icon, color, is_active, created_at, updated_at " +
+                "FROM event_category ORDER BY name";
+        try (PreparedStatement ps = cnx().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                EventCategory cat = new EventCategory();
+                cat.setId(rs.getInt("id"));
+                cat.setName(rs.getString("name"));
+                cat.setDescription(rs.getString("description"));
+                cat.setIcon(rs.getString("icon"));
+                cat.setColor(rs.getString("color"));
+                cat.setActive(rs.getBoolean("is_active"));
+                if (rs.getTimestamp("created_at") != null)
+                    cat.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                if (rs.getTimestamp("updated_at") != null)
+                    cat.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+                list.add(cat);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("getEventCategories failed", e);
+        }
+        return list;
     }
 }

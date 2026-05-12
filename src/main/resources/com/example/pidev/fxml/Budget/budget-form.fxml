@@ -2,44 +2,41 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pidev.controller.budget.BudgetFormController"
-            style="-fx-background-color:white; -fx-padding:18;">
+            style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+            prefWidth="500" prefHeight="400">
+    <padding>
+        <Insets top="25" right="30" bottom="25" left="30"/>
+    </padding>
 
-    <VBox spacing="12" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+    <VBox spacing="20" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+        <Label fx:id="titleLabel" text="➕ Nouveau Budget" style="-fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-padding: 0 0 10 0;"/>
 
-        <Label fx:id="titleLabel" text="➕ Nouveau Budget"
-               style="-fx-font-size:20px; -fx-font-weight:900; -fx-text-fill:#0f172a;"/>
-
-        <Label fx:id="errorLabel" text=""
-               style="-fx-text-fill:#dc2626; -fx-font-weight:700;"/>
-
-        <GridPane hgap="12" vgap="10">
+        <GridPane hgap="15" vgap="15">
             <columnConstraints>
-                <ColumnConstraints percentWidth="35"/>
-                <ColumnConstraints percentWidth="65"/>
+                <ColumnConstraints minWidth="120" prefWidth="120" maxWidth="150" halignment="RIGHT"/>
+                <ColumnConstraints minWidth="350" prefWidth="380" maxWidth="450" hgrow="ALWAYS"/>
             </columnConstraints>
 
-            <Label text="Événement" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight:800;"/>
-            <ComboBox fx:id="eventComboBox" promptText="Choisir un événement" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="📅 Événement" style="-fx-font-weight: 700; -fx-text-fill: #334155;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="eventComboBox" promptText="Choisir un événement" styleClass="combo-box" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-            <Label text="Budget Initial" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight:800;"/>
-            <TextField fx:id="initialField" promptText="ex: 5000" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="💰 Budget initial" style="-fx-font-weight: 700; -fx-text-fill: #334155;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="initialField" promptText="ex: 5000" styleClass="text-field" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <Label text="Revenus" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight:800;"/>
-            <TextField fx:id="revenueField" promptText="ex: 3000" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="📈 Revenus estimés" style="-fx-font-weight: 700; -fx-text-fill: #334155;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="revenueField" promptText="ex: 3000 (optionnel)" styleClass="text-field" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
         </GridPane>
 
-        <HBox alignment="CENTER_RIGHT" spacing="10">
-            <Button text="Annuler"
-                    onAction="#onCancel"
-                    style="-fx-background-color:#e2e8f0; -fx-text-fill:#0f172a; -fx-font-weight:900; -fx-background-radius:10; -fx-padding:10 16;"/>
-            <Button text="Enregistrer"
-                    onAction="#onSave"
-                    style="-fx-background-color:#10b981; -fx-text-fill:white; -fx-font-weight:900; -fx-background-radius:10; -fx-padding:10 16;"/>
-        </HBox>
+        <Label fx:id="errorLabel" text="" style="-fx-text-fill: #dc2626; -fx-font-weight: 700; -fx-padding: 5 0;"/>
 
+        <HBox spacing="15" alignment="CENTER_RIGHT">
+            <Button text="Annuler" onAction="#onCancel" styleClass="btn-outline" prefWidth="120"/>
+            <Button text="Enregistrer" onAction="#onSave" styleClass="btn-success" prefWidth="120"/>
+        </HBox>
     </VBox>
 </AnchorPane>

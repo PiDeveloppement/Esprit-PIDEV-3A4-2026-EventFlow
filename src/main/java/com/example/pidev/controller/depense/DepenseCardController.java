@@ -11,10 +11,10 @@ public class DepenseCardController {
 
     @FXML private Label descLabel;
     @FXML private Label amountLabel;
-
     @FXML private Label categoryLabel;
     @FXML private Label dateLabel;
-
+    @FXML private Label categoryPrefix;
+    @FXML private Label datePrefix;
     @FXML private Button detailsBtn;
     @FXML private Button editBtn;
     @FXML private Button deleteBtn;
@@ -26,11 +26,8 @@ public class DepenseCardController {
 
         if (descLabel != null) descLabel.setText(nvl(d.getDescription(), "—"));
         if (amountLabel != null) amountLabel.setText(String.format("%,.2f DT", d.getAmount()));
-
         if (categoryLabel != null) categoryLabel.setText(nvl(d.getCategory(), "—"));
-        if (dateLabel != null) {
-            dateLabel.setText(d.getExpense_date() == null ? "—" : FMT.format(d.getExpense_date()));
-        }
+        if (dateLabel != null) dateLabel.setText(d.getExpense_date() == null ? "—" : FMT.format(d.getExpense_date()));
 
         if (detailsBtn != null) detailsBtn.setOnAction(e -> { if (onDetails != null) onDetails.run(); });
         if (editBtn != null) editBtn.setOnAction(e -> { if (onEdit != null) onEdit.run(); });

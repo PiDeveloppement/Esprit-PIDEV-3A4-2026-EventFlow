@@ -9,11 +9,16 @@ public class Sponsor {
     private double contribution_name;
     private String contact_email;
     private String contract_url;
+    private String industry;
+    private String phone;
+    private String tax_id;          // nouveau
+    private String document_url;    // nouveau
 
     public Sponsor() {}
 
     public Sponsor(int id, int event_id, String company_name, String logo_url,
-                   double contribution_name, String contact_email, String contract_url) {
+                   double contribution_name, String contact_email, String contract_url,
+                   String industry, String phone, String tax_id, String document_url) {
         this.id = id;
         this.event_id = event_id;
         this.company_name = company_name;
@@ -21,6 +26,10 @@ public class Sponsor {
         this.contribution_name = contribution_name;
         this.contact_email = contact_email;
         this.contract_url = contract_url;
+        this.industry = industry;
+        this.phone = phone;
+        this.tax_id = tax_id;
+        this.document_url = document_url;
     }
 
     public int getId() { return id; }
@@ -41,8 +50,22 @@ public class Sponsor {
     public String getContact_email() { return contact_email; }
     public void setContact_email(String contact_email) { this.contact_email = contact_email; }
 
-
     public String getContract_url() { return contract_url; }
+    public void setContract_url(String contract_url) { this.contract_url = contract_url; }
+
+    public String getIndustry() { return industry; }
+    public void setIndustry(String industry) { this.industry = industry; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getTax_id() { return tax_id; }
+    public void setTax_id(String tax_id) { this.tax_id = tax_id; }
+
+    public String getDocument_url() { return document_url; }
+    public void setDocument_url(String document_url) { this.document_url = document_url; }
+
+    // Anciens champs (user_id, access_code) si nécessaires
     private Integer user_id;
     private String access_code;
 
@@ -51,6 +74,4 @@ public class Sponsor {
 
     public String getAccess_code() { return access_code; }
     public void setAccess_code(String access_code) { this.access_code = access_code; }
-
-    public void setContract_url(String contract_url) { this.contract_url = contract_url; }
 }

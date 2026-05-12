@@ -27,18 +27,14 @@
             </columnConstraints>
 
             <VBox spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                <Label style="-fx-text-fill:#64748b; -fx-font-size:12px;" text="Catégorie" />
+                <Label fx:id="categoryPrefix" style="-fx-text-fill:#64748b; -fx-font-size:12px;" text="Catégorie:" />
                 <Label fx:id="categoryLabel" style="-fx-font-weight:900; -fx-text-fill:#0f172a;" text="—" />
             </VBox>
 
             <VBox spacing="2" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                <Label style="-fx-text-fill:#64748b; -fx-font-size:12px;" text="Date" />
+                <Label fx:id="datePrefix" style="-fx-text-fill:#64748b; -fx-font-size:12px;" text="Date:" />
                 <Label fx:id="dateLabel" style="-fx-font-weight:900; -fx-text-fill:#0f172a;" text="—" />
             </VBox>
-
-            <rowConstraints>
-                <RowConstraints />
-            </rowConstraints>
         </GridPane>
 
         <HBox spacing="10" style="-fx-padding: 8 0 0 0;">
@@ -59,6 +55,5 @@
                            -fx-background-radius:12; -fx-padding: 8 12;"
                     text="Supprimer" />
         </HBox>
-
     </VBox>
 </AnchorPane>

@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class BudgetService {
 
@@ -15,7 +16,9 @@ public class BudgetService {
         return DBConnection.getInstance().getConnection();
     }
 
-    // ===================== ACCÈS DIRECT À LA TABLE EVENT =====================
+    // ===================== EVENT =====================
+
+    /** title depuis event.id */
     public String getEventTitleById(int eventId) {
         String sql = "SELECT title FROM event WHERE id = ?";
         try (PreparedStatement ps = cnx().prepareStatement(sql)) {
@@ -29,6 +32,26 @@ public class BudgetService {
         return "Événement inconnu";
     }
 
+    /** ✅ title depuis budget.id (JOIN budget -> event) */
+    public String getEventTitleByBudgetId(int budgetId) {
+        String sql = """
+            SELECT e.title
+            FROM budget b
+            JOIN event e ON b.event_id = e.id
+            WHERE b.id = ?
+        """;
+        try (PreparedStatement ps = cnx().prepareStatement(sql)) {
+            ps.setInt(1, budgetId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur récupération titre événement par budgetId", e);
+        }
+        return "Événement inconnu";
+    }
+
+    /** ✅ Utilisé par BudgetFormController/BudgetListController */
     public ObservableList<String> getAllEventTitles() {
         ObservableList<String> list = FXCollections.observableArrayList();
         String sql = "SELECT title FROM event ORDER BY title";
@@ -41,6 +64,7 @@ public class BudgetService {
         return list;
     }
 
+    /** ✅ Utilisé par BudgetFormController/BudgetListController */
     public int getEventIdByTitle(String title) throws SQLException {
         String sql = "SELECT id FROM event WHERE title = ?";
         try (PreparedStatement ps = cnx().prepareStatement(sql)) {
@@ -53,6 +77,7 @@ public class BudgetService {
     }
 
     // ===================== CRUD BUDGET =====================
+
     public boolean eventExists(int eventId) {
         String sql = "SELECT 1 FROM event WHERE id=? LIMIT 1";
         try (PreparedStatement ps = cnx().prepareStatement(sql)) {
@@ -238,53 +263,122 @@ public class BudgetService {
         }
     }
 
-    // Methods for Depense form - budget selection by name
-    public ObservableList<String> getAllBudgetNames() {
-        ObservableList<String> list = FXCollections.observableArrayList();
-        String sql = "SELECT id, initial_budget FROM budget ORDER BY id DESC";
+    // ==================== DEPENSE FORM / EXPORT ====================
 
+    /**
+     * ✅ Affichage ComboBox Dépense (SANS ID):
+     * "Hackathon 2024 (200.00 DT)"
+     */
+    public ObservableList<String> getBudgetDisplayNames() {
+        ObservableList<String> list = FXCollections.observableArrayList();
+        String sql = """
+            SELECT e.title, b.initial_budget
+            FROM budget b
+            JOIN event e ON b.event_id = e.id
+            ORDER BY b.id DESC
+        """;
         try (PreparedStatement ps = cnx().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                int budgetId = rs.getInt("id");
+                String title = rs.getString("title");
                 double initial = rs.getDouble("initial_budget");
-                String name = String.format("Budget N°%d (%.2f DT)", budgetId, initial);
-                list.add(name);
+                String initialStr = String.format(Locale.US, "%.2f", initial);
+                list.add(title + " (" + initialStr + " DT)");
             }
-            return list;
         } catch (SQLException e) {
-            throw new RuntimeException("getAllBudgetNames failed", e);
+            throw new RuntimeException("getBudgetDisplayNames failed", e);
         }
+        return list;
     }
 
-    public int getBudgetIdByName(String name) {
-        if (name == null || name.isEmpty()) return -1;
-        try {
-            int startIdx = name.indexOf("°") + 1;
-            int endIdx = name.indexOf("(");
-            if (startIdx <= 0 || endIdx <= 0) return -1;
-            String idStr = name.substring(startIdx, endIdx).trim();
-            return Integer.parseInt(idStr);
-        } catch (Exception e) {
-            System.err.println("getBudgetIdByName error: " + e.getMessage());
-            return -1;
-        }
-    }
-
-    public String getBudgetNameById(int budgetId) {
-        String sql = "SELECT initial_budget FROM budget WHERE id=?";
+    /**
+     * ✅ Pour pré-sélectionner correctement en mode Modifier (même format exact)
+     */
+    public String getBudgetDisplayNameById(int budgetId) {
+        String sql = """
+            SELECT e.title, b.initial_budget
+            FROM budget b
+            JOIN event e ON b.event_id = e.id
+            WHERE b.id = ?
+        """;
         try (PreparedStatement ps = cnx().prepareStatement(sql)) {
             ps.setInt(1, budgetId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    double initial = rs.getDouble("initial_budget");
-                    return String.format("Budget N°%d (%.2f DT)", budgetId, initial);
+                    String title = rs.getString(1);
+                    double initial = rs.getDouble(2);
+                    String initialStr = String.format(Locale.US, "%.2f", initial);
+                    return title + " (" + initialStr + " DT)";
                 }
             }
         } catch (SQLException e) {
-            System.err.println("getBudgetNameById error: " + e.getMessage());
+            throw new RuntimeException("getBudgetDisplayNameById failed", e);
         }
-        return "Budget N°" + budgetId;
+        return null;
+    }
+
+    /**
+     * ✅ Parsing robuste pour retrouver budget.id depuis "title (amount DT)"
+     */
+    public int getBudgetIdByDisplayName(String displayName) {
+        if (displayName == null || displayName.isBlank()) return -1;
+
+        try {
+            int lastParen = displayName.lastIndexOf('(');
+            if (lastParen == -1) return -1;
+
+            String title = displayName.substring(0, lastParen).trim();
+
+            String amountStr = displayName
+                    .substring(lastParen + 1, displayName.length() - 1)
+                    .replace("DT", "")
+                    .replace(",", "")
+                    .trim();
+
+            double amount = Double.parseDouble(amountStr);
+
+            String sql = """
+                SELECT b.id
+                FROM budget b
+                JOIN event e ON b.event_id = e.id
+                WHERE e.title = ? AND b.initial_budget = ?
+                ORDER BY b.id DESC
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = cnx().prepareStatement(sql)) {
+                ps.setString(1, title);
+                ps.setDouble(2, amount);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            return -1;
+        }
+
+        return -1;
+    }
+
+    /**
+     * ✅ Utilisé par ExcelExportService (au lieu de getBudgetNameById manquant)
+     * Retourne: "Hackathon 2024 (200.00 DT)"
+     */
+    public String getBudgetNameById(int budgetId) {
+        String s = getBudgetDisplayNameById(budgetId);
+        return (s == null || s.isBlank()) ? ("Budget " + budgetId) : s;
+    }
+
+    public double getInitialBudgetById(int budgetId) {
+        String sql = "SELECT initial_budget FROM budget WHERE id=?";
+        try (PreparedStatement ps = cnx().prepareStatement(sql)) {
+            ps.setInt(1, budgetId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getDouble("initial_budget");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("getInitialBudgetById failed", e);
+        }
+        return 0;
     }
 }

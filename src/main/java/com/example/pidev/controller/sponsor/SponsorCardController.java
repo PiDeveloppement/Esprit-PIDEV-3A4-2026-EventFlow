@@ -14,6 +14,7 @@ public class SponsorCardController {
     @FXML private Label companyLabel;
     @FXML private Label emailLabel;
     @FXML private Label contributionLabel;
+    @FXML private Label eventLabelPrefix;
     @FXML private Label eventLabel;
     @FXML private Button detailsBtn;
     @FXML private Button pdfBtn;
@@ -22,34 +23,77 @@ public class SponsorCardController {
 
     private final SponsorService sponsorService = new SponsorService();
 
-    public void setData(Sponsor s, Runnable onDetails, Runnable onPdf, Runnable onEdit, Runnable onDelete) {
-        if (s == null) return;
+    public void setData(Sponsor sponsor, Runnable onDetails, Runnable onPdf, Runnable onEdit, Runnable onDelete) {
+        if (sponsor == null) return;
 
-        if (companyLabel != null) companyLabel.setText(nv(s.getCompany_name()));
-        if (emailLabel != null) emailLabel.setText(nv(s.getContact_email()));
-        if (contributionLabel != null) contributionLabel.setText(String.format("%,.2f DT", s.getContribution_name()));
+        if (companyLabel != null) companyLabel.setText(nv(sponsor.getCompany_name()));
+        if (emailLabel != null) emailLabel.setText(nv(sponsor.getContact_email()));
+        if (contributionLabel != null) contributionLabel.setText(String.format("%,.2f DT", sponsor.getContribution_name()));
 
         if (eventLabel != null) {
-            String title = sponsorService.getEventTitleById(s.getEvent_id());
-            if (title == null || title.isBlank()) title = "—";
-            eventLabel.setText("Événement: " + title);
+            String title = null;
+            try {
+                title = sponsorService.getEventTitleById(sponsor.getEvent_id());
+            } catch (Exception ignored) {
+            }
+            if (title == null || title.isBlank()) title = "-";
+            eventLabel.setText(title);
         }
 
-        try {
-            if (logoView != null && s.getLogo_url() != null && !s.getLogo_url().isBlank()) {
-                logoView.setImage(new Image(s.getLogo_url(), true));
-            } else if (logoView != null) {
+        if (logoView != null) {
+            String logoUrl = sponsor.getLogo_url();
+            if (logoUrl != null && !logoUrl.isBlank()) {
+                try {
+                    Image img = new Image(logoUrl, true);
+                    img.errorProperty().addListener((obs, wasError, isError) -> {
+                        if (Boolean.TRUE.equals(isError)) {
+                            logoView.setImage(null);
+                        }
+                    });
+                    logoView.setImage(img);
+                } catch (Exception ignored) {
+                    logoView.setImage(null);
+                }
+            } else {
                 logoView.setImage(null);
             }
-        } catch (Exception ignored) {}
+        }
 
-        if (detailsBtn != null) detailsBtn.setOnAction(e -> { if (onDetails != null) onDetails.run(); });
-        if (pdfBtn != null) pdfBtn.setOnAction(e -> { if (onPdf != null) onPdf.run(); });
-        if (editBtn != null) editBtn.setOnAction(e -> { if (onEdit != null) onEdit.run(); });
-        if (deleteBtn != null) deleteBtn.setOnAction(e -> { if (onDelete != null) onDelete.run(); });
+        if (detailsBtn != null) {
+            boolean enabled = onDetails != null;
+            detailsBtn.setVisible(enabled);
+            detailsBtn.setManaged(enabled);
+            if (enabled) {
+                detailsBtn.setOnAction(e -> onDetails.run());
+            }
+        }
+        if (pdfBtn != null) {
+            boolean enabled = onPdf != null;
+            pdfBtn.setVisible(enabled);
+            pdfBtn.setManaged(enabled);
+            if (enabled) {
+                pdfBtn.setOnAction(e -> onPdf.run());
+            }
+        }
+        if (editBtn != null) {
+            boolean enabled = onEdit != null;
+            editBtn.setVisible(enabled);
+            editBtn.setManaged(enabled);
+            if (enabled) {
+                editBtn.setOnAction(e -> onEdit.run());
+            }
+        }
+        if (deleteBtn != null) {
+            boolean enabled = onDelete != null;
+            deleteBtn.setVisible(enabled);
+            deleteBtn.setManaged(enabled);
+            if (enabled) {
+                deleteBtn.setOnAction(e -> onDelete.run());
+            }
+        }
     }
 
-    private static String nv(String s) {
-        return (s == null || s.isBlank()) ? "—" : s;
+    private static String nv(String value) {
+        return (value == null || value.isBlank()) ? "-" : value;
     }
 }

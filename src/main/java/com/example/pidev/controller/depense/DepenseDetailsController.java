@@ -1,10 +1,12 @@
 package com.example.pidev.controller.depense;
 
 import com.example.pidev.model.depense.Depense;
+import com.example.pidev.service.budget.BudgetService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;   // ✅ IMPORT MANQUANT
 
 public class DepenseDetailsController {
 
@@ -17,6 +19,7 @@ public class DepenseDetailsController {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private final BudgetService budgetService = new BudgetService();
     private Runnable onCloseAction;
 
     public void setOnCloseAction(Runnable r) {
@@ -26,18 +29,24 @@ public class DepenseDetailsController {
     public void setDepense(Depense d) {
         if (d == null) return;
 
-        if (budgetIdLabel != null) budgetIdLabel.setText("Budget N°" + d.getBudget_id());
-        if (descLabel != null) descLabel.setText(nullSafe(d.getDescription()));
-        if (categoryLabel != null) categoryLabel.setText(nullSafe(d.getCategory()));
+        // affichage du nom de l'événement sans ID
+        String eventTitle = budgetService.getEventTitleByBudgetId(d.getBudget_id());
+        budgetIdLabel.setText("Budget : " + eventTitle);
 
-        if (amountLabel != null) amountLabel.setText(String.format("%,.2f DT", d.getAmount()));
-        if (dateLabel != null) dateLabel.setText(d.getExpense_date() == null ? "—" : FMT.format(d.getExpense_date()));
-        if (statusLabel != null) statusLabel.setText("Enregistrée");
+        descLabel.setText(nullSafe(d.getDescription()));
+        categoryLabel.setText(nullSafe(d.getCategory()));
+
+        amountLabel.setText(String.format(Locale.US, "%,.2f DT", d.getAmount()));
+        dateLabel.setText(d.getExpense_date() == null ? "—" : FMT.format(d.getExpense_date()));
+
+        statusLabel.setText("Enregistrée");
     }
 
     @FXML
     private void onClose() {
-        if (onCloseAction != null) onCloseAction.run();
+        if (onCloseAction != null) {
+            onCloseAction.run();
+        }
     }
 
     private String nullSafe(String s) {

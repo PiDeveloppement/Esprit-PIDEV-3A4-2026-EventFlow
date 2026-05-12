@@ -2,11 +2,13 @@ package com.example.pidev.controller.budget;
 
 import com.example.pidev.model.budget.Budget;
 import com.example.pidev.service.budget.BudgetService;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import java.sql.SQLException;
+import java.util.function.Consumer;
 
 public class BudgetFormController {
 
@@ -19,10 +21,12 @@ public class BudgetFormController {
     private Budget editing;
     private Budget result;
     private Runnable onFormDone;
+    private Consumer<Budget> onSaved;
 
     private final BudgetService budgetService = new BudgetService();
 
     public void setOnFormDone(Runnable callback) { this.onFormDone = callback; }
+    public void setOnSaved(Consumer<Budget> callback) { this.onSaved = callback; }
     public Budget getResult() { return result; }
 
     @FXML
@@ -32,7 +36,8 @@ public class BudgetFormController {
 
     private void loadEventTitles() {
         try {
-            eventComboBox.setItems(budgetService.getAllEventTitles());
+            ObservableList<String> titles = budgetService.getAllEventTitles();
+            eventComboBox.setItems(titles);
         } catch (Exception e) {
             error("Erreur chargement événements: " + e.getMessage());
         }
@@ -53,12 +58,12 @@ public class BudgetFormController {
         editing = b;
         result = null;
         clearErrors();
+
         try {
             String eventTitle = budgetService.getEventTitleById(b.getEvent_id());
             eventComboBox.setValue(eventTitle);
-        } catch (Exception e) {
-            // ignore
-        }
+        } catch (Exception ignored) {}
+
         initialField.setText(String.valueOf(b.getInitial_budget()));
         revenueField.setText(String.valueOf(b.getTotal_revenue()));
     }
@@ -68,80 +73,92 @@ public class BudgetFormController {
         clearErrors();
 
         String selectedEvent = eventComboBox.getValue();
-        String initialTxt = initialField.getText().trim().replace(",", ".");
-        String revenueTxt = revenueField.getText().trim().replace(",", ".");
+        String initialText = initialField.getText() == null ? "" : initialField.getText().trim();
+        String revenueText = revenueField.getText() == null ? "" : revenueField.getText().trim();
 
         if (selectedEvent == null || selectedEvent.isEmpty()) {
-            error("Sélectionnez un événement");
+            error("Veuillez sélectionner un événement.");
             return;
+        }
+
+        if (initialText.isEmpty()) {
+            error("Le budget initial est obligatoire.");
+            return;
+        }
+
+        double initial;
+        try {
+            initial = Double.parseDouble(initialText);
+            if (initial <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            error("Budget initial invalide (doit être > 0).");
+            return;
+        }
+
+        double revenue = 0;
+        if (!revenueText.isEmpty()) {
+            try {
+                revenue = Double.parseDouble(revenueText);
+                if (revenue < 0) throw new NumberFormatException();
+            } catch (NumberFormatException e) {
+                error("Revenus invalides.");
+                return;
+            }
         }
 
         int eventId;
         try {
             eventId = budgetService.getEventIdByTitle(selectedEvent);
-        } catch (Exception e) {
-            error("Événement invalide");
+        } catch (SQLException e) {
+            error("Événement invalide: " + e.getMessage());
             return;
         }
 
-        double initial, revenue;
-        try {
-            initial = Double.parseDouble(initialTxt);
-            if (initial < 0) throw new NumberFormatException();
-        } catch (NumberFormatException e) {
-            error("Budget initial invalide (doit être >= 0)");
-            return;
+        Budget budget;
+        if (editing == null) {
+            budget = new Budget(eventId, initial, revenue);
+        } else {
+            budget = editing;
+            budget.setEvent_id(eventId);
+            budget.setInitial_budget(initial);
+            budget.setTotal_revenue(revenue);
         }
 
         try {
-            revenue = Double.parseDouble(revenueTxt);
-            if (revenue < 0) throw new NumberFormatException();
-        } catch (NumberFormatException e) {
-            error("Revenus invalides (doit être >= 0)");
-            return;
-        }
+            if (editing == null) budgetService.addBudget(budget);
+            else budgetService.updateBudget(budget);
 
-        Budget out = new Budget();
-        if (editing != null) out.setId(editing.getId());
-        out.setEvent_id(eventId);
-        out.setInitial_budget(initial);
-        out.setTotal_revenue(revenue);
-        out.setTotal_expenses(editing == null ? 0 : editing.getTotal_expenses());
-        out.setRentabilite(revenue - (editing == null ? 0 : editing.getTotal_expenses()));
+            // ✅ PAS besoin de getId() ni getBudgets()
+            // On renvoie simplement l'objet budget mis à jour
+            result = budget;
 
-        try {
-            if (editing == null) budgetService.addBudget(out);
-            else budgetService.updateBudget(out);
-
-            result = out;
+            if (onSaved != null) onSaved.accept(result);
             if (onFormDone != null) onFormDone.run();
+            closeWindow();
 
-            closeWindowIfModal();
-
-        } catch (Exception ex) {
-            error("Erreur sauvegarde: " + ex.getMessage());
+        } catch (Exception e) {
+            error("Erreur lors de l'enregistrement : " + e.getMessage());
         }
     }
 
     @FXML
     private void onCancel() {
-        result = null;
         if (onFormDone != null) onFormDone.run();
-        closeWindowIfModal();
+        closeWindow();
     }
 
-    private void closeWindowIfModal() {
+    private void closeWindow() {
         try {
             Stage stage = (Stage) eventComboBox.getScene().getWindow();
-            if (stage != null && stage.isShowing()) stage.close();
+            stage.close();
         } catch (Exception ignored) {}
     }
 
     private void error(String msg) {
-        if (errorLabel != null) errorLabel.setText("❌ " + msg);
+        errorLabel.setText("❌ " + msg);
     }
 
     private void clearErrors() {
-        if (errorLabel != null) errorLabel.setText("");
+        errorLabel.setText("");
     }
 }

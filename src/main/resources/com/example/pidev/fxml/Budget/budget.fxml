@@ -1,113 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.geometry.*?>
+<?import javafx.scene.shape.Rectangle?>
 
-<BorderPane prefHeight="900" prefWidth="1200"
+<BorderPane prefHeight="900" prefWidth="1600"
             style="-fx-background-color: #f1f5f9;"
             stylesheets="@../../css/design-system.css"
-            xmlns="http://javafx.com/javafx/17"
+            xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pidev.controller.budget.BudgetListController">
 
     <center>
-        <ScrollPane fx:id="pageScroll" fitToWidth="true"
+        <ScrollPane fx:id="pageScroll"
+                    fitToWidth="true"
                     hbarPolicy="NEVER"
-                    style="-fx-background-color: transparent; -fx-border-color: transparent;"
-                    vbarPolicy="AS_NEEDED">
+                    vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-border-color: transparent;">
             <content>
-                <VBox spacing="0">
+                <VBox spacing="0" fillWidth="true">
 
-                    <HBox alignment="CENTER_LEFT" spacing="20"
-                          style="-fx-background-color: white; -fx-padding: 28 40; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 2 0;">
-                        <VBox spacing="4">
-                            <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="💰 Gestion des Budgets" />
-                            <Label style="-fx-text-fill: #64748b;" text="Suivi financier détaillé par événement" />
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <VBox alignment="CENTER_RIGHT" spacing="2">
-                            <Label text="Finances" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
-                            <Label text="EventFlow" style="-fx-text-fill: #1e293b; -fx-font-weight: bold;"/>
-                        </VBox>
-                    </HBox>
+                    <!-- ── KPI Cards ── -->
+                    <FlowPane hgap="16" vgap="16" prefWrapLength="980"
+                              style="-fx-padding: 24 35; -fx-background-color: #f1f5f9;">
 
-                    <HBox spacing="14" style="-fx-padding: 24 40;">
-                        <VBox spacing="10" styleClass="stat-card stat-card-emerald" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12;">
-                            <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label style="-fx-font-size: 28px;" text="💰" />
-                                <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 12px;" text="Total Budgets" />
-                                    <Label fx:id="kpiCountLabel" style="-fx-text-fill: #15803d; -fx-font-size: 20px; -fx-font-weight: bold;" text="0" />
+                        <VBox prefWidth="220" minWidth="210" maxWidth="240" spacing="12" styleClass="dashboard-stat-card">
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <StackPane styleClass="dashboard-icon-box icon-purple">
+                                    <Label text="💰" styleClass="dashboard-icon-label"/>
+                                </StackPane>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Total Budgets" styleClass="dashboard-stat-title"/>
+                                    <Label fx:id="kpiCountLabel" text="0" styleClass="dashboard-stat-value dashboard-stat-value-small value-purple"/>
                                 </VBox>
                             </HBox>
+                            <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-purple"/>
+                            <Label text="Enregistrés" styleClass="dashboard-stat-footer footer-purple"/>
                         </VBox>
 
-                        <VBox spacing="10" styleClass="stat-card stat-card-blue" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12;">
-                            <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label style="-fx-font-size: 28px;" text="📥" />
-                                <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 12px;" text="Budget Initial" />
-                                    <Label fx:id="kpiInitialLabel" style="-fx-text-fill: #1e40af; -fx-font-size: 20px; -fx-font-weight: bold;" text="0,00 DT" />
+                        <VBox prefWidth="220" minWidth="210" maxWidth="260" spacing="12" styleClass="dashboard-stat-card">
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <StackPane styleClass="dashboard-icon-box icon-emerald">
+                                    <Label text="📥" styleClass="dashboard-icon-label"/>
+                                </StackPane>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Budget Initial" styleClass="dashboard-stat-title"/>
+                                    <Label fx:id="kpiInitialLabel" text="0,00 DT" wrapText="true" styleClass="dashboard-stat-value value-emerald"/>
                                 </VBox>
                             </HBox>
+                            <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-emerald"/>
+                            <Label text="Alloué" styleClass="dashboard-stat-footer footer-emerald"/>
                         </VBox>
 
-                        <VBox spacing="10" styleClass="stat-card stat-card-purple" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12;">
-                            <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label style="-fx-font-size: 28px;" text="📈" />
-                                <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 12px;" text="Rentabilité" />
-                                    <Label fx:id="kpiRentLabel" style="-fx-text-fill: #7c3aed; -fx-font-size: 20px; -fx-font-weight: bold;" text="0,00 DT" />
+                        <VBox prefWidth="220" minWidth="210" maxWidth="260" spacing="12" styleClass="dashboard-stat-card">
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <StackPane styleClass="dashboard-icon-box icon-blue">
+                                    <Label text="📈" styleClass="dashboard-icon-label"/>
+                                </StackPane>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Rentabilité" styleClass="dashboard-stat-title"/>
+                                    <Label fx:id="kpiRentLabel" text="0,00 DT" wrapText="true" styleClass="dashboard-stat-value value-blue"/>
                                 </VBox>
                             </HBox>
+                            <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-blue"/>
+                            <Label text="Performance" styleClass="dashboard-stat-footer footer-blue"/>
                         </VBox>
 
-                        <VBox spacing="10" styleClass="stat-card stat-card-rose" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12;">
-                            <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label style="-fx-font-size: 28px;" text="⚠" />
-                                <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 12px;" text="En Déficit" />
-                                    <Label fx:id="kpiDeficitLabel" style="-fx-text-fill: #be123c; -fx-font-size: 20px; -fx-font-weight: bold;" text="0" />
+                        <VBox prefWidth="220" minWidth="210" maxWidth="240" spacing="12" styleClass="dashboard-stat-card">
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <StackPane styleClass="dashboard-icon-box icon-amber">
+                                    <Label text="⚠" styleClass="dashboard-icon-label"/>
+                                </StackPane>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="En Déficit" styleClass="dashboard-stat-title"/>
+                                    <Label fx:id="kpiDeficitLabel" text="0" styleClass="dashboard-stat-value dashboard-stat-value-small value-amber"/>
                                 </VBox>
                             </HBox>
+                            <Region maxWidth="1.7976931348623157E308" styleClass="dashboard-stat-bar bar-amber"/>
+                            <Label text="À surveiller" styleClass="dashboard-stat-footer footer-amber"/>
                         </VBox>
-                    </HBox>
+                    </FlowPane>
 
+                    <!-- ── Filtres ── -->
                     <HBox alignment="CENTER_LEFT" spacing="14"
-                          style="-fx-padding: 20 40; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 1 0;">
-                        <ComboBox fx:id="healthFilter" prefWidth="180" promptText="🏥 Santé" />
-                        <ComboBox fx:id="eventFilter" prefWidth="180" promptText="📅 Événement" />
-                        <ComboBox fx:id="statusFilter" prefWidth="150" promptText="📌 État" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="addBtn" minHeight="40" minWidth="160"
-                                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" text="➕ Nouveau Budget" />
+                          style="-fx-padding: 20 35; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+                        <ComboBox fx:id="healthFilter" prefWidth="200" promptText="🏥 Santé Financière" styleClass="text-field"/>
+                        <ComboBox fx:id="eventFilter"  prefWidth="200" promptText="📅 Événement"        styleClass="text-field"/>
+                        <ComboBox fx:id="statusFilter" prefWidth="180" promptText="📌 État"              styleClass="text-field"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="addBtn" minHeight="42" minWidth="180" styleClass="btn-success" text="➕ Nouveau Budget"/>
                     </HBox>
 
-                    <VBox alignment="CENTER" style="-fx-padding: 20 40;">
-                        <VBox style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
-                            <BarChart fx:id="budgetComparisonChart" prefHeight="350" title="Top 5 Budgets">
-                                <xAxis><CategoryAxis label="Événement"/></xAxis>
-                                <yAxis><NumberAxis label="Montant (DT)"/></yAxis>
-                            </BarChart>
+                    <!-- ── Graphiques ── -->
+                    <HBox spacing="20" fillHeight="true"
+                          style="-fx-padding: 24 35 20 35;">
+
+                        <!-- Gauche -->
+                        <VBox spacing="8" HBox.hgrow="ALWAYS" styleClass="chart-card-modern"
+                              minWidth="0" maxWidth="1.7976931348623157E308">
+                            <Label text="Comparaison des budgets" styleClass="chart-card-title"/>
+                            <Label text="Budget initial, dépenses et revenus sur les derniers événements" styleClass="chart-card-subtitle"/>
+
+                            <!--
+                                ✅ Clé du fix :
+                                - StackPane avec minWidth=0 pour ne PAS résister à la compression
+                                - maxWidth=MAX pour s'étirer avec le HBox
+                                - L'ImageView est gérée EN TOTALITÉ par le controller (binding au StackPane)
+                            -->
+                            <StackPane fx:id="budgetChartHolder"
+                                       prefHeight="340" minHeight="340" maxHeight="340"
+                                       minWidth="0" maxWidth="1.7976931348623157E308"
+                                       VBox.vgrow="NEVER"
+                                       style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-border-width: 1;"/>
                         </VBox>
-                    </VBox>
 
-                    <VBox spacing="20" style="-fx-padding: 10 40 40 40;" VBox.vgrow="ALWAYS">
-                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="📋 Liste des Budgets" />
+                        <!-- Droite -->
+                        <VBox spacing="8" HBox.hgrow="ALWAYS" styleClass="chart-card-modern"
+                              minWidth="0" maxWidth="1.7976931348623157E308">
+                            <Label text="Tendance du ROI" styleClass="chart-card-title"/>
+                            <Label text="Lecture plus visuelle de l'évolution et projection" styleClass="chart-card-subtitle"/>
 
-                        <TilePane fx:id="cardsPane"
-                                  alignment="TOP_LEFT"
-                                  hgap="20"
-                                  vgap="20"
-                                  prefColumns="3"
-                                  prefTileWidth="340"
-                                  style="-fx-background-color: transparent;" />
+                            <StackPane fx:id="roiChartHolder"
+                                       prefHeight="340" minHeight="340" maxHeight="340"
+                                       minWidth="0" maxWidth="1.7976931348623157E308"
+                                       VBox.vgrow="NEVER"
+                                       style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-border-width: 1;"/>
+                        </VBox>
+                    </HBox>
 
-                        <Label fx:id="statusLabel" style="-fx-text-fill: #94a3b8; -fx-font-style: italic;" text="0 résultat(s)" />
+                    <!-- ── Liste budgets ── -->
+                    <VBox spacing="20" styleClass="list-block-modern">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="📋" style="-fx-font-size: 18px;"/>
+                            <Label text="Liste des Budgets" styleClass="section-title-modern"/>
+                            <Label fx:id="statusLabel" text="..." styleClass="section-desc-modern"/>
+                        </HBox>
+                        <TilePane fx:id="cardsPane" hgap="16" vgap="16" prefColumns="3" style="-fx-padding: 10;"/>
                     </VBox>
 
                 </VBox>

@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -13,28 +14,24 @@
             style="-fx-background-color:#f0f4f8; -fx-border-color: transparent;">
 
     <content>
-        <!-- ✅ Centre le contenu -->
         <StackPane alignment="CENTER" style="-fx-padding: 30;">
-            <!-- ✅ largeur contrôlée (évite l'effet “perdu”) -->
             <VBox spacing="20" maxWidth="720" style="-fx-padding: 0;">
 
-                <!-- HEADER -->
                 <VBox spacing="8"
                       style="-fx-background-color: linear-gradient(to right, #1e40af, #2563eb);
                              -fx-background-radius: 16; -fx-padding: 24;">
-                    <Label text="💰 Détails du Budget"
+                    <Label text="Details du Budget"
                            style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label fx:id="eventIdLabel" text="Événement: --"
+                    <Label fx:id="eventTitleLabel" text="--"
                            style="-fx-font-size: 14px; -fx-text-fill: #dbeafe;"/>
                 </VBox>
 
-                <!-- KPI -->
                 <HBox spacing="16">
                     <VBox spacing="8" HBox.hgrow="ALWAYS"
                           style="-fx-background-color: white; -fx-background-radius: 12;
                                  -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-width: 1;
                                  -fx-border-radius: 12;">
-                        <Label text="📊 Budget Initial"
+                        <Label text="Budget Initial"
                                style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
                         <Label fx:id="initialLabel" text="0,00 DT"
                                style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
@@ -44,7 +41,7 @@
                           style="-fx-background-color: white; -fx-background-radius: 12;
                                  -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-width: 1;
                                  -fx-border-radius: 12;">
-                        <Label text="📉 Dépenses"
+                        <Label text="Depenses"
                                style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
                         <Label fx:id="expensesLabel" text="0,00 DT"
                                style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
@@ -54,33 +51,58 @@
                           style="-fx-background-color: white; -fx-background-radius: 12;
                                  -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-width: 1;
                                  -fx-border-radius: 12;">
-                        <Label text="📈 Revenus"
+                        <Label text="Revenus"
                                style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
                         <Label fx:id="revenueLabel" text="0,00 DT"
                                style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
                     </VBox>
                 </HBox>
 
-                <!-- RENTABILITE -->
                 <VBox spacing="12"
                       style="-fx-background-color: white; -fx-background-radius: 16;
                              -fx-padding: 20; -fx-border-color: #e2e8f0; -fx-border-width: 1;
                              -fx-border-radius: 16;">
-                    <Label text="🎯 Rentabilité"
+                    <Label text="Rentabilite"
                            style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <HBox spacing="16" alignment="CENTER_LEFT">
                         <Label fx:id="rentLabel" text="0,00 DT"
                                style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
-                        <Label fx:id="statusLabel" text="✓ Rentable"
+                        <Label fx:id="statusLabel" text="Rentable"
                                style="-fx-font-size: 14px; -fx-text-fill: #16a34a; -fx-font-weight: bold;
                                       -fx-background-color: #d1fae5; -fx-background-radius: 8;
                                       -fx-padding: 8 12;"/>
                     </HBox>
                 </VBox>
 
-                <!-- ACTION -->
+                <VBox spacing="8"
+                      style="-fx-background-color: white; -fx-background-radius: 16;
+                             -fx-padding: 20; -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                             -fx-border-radius: 16;">
+                    <Label text="Prevision"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label fx:id="forecastLabel" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label fx:id="adjustedForecastLabel" style="-fx-font-size: 12px; -fx-text-fill: #2563eb;"/>
+
+                    <Separator style="-fx-padding: 8 0 8 0;"/>
+
+                    <Label text="Simulation billets"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    <Label text="Prix billet (fixe depuis event.ticket_price)"
+                           style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                    <TextField fx:id="ticketPriceField" editable="false"
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-background-radius: 8;"/>
+                    <Label fx:id="soldTicketsLabel" text="Tickets vendus : 0"
+                           style="-fx-font-size: 12px; -fx-text-fill: #334155; -fx-font-weight: bold;"/>
+                    <Label fx:id="participantsToTargetLabel" text="Participants necessaires pour atteindre le budget initial : --"
+                           style="-fx-font-size: 12px; -fx-text-fill: #0f172a;"/>
+                    <Label fx:id="participantsToBreakEvenLabel" text="Participants necessaires pour couvrir les depenses : --"
+                           style="-fx-font-size: 12px; -fx-text-fill: #0f172a;"/>
+                    <Label fx:id="capacityAlertLabel" text=""
+                           style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: bold;" wrapText="true"/>
+                </VBox>
+
                 <HBox alignment="CENTER_RIGHT">
-                    <Button text="✓ Fermer"
+                    <Button text="Fermer"
                             onAction="#onClose"
                             style="-fx-background-color: linear-gradient(to right, #2563eb, #1d4ed8);
                                    -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;

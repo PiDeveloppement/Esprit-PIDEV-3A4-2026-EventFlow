@@ -1,92 +1,249 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pidev.controller.sponsor.SponsorFormController"
-            style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 18;"
-            prefWidth="520" prefHeight="720">
+            style="-fx-background-color: white;
+                   -fx-background-radius: 20;
+                   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+            prefWidth="620"
+            prefHeight="780">
 
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 8 8 18 8;">
-            <Label fx:id="titleLabel" text="Sponsor"
-                   style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="EventFlow" style="-fx-text-fill: #64748b; -fx-font-weight: 700;"/>
-        </HBox>
+        <VBox style="-fx-background-color: linear-gradient(to right, #1565C0, #0D47A1);
+                     -fx-background-radius: 20 20 0 0;
+                     -fx-padding: 20 28 20 28;">
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <StackPane prefWidth="44" prefHeight="44"
+                           style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12;">
+                    <Label text="SP" style="-fx-font-size: 15px; -fx-font-weight: 900; -fx-text-fill: white;"/>
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="titleLabel" text="Sponsor"
+                           style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: white;"/>
+                    <Label text="Remplissez les informations du sponsor"
+                           style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 12px;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="EventFlow"
+                       style="-fx-text-fill: rgba(255,255,255,0.55); -fx-font-weight: 700; -fx-font-size: 13px;"/>
+            </HBox>
+        </VBox>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color:transparent; -fx-border-color:transparent;">
-            <VBox spacing="12" style="-fx-padding: 0 8 0 8;">
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox spacing="0" style="-fx-padding: 0;">
 
-                <VBox spacing="6">
-                    <Label text="Événement" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
-                    <ComboBox fx:id="eventComboBox" promptText="Choisir un événement"
-                              style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                <GridPane hgap="12" vgap="0" style="-fx-padding: 20 28 10 28;">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="130" prefWidth="130" maxWidth="150" halignment="RIGHT"/>
+                        <ColumnConstraints minWidth="360" prefWidth="380" maxWidth="460" hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <Label text="Entreprise"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="0" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="12"/></VBox.margin>
+                        <TextField fx:id="companyField" promptText="Nom entreprise"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                          -fx-padding: 9 14; -fx-background-color: #f8fafc;
+                                          -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"
+                                   maxWidth="Infinity"/>
+                    </VBox>
+
+                    <Label text="Email"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="12"/></VBox.margin>
+                        <TextField fx:id="emailField" promptText="ex: sponsor@gmail.com"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                          -fx-padding: 9 14; -fx-background-color: #f8fafc;
+                                          -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"
+                                   maxWidth="Infinity"/>
+                        <Label text="Email du compte sponsor (verrouille en session)"
+                               style="-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-padding: 4 4 0 4;"/>
+                    </VBox>
+
+                    <Label text="WhatsApp"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="12"/></VBox.margin>
+                        <TextField fx:id="phoneField" promptText="216XXXXXXXX"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                          -fx-padding: 9 14; -fx-background-color: #f8fafc;
+                                          -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"
+                                   maxWidth="Infinity"/>
+                    </VBox>
+
+                    <Label text="Secteur"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="3" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="12"/></VBox.margin>
+                        <TextField fx:id="industryField" promptText="ex: Technologie, Marketing"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                          -fx-padding: 9 14; -fx-background-color: #f8fafc;
+                                          -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"
+                                   maxWidth="Infinity"/>
+                    </VBox>
+
+                    <Label text="No Fiscal"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="4" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="12"/></VBox.margin>
+                        <TextField fx:id="taxIdField" promptText="ex: 1234567A"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                          -fx-padding: 9 14; -fx-background-color: #f8fafc;
+                                          -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"
+                                   maxWidth="Infinity"/>
+                    </VBox>
+
+                    <Label text="Justificatif"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="5" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="16"/></VBox.margin>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button fx:id="uploadDocBtn" text="Choisir fichier"
+                                    style="-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8;
+                                           -fx-font-weight: 800; -fx-background-radius: 10;
+                                           -fx-padding: 9 16; -fx-border-color: #bfdbfe;
+                                           -fx-border-width: 1; -fx-border-radius: 10; -fx-cursor: hand;"/>
+                            <Label fx:id="docFileLabel" text="Aucun fichier"
+                                   style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+                        </HBox>
+                    </VBox>
+                </GridPane>
+
+                <VBox spacing="0" style="-fx-padding: 0 28 0 28;">
+                    <VBox spacing="12"
+                          style="-fx-background-color: #f8fafc;
+                                 -fx-background-radius: 14;
+                                 -fx-border-radius: 14;
+                                 -fx-border-color: #e2e8f0;
+                                 -fx-border-width: 1;
+                                 -fx-padding: 16;">
+                        <Label text="Logo du Sponsor"
+                               style="-fx-font-size: 14px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Choisir logo" onAction="#onChooseLogo"
+                                    style="-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8;
+                                           -fx-font-weight: 800; -fx-background-radius: 10;
+                                           -fx-padding: 9 16; -fx-border-color: #bfdbfe;
+                                           -fx-border-width: 1; -fx-border-radius: 10; -fx-cursor: hand;"/>
+                            <Button text="Supprimer logo" onAction="#onRemoveLogo"
+                                    style="-fx-background-color: #fff1f2; -fx-text-fill: #be123c;
+                                           -fx-font-weight: 800; -fx-background-radius: 10;
+                                           -fx-padding: 9 16; -fx-border-color: #fecdd3;
+                                           -fx-border-width: 1; -fx-border-radius: 10; -fx-cursor: hand;"/>
+                            <Label fx:id="logoFileLabel" text="Aucun fichier"
+                                   style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+                        </HBox>
+
+                        <HBox spacing="16">
+                            <StackPane prefHeight="120" prefWidth="120"
+                                       style="-fx-background-color: white;
+                                              -fx-background-radius: 12;
+                                              -fx-border-radius: 12;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-width: 1.5;">
+                                <ImageView fx:id="logoPreview" fitWidth="90" fitHeight="90" preserveRatio="true"/>
+                            </StackPane>
+
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <TextField fx:id="logoField"
+                                           editable="false"
+                                           promptText="URL logo (auto)"
+                                           style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                                  -fx-padding: 9 14; -fx-background-color: white;
+                                                  -fx-border-color: #e2e8f0; -fx-border-width: 1.5;
+                                                  -fx-text-fill: #64748b; -fx-font-size: 12px;"
+                                           maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                    <VBox.margin><Insets bottom="16"/></VBox.margin>
                 </VBox>
 
-                <VBox spacing="6">
-                    <Label text="Entreprise" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
-                    <TextField fx:id="companyField" promptText="Nom entreprise"
-                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                <VBox spacing="0" style="-fx-padding: 0 28 0 28;">
+                    <VBox spacing="12"
+                          style="-fx-background-color: #f0fdf4;
+                                 -fx-background-radius: 14;
+                                 -fx-border-radius: 14;
+                                 -fx-border-color: #bbf7d0;
+                                 -fx-border-width: 1.5;
+                                 -fx-padding: 16;">
+                        <Label text="Contribution Financiere"
+                               style="-fx-font-size: 14px; -fx-font-weight: 800; -fx-text-fill: #166534;"/>
+                        <HBox spacing="10">
+                            <TextField fx:id="contributionField" promptText="ex: 3500" HBox.hgrow="ALWAYS"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                              -fx-padding: 9 14; -fx-background-color: white;
+                                              -fx-border-color: #86efac; -fx-border-width: 1.5;
+                                              -fx-font-size: 16px; -fx-font-weight: 700;"/>
+                            <ComboBox fx:id="currencyComboBox" prefWidth="110"
+                                      style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                             -fx-padding: 9 12; -fx-background-color: white;
+                                             -fx-border-color: #86efac; -fx-border-width: 1.5;"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="En TND:"
+                                   style="-fx-font-weight: 700; -fx-text-fill: #166534; -fx-font-size: 13px;"/>
+                            <Label fx:id="convertedAmountLabel"
+                                   style="-fx-text-fill: #059669; -fx-font-weight: 900; -fx-font-size: 18px;
+                                          -fx-background-color: white; -fx-background-radius: 10;
+                                          -fx-padding: 8 18; -fx-border-color: #86efac;
+                                          -fx-border-width: 1.5; -fx-border-radius: 10; -fx-min-width: 180;"/>
+                        </HBox>
+                    </VBox>
+                    <VBox.margin><Insets bottom="12"/></VBox.margin>
                 </VBox>
 
-                <VBox spacing="6">
-                    <Label text="Email contact" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
-                    <TextField fx:id="emailField" promptText="ex: sponsor@gmail.com"
-                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
-                </VBox>
-
-                <Separator/>
-
-                <VBox spacing="8">
-                    <Label text="Logo (upload Cloudinary)" style="-fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
-
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Button text="Choisir Logo" onAction="#onChooseLogo"
-                                style="-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8;
-                                       -fx-font-weight: 800; -fx-background-radius: 10; -fx-padding: 10 14;"/>
-                        <Label fx:id="logoFileLabel" text="Aucun fichier choisi" style="-fx-text-fill: #334155;"/>
-                    </HBox>
-
-                    <!-- ✅ preview -->
-                    <StackPane prefHeight="140"
-                               style="-fx-background-color:#f1f5f9; -fx-background-radius: 14; -fx-border-radius:14; -fx-border-color:#e2e8f0;">
-                        <ImageView fx:id="logoPreview" fitWidth="110" fitHeight="110" preserveRatio="true"/>
-                    </StackPane>
-
-                    <!-- URL cachée / readonly -->
-                    <TextField fx:id="logoField" editable="false"
-                               promptText="URL logo (remplie automatiquement)"
-                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
-                </VBox>
-
-                <Separator/>
-
-                <VBox spacing="6">
-                    <Label text="Contribution (DT)" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
-                    <TextField fx:id="contributionField" promptText="ex: 3500"
-                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
-                </VBox>
-
-                <Label fx:id="errorLabel" text=""
-                       style="-fx-text-fill: #dc2626; -fx-font-weight: 700;"/>
+                <HBox style="-fx-padding: 0 28 10 28;">
+                    <Label fx:id="errorLabel" text=""
+                           style="-fx-text-fill: #dc2626; -fx-font-weight: 700;
+                                  -fx-background-color: #fef2f2; -fx-background-radius: 8;
+                                  -fx-padding: 8 14; -fx-border-color: #fecaca;
+                                  -fx-border-width: 1; -fx-border-radius: 8;"
+                           wrapText="true"
+                           maxWidth="Infinity"/>
+                </HBox>
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 18 8 8 8;">
+        <HBox alignment="CENTER_RIGHT" spacing="12"
+              style="-fx-padding: 16 28;
+                     -fx-background-color: #f8fafc;
+                     -fx-border-color: #e2e8f0;
+                     -fx-border-width: 1 0 0 0;
+                     -fx-background-radius: 0 0 20 20;">
             <Button text="Annuler" onAction="#onCancel"
-                    style="-fx-background-color: #f1f5f9; -fx-text-fill: #0f172a;
-                           -fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 16;"/>
+                    style="-fx-background-color: white; -fx-text-fill: #334155;
+                           -fx-font-weight: 700; -fx-font-size: 14px;
+                           -fx-background-radius: 10; -fx-padding: 11 26;
+                           -fx-cursor: hand; -fx-border-color: #cbd5e1;
+                           -fx-border-width: 1.5; -fx-border-radius: 10;"/>
             <Button text="Enregistrer" onAction="#onSave"
                     style="-fx-background-color: #10b981; -fx-text-fill: white;
-                           -fx-font-weight: 800; -fx-background-radius: 10; -fx-padding: 10 16;"/>
+                           -fx-font-weight: 900; -fx-font-size: 14px;
+                           -fx-background-radius: 10; -fx-padding: 11 26;
+                           -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.35), 8, 0, 0, 3);"/>
         </HBox>
     </bottom>
+
 </BorderPane>

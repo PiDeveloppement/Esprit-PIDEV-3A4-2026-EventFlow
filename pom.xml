@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.example</groupId>
     <artifactId>PiDev</artifactId>
@@ -25,48 +24,12 @@
             <url>https://repo.maven.apache.org/maven2</url>
         </repository>
     </repositories>
-
     <dependencies>
         <!-- Persistence -->
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
-        </dependency>
-
-        <!-- MySQL Connector - ADDED -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
-        </dependency>
-
-        <!-- jBCrypt for password hashing - ADDED -->
-        <dependency>
-            <groupId>org.mindrot</groupId>
-            <artifactId>jbcrypt</artifactId>
-            <version>0.4</version>
-        </dependency>
-
-        <!-- Atlantafx - Modern JavaFX CSS theme -->
-        <dependency>
-            <groupId>io.github.mkpaz</groupId>
-            <artifactId>atlantafx-base</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-
-        <!-- FontAwesome -->
-        <dependency>
-            <groupId>de.jensd</groupId>
-            <artifactId>fontawesomefx-fontawesome</artifactId>
-            <version>4.7.0-9.1.2</version>
-        </dependency>
-
-        <!-- JFxtras -->
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>jfxtras-controls</artifactId>
-            <version>17-r1</version>
         </dependency>
 
         <!-- Twilio -->
@@ -95,45 +58,55 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
-            <classifier>win</classifier>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
-            <classifier>win</classifier>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
-            <classifier>win</classifier>
         </dependency>
 
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>win</classifier>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
         </dependency>
 
+        <!-- AtlantaFX -->
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>win</classifier>
+            <groupId>io.github.mkpaz</groupId>
+            <artifactId>atlantafx-base</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- MySQL - UNE SEULE VERSION -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+        <!-- FontAwesome -->
+        <dependency>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx-fontawesome</artifactId>
+            <version>4.7.0-9.1.2</version>
+        </dependency>
+
+        <!-- JFxtras -->
+        <dependency>
+            <groupId>org.jfxtras</groupId>
+            <artifactId>jfxtras-controls</artifactId>
+            <version>17-r1</version>
         </dependency>
 
         <!-- iText 7 Core -->
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>itext7-core</artifactId>
-            <version>${itext.version}</version>
-            <type>pom</type>
-        </dependency>
-
         <!-- iText 5 (pour compatibilité) -->
         <dependency>
             <groupId>com.itextpdf</groupId>
@@ -141,7 +114,7 @@
             <version>5.5.13.3</version>
         </dependency>
 
-        <!-- Modules iText 7 individuels -->
+        <!-- Modules iText 7 individuels (optionnels si itext7-core est utilisé) -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>kernel</artifactId>
@@ -229,7 +202,7 @@
             <version>2.0.7</version>
         </dependency>
 
-        <!-- JSON -->
+        <!-- JSON - UNE SEULE VERSION -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -257,7 +230,7 @@
             <version>1.3.04</version>
         </dependency>
 
-        <!-- Mail -->
+        <!-- Mail - UNE SEULE VERSION (JavaMail) -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
@@ -271,20 +244,38 @@
             <version>3.12.0</version>
         </dependency>
 
+        <!-- JSON / Charts -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
+        <!-- Math -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
+        <!-- Excel -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
         <!-- Vosk (reconnaissance vocale) -->
         <dependency>
             <groupId>com.alphacephei</groupId>
             <artifactId>vosk</artifactId>
             <version>0.3.45</version>
         </dependency>
-
-        <!-- Jackson Databind -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.15.2</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -292,17 +283,6 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/*.fxml</include>
-                    <include>**/*.css</include>
-                    <include>**/*.xml</include>
-                    <include>**/*.properties</include>
-                    <include>**/*.png</include>
-                    <include>**/*.jpg</include>
-                    <include>**/*.jpeg</include>
-                    <include>**/*.mp4</include>
-                    <include>**/*.js</include>
-                </includes>
             </resource>
         </resources>
         <plugins>
@@ -328,7 +308,8 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.example.pidev.HelloApplication</mainClass>
+                    <mainClass>com.example.pidev/com.example.pidev.HelloApplication</mainClass>
+                    <includePathExceptionsInClasspath>true</includePathExceptionsInClasspath>
                 </configuration>
             </plugin>
         </plugins>

@@ -2,47 +2,58 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pidev.controller.depense.DepenseFormController"
-            style="-fx-background-color:white; -fx-padding:20;">
+            style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+            prefWidth="600" prefHeight="700">
+    <padding>
+        <Insets top="25" right="30" bottom="25" left="30"/>
+    </padding>
 
-    <VBox spacing="12" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+        <VBox spacing="20" style="-fx-padding: 0 5 0 5;">
+            <Label fx:id="titleLabel" text="➕ Nouvelle Dépense" style="-fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-padding: 0 0 10 0;"/>
 
-        <Label fx:id="titleLabel" text="➕ Nouvelle Dépense"
-               style="-fx-font-size:22px; -fx-font-weight:900; -fx-text-fill:#0f172a;"/>
+            <GridPane hgap="15" vgap="15">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120" prefWidth="120" maxWidth="150" halignment="RIGHT"/>
+                    <ColumnConstraints minWidth="350" prefWidth="400" maxWidth="450" hgrow="ALWAYS"/>
+                </columnConstraints>
 
-        <GridPane hgap="10" vgap="10">
-            <columnConstraints>
-                <ColumnConstraints minWidth="100" prefWidth="120" maxWidth="150"/>
-                <ColumnConstraints minWidth="200" prefWidth="250" maxWidth="500" hgrow="ALWAYS"/>
-            </columnConstraints>
+                <Label text="💰 Budget" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="budgetComboBox" promptText="Sélectionnez un budget" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-            <Label text="Budget" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="budgetComboBox" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="📝 Description" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="descField" promptText="Ex: Achat de matériel" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <Label text="Description" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <TextField fx:id="descField" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="🏷️ Catégorie" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="categoryComboBox" promptText="Choisissez une catégorie" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-            <Label text="Catégorie" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <TextField fx:id="categoryField" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Label text="💵 Montant" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <HBox spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                    <TextField fx:id="amountField" promptText="Ex: 150.50" HBox.hgrow="ALWAYS" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"/>
+                    <ComboBox fx:id="currencyComboBox" prefWidth="150" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 10 15; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"/>
+                </HBox>
 
-            <Label text="Montant" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <TextField fx:id="amountField" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                <Label text="💱 Résultat" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                    <Label fx:id="convertedAmountLabel" style="-fx-text-fill: #059669; -fx-font-weight: 800; -fx-font-size: 18px; -fx-background-color: #d1fae5; -fx-background-radius: 12; -fx-padding: 12 20; -fx-border-color: #a7f3d0; -fx-border-width: 1.5; -fx-border-radius: 12; -fx-min-width: 200;"/>
+                </HBox>
 
-            <Label text="Date" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="datePicker" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-        </GridPane>
+                <Label text="📅 Date" style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 14px;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="datePicker" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 8; -fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+            </GridPane>
 
-        <Label fx:id="errorLabel" text=""
-               style="-fx-text-fill:#dc2626; -fx-font-weight:800;"/>
+            <Label fx:id="errorLabel" style="-fx-text-fill: #dc2626; -fx-font-weight: 700; -fx-padding: 5 0; -fx-font-size: 14px;"/>
 
-        <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Button text="Annuler" onAction="#onCancel"/>
-            <Button text="Enregistrer" onAction="#onSave"
-                    style="-fx-background-color:#2563eb; -fx-text-fill:white; -fx-font-weight:900;"/>
-        </HBox>
-
-    </VBox>
+            <HBox spacing="15" alignment="CENTER_RIGHT">
+                <Button text="Annuler" onAction="#onCancel" style="-fx-background-color: #e2e8f0; -fx-text-fill: #334155; -fx-font-weight: 700; -fx-font-size: 14px; -fx-background-radius: 12; -fx-padding: 12 30; -fx-cursor: hand; -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 12;"/>
+                <Button text="Enregistrer" onAction="#onSave" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: 700; -fx-font-size: 14px; -fx-background-radius: 12; -fx-padding: 12 30; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.3), 8, 0, 0, 3);"/>
+            </HBox>
+        </VBox>
+    </ScrollPane>
 </AnchorPane>

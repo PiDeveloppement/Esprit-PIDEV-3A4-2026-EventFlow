@@ -148,7 +148,6 @@ public class MainController {
     @FXML private Button questionsBtn;
     @FXML private Button reponsesBtn;
 
-    @FXML private Button settingsBtn;
     @FXML private Button logoutBtn;
     @FXML private TextField globalSearchField;
 
@@ -373,7 +372,7 @@ public class MainController {
                 usersToggleBtn, rolesBtn, inscriptionsBtn,
                 sponsorsBtn, sponsorsListBtn, sponsorPortalBtn, budgetBtn, contratsBtn,
                 resourcesToggleBtn, sallesBtn, equipementsBtn, reservationsBtn,
-                questionnairesToggleBtn, questionsBtn, reponsesBtn, settingsBtn
+                questionnairesToggleBtn, questionsBtn, reponsesBtn
         };
         for (Button btn : allButtons) {
             if (btn != null) {
@@ -414,7 +413,6 @@ public class MainController {
         if (reservationsBtn != null) reservationsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reservationsBtn); loadReservationsView(); });
         if (questionsBtn != null) questionsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(questionsBtn); showQuestionEditor(); });
         if (reponsesBtn != null) reponsesBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(reponsesBtn); showResultats(); });
-        if (settingsBtn != null) settingsBtn.setOnAction(e -> { collapseAllSubmenus(); setActiveButton(settingsBtn); loadSettingsView(); });
         if (logoutBtn != null) logoutBtn.setOnAction(e -> logout());
     }
 
@@ -442,23 +440,23 @@ public class MainController {
     private void showOnlyParticipantButtons() {
         showNode(dashboardBtn); hideNode(eventsToggleBtn); hideNode(usersToggleBtn);
         hideNode(sponsorsBtn); hideNode(resourcesToggleBtn); hideNode(questionnairesToggleBtn);
-        hideNode(settingsBtn); hideNode(budgetBtn); hideAllSubmenus();
+        hideNode(budgetBtn); hideAllSubmenus();
     }
 
     private void showOnlySponsorButtons() {
         showNode(dashboardBtn); showNode(sponsorsBtn); showNode(budgetBtn);
         hideNode(eventsToggleBtn); hideNode(usersToggleBtn); hideNode(resourcesToggleBtn);
-        hideNode(questionnairesToggleBtn); hideNode(settingsBtn); hideAllSubmenus();
+        hideNode(questionnairesToggleBtn); hideAllSubmenus();
     }
 
     private void hideAllButtons() {
         hideNode(dashboardBtn); hideNode(sponsorsBtn); hideNode(eventsToggleBtn);
         hideNode(usersToggleBtn); hideNode(resourcesToggleBtn); hideNode(questionnairesToggleBtn);
-        hideNode(settingsBtn); hideNode(budgetBtn);
+        hideNode(budgetBtn);
     }
 
     private void showAllButtons() {
-        Node[] main = { dashboardBtn, eventsToggleBtn, usersToggleBtn, sponsorsBtn, resourcesToggleBtn, questionnairesToggleBtn, settingsBtn, budgetBtn };
+        Node[] main = { dashboardBtn, eventsToggleBtn, usersToggleBtn, sponsorsBtn, resourcesToggleBtn, questionnairesToggleBtn, budgetBtn };
         for (Node n : main) showNode(n);
         collapseAllSubmenus();
     }
@@ -481,6 +479,16 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void onSearchClick() {
+        String query = globalSearchField.getText().trim();
+        if (!query.isEmpty()) {
+            performSimpleSearch(query);
+        } else {
+            showSimpleAlert("Recherche", "Veuillez entrer un terme de recherche");
+        }
+    }
+
     private void performSimpleSearch(String query) {
         String lowerQuery = query.toLowerCase();
         ObservableList<String> results = FXCollections.observableArrayList();
@@ -490,7 +498,6 @@ public class MainController {
         if ("sponsors".contains(lowerQuery)) { results.add("💼 Sponsors"); results.add("   📋 Liste sponsors"); results.add("   🔑 Portail Sponsor"); results.add("   💰 Budget"); results.add("   📄 Dépenses"); }
         if ("ressources".contains(lowerQuery)) { results.add("📦 Ressources"); results.add("   💻 Équipements"); results.add("   🏢 Salles"); results.add("   📅 Réservations"); }
         if ("questionnaires".contains(lowerQuery)) { results.add("📝 Questionnaires"); results.add("   ❓ Questions"); results.add("   📊 Résultats"); results.add("   📜 Historique"); results.add("   🎯 Passer le Quiz"); }
-        if ("paramètres".contains(lowerQuery) || "settings".contains(lowerQuery)) results.add("⚙️ Paramètres");
         if (results.isEmpty()) showSimpleAlert("Aucun résultat", "Aucun résultat trouvé pour: " + query);
         else showSimpleResultsPopup(query, results);
     }
@@ -539,7 +546,6 @@ public class MainController {
         else if (selected.contains("Résultats")) reponsesBtn.fire();
         else if (selected.contains("Historique")) showHistorique();
         else if (selected.contains("Passer le Quiz")) showParticipantQuiz();
-        else if (selected.contains("Paramètres")) settingsBtn.fire();
     }
 
     // ===================== NAVIGATION - SPONSORS =====================
