@@ -36,4 +36,9 @@ public class ReservationResource {
     public void setUserId(int userId) {
         this.userId = userId;
     }
+
+    private Integer eventId;
+
+    public Integer getEventId() { return eventId; }
+    public void setEventId(Integer eventId) { this.eventId = eventId; }
 }
