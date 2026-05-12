@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service pour gÃƒÂ©rer les opÃƒÂ©rations CRUD sur les tickets
+ * Service pour gérer les opérations CRUD sur les tickets
  * @author Ons Abdesslem
  */
 public class EventTicketService {
@@ -24,100 +24,59 @@ public class EventTicketService {
         // Initialiser la connexion
         this.connection = DBConnection.getConnection();
         if (this.connection == null) {
-            System.err.println("Ã¢ÂÅ’ Erreur de connexion ÃƒÂ  la base de donnÃƒÂ©es pour EventTicketService");
+            System.err.println("❌ Erreur de connexion à la base de données pour EventTicketService");
         } else {
-            System.out.println("Ã¢Å“â€¦ Connexion ÃƒÂ©tablie pour EventTicketService");
+            System.out.println("✅ Connexion établie pour EventTicketService");
         }
     }
 
     // ==================== CREATE ====================
 
     /**
-     * CrÃƒÂ©er un nouveau ticket
-     * @param eventId ID de l'ÃƒÂ©vÃƒÂ©nement
+     * Créer un nouveau ticket
+     * @param eventId ID de l'événement
      * @param userId ID de l'utilisateur
-     * @return Le ticket crÃƒÂ©ÃƒÂ© ou null si erreur
+     * @return Le ticket créé ou null si erreur
      */
     public EventTicket createTicket(int eventId, int userId) {
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("[Ticket] No database connection");
+            System.err.println("❌ Pas de connexion à la base de données");
             return null;
         }
 
-        Integer validEventId = resolveExistingId("event", "id", eventId);
-        Integer validUserId = resolveExistingId("user_model", "Id_User", userId);
-
-        if (validEventId == null) {
-            System.err.println("[Ticket] No valid event found for ticket creation");
-            return null;
-        }
-        if (validUserId == null) {
-            System.err.println("[Ticket] No valid user found for ticket creation");
-            return null;
-        }
-        if (validEventId != eventId) {
-            System.err.println("[Ticket] Invalid event_id " + eventId + ", fallback=" + validEventId);
-        }
-        if (validUserId != userId) {
-            System.err.println("[Ticket] Invalid user_id " + userId + ", fallback=" + validUserId);
-        }
-
-        String ticketCode = EventTicket.generateTicketCode(validEventId, validUserId);
+        String ticketCode = EventTicket.generateTicketCode(eventId, userId);
         String qrUrl = buildQrUrl(ticketCode);
 
         String sql = "INSERT INTO event_ticket (ticket_code, event_id, user_id, qr_code) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             pstmt.setString(1, ticketCode);
-            pstmt.setInt(2, validEventId);
-            pstmt.setInt(3, validUserId);
+            pstmt.setInt(2, eventId);
+            pstmt.setInt(3, userId);
             pstmt.setString(4, qrUrl);
 
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
+                // Récupérer l'ID généré
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        EventTicket ticket = new EventTicket(ticketCode, validEventId, validUserId);
+                        EventTicket ticket = new EventTicket(ticketCode, eventId, userId);
                         ticket.setId(rs.getInt(1));
                         ticket.setCreatedAt(LocalDateTime.now());
                         ticket.setQrCode(qrUrl);
 
-                        System.out.println("[Ticket] Created: " + ticketCode);
+                        System.out.println("✅ Ticket créé: " + ticketCode);
                         return ticket;
                     }
                 }
             }
 
         } catch (SQLException e) {
-            System.err.println("[Ticket] Creation error: " + e.getMessage());
+            System.err.println("❌ Erreur création ticket: " + e.getMessage());
             e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private Integer resolveExistingId(String table, String idColumn, int preferredId) {
-        String existsSql = "SELECT 1 FROM " + table + " WHERE " + idColumn + " = ? LIMIT 1";
-        try (PreparedStatement existsStmt = connection.prepareStatement(existsSql)) {
-            existsStmt.setInt(1, preferredId);
-            try (ResultSet rs = existsStmt.executeQuery()) {
-                if (rs.next()) {
-                    return preferredId;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("[Ticket] ID check error in " + table + ": " + e.getMessage());
-        }
-
-        String fallbackSql = "SELECT " + idColumn + " FROM " + table + " ORDER BY " + idColumn + " ASC LIMIT 1";
-        try (PreparedStatement fallbackStmt = connection.prepareStatement(fallbackSql);
-             ResultSet rs = fallbackStmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.err.println("[Ticket] ID fallback error in " + table + ": " + e.getMessage());
         }
 
         return null;
@@ -125,17 +84,17 @@ public class EventTicketService {
 
     private String buildQrUrl(String ticketCode) {
         try {
-            // URL qui ouvrira le PDF du billet quand scannÃƒÂ©
+            // URL qui ouvrira le PDF du billet quand scanné
             String pdfUrl = "http://localhost:8080/ticket/" +
                     URLEncoder.encode(ticketCode, StandardCharsets.UTF_8) + "/pdf";
 
             // Encoder l'URL dans le QR
             String encodedUrl = URLEncoder.encode(pdfUrl, StandardCharsets.UTF_8);
 
-            // QuickChart gÃƒÂ©nÃƒÂ¨re le QR contenant l'URL du PDF
+            // QuickChart génère le QR contenant l'URL du PDF
             return "https://quickchart.io/qr?text=" + encodedUrl + "&size=200&margin=2";
         } catch (Exception e) {
-            System.err.println("Ã¢ÂÅ’ Erreur gÃƒÂ©nÃƒÂ©ration QR URL: " + e.getMessage());
+            System.err.println("❌ Erreur génération QR URL: " + e.getMessage());
             return null;
         }
     }
@@ -143,14 +102,14 @@ public class EventTicketService {
     // ==================== READ ====================
 
     /**
-     * RÃƒÂ©cupÃƒÂ©rer tous les tickets
+     * Récupérer tous les tickets
      */
     public List<EventTicket> getAllTickets() {
         List<EventTicket> tickets = new ArrayList<>();
 
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return tickets;
         }
 
@@ -163,10 +122,10 @@ public class EventTicketService {
                 tickets.add(extractTicketFromResultSet(rs));
             }
 
-            System.out.println("Ã¢Å“â€¦ " + tickets.size() + " tickets rÃƒÂ©cupÃƒÂ©rÃƒÂ©s");
+            System.out.println("✅ " + tickets.size() + " tickets récupérés");
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur rÃƒÂ©cupÃƒÂ©ration tickets: " + e.getMessage());
+            System.err.println("❌ Erreur récupération tickets: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -174,12 +133,12 @@ public class EventTicketService {
     }
 
     /**
-     * RÃƒÂ©cupÃƒÂ©rer un ticket par son ID
+     * Récupérer un ticket par son ID
      */
     public EventTicket getTicketById(int id) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return null;
         }
 
@@ -196,7 +155,7 @@ public class EventTicketService {
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur rÃƒÂ©cupÃƒÂ©ration ticket ID=" + id + ": " + e.getMessage());
+            System.err.println("❌ Erreur récupération ticket ID=" + id + ": " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -204,14 +163,14 @@ public class EventTicketService {
     }
 
     /**
-     * RÃƒÂ©cupÃƒÂ©rer les tickets d'un ÃƒÂ©vÃƒÂ©nement
+     * Récupérer les tickets d'un événement
      */
     public List<EventTicket> getTicketsByEvent(int eventId) {
         List<EventTicket> tickets = new ArrayList<>();
 
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return tickets;
         }
 
@@ -228,7 +187,7 @@ public class EventTicketService {
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur rÃƒÂ©cupÃƒÂ©ration tickets event " + eventId + ": " + e.getMessage());
+            System.err.println("❌ Erreur récupération tickets event " + eventId + ": " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -236,14 +195,14 @@ public class EventTicketService {
     }
 
     /**
-     * RÃƒÂ©cupÃƒÂ©rer les tickets d'un utilisateur
+     * Récupérer les tickets d'un utilisateur
      */
     public List<EventTicket> getTicketsByUser(int userId) {
         List<EventTicket> tickets = new ArrayList<>();
 
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return tickets;
         }
 
@@ -260,7 +219,7 @@ public class EventTicketService {
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur rÃƒÂ©cupÃƒÂ©ration tickets user " + userId + ": " + e.getMessage());
+            System.err.println("❌ Erreur récupération tickets user " + userId + ": " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -268,12 +227,12 @@ public class EventTicketService {
     }
 
     /**
-     * RÃƒÂ©cupÃƒÂ©rer un ticket par son code
+     * Récupérer un ticket par son code
      */
     public EventTicket getTicketByCode(String ticketCode) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return null;
         }
 
@@ -290,7 +249,7 @@ public class EventTicketService {
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur rÃƒÂ©cupÃƒÂ©ration ticket code " + ticketCode + ": " + e.getMessage());
+            System.err.println("❌ Erreur récupération ticket code " + ticketCode + ": " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -300,12 +259,12 @@ public class EventTicketService {
     // ==================== UPDATE ====================
 
     /**
-     * Marquer un ticket comme utilisÃƒÂ© (check-in)
+     * Marquer un ticket comme utilisé (check-in)
      */
     public boolean markTicketAsUsed(int ticketId) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return false;
         }
 
@@ -318,12 +277,12 @@ public class EventTicketService {
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                System.out.println("Ã¢Å“â€¦ Ticket ID=" + ticketId + " marquÃƒÂ© comme utilisÃƒÂ©");
+                System.out.println("✅ Ticket ID=" + ticketId + " marqué comme utilisé");
                 return true;
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur mise ÃƒÂ  jour ticket: " + e.getMessage());
+            System.err.println("❌ Erreur mise à jour ticket: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -331,12 +290,12 @@ public class EventTicketService {
     }
 
     /**
-     * Mettre ÃƒÂ  jour un ticket (admin)
+     * Mettre à jour un ticket (admin)
      */
     public boolean updateTicket(EventTicket ticket) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return false;
         }
 
@@ -354,12 +313,12 @@ public class EventTicketService {
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                System.out.println("Ã¢Å“â€¦ Ticket ID=" + ticket.getId() + " mis ÃƒÂ  jour");
+                System.out.println("✅ Ticket ID=" + ticket.getId() + " mis à jour");
                 return true;
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur mise ÃƒÂ  jour ticket: " + e.getMessage());
+            System.err.println("❌ Erreur mise à jour ticket: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -372,9 +331,9 @@ public class EventTicketService {
      * Supprimer un ticket
      */
     public boolean deleteTicket(int id) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return false;
         }
 
@@ -386,12 +345,12 @@ public class EventTicketService {
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                System.out.println("Ã¢Å“â€¦ Ticket supprimÃƒÂ© (ID=" + id + ")");
+                System.out.println("✅ Ticket supprimé (ID=" + id + ")");
                 return true;
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur suppression ticket: " + e.getMessage());
+            System.err.println("❌ Erreur suppression ticket: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -401,12 +360,12 @@ public class EventTicketService {
     // ==================== STATISTIQUES ====================
 
     /**
-     * Compter le nombre de tickets pour un ÃƒÂ©vÃƒÂ©nement
+     * Compter le nombre de tickets pour un événement
      */
     public int countTicketsByEvent(int eventId) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return 0;
         }
 
@@ -423,7 +382,7 @@ public class EventTicketService {
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur comptage tickets: " + e.getMessage());
+            System.err.println("❌ Erreur comptage tickets: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -431,12 +390,12 @@ public class EventTicketService {
     }
 
     /**
-     * Compter le nombre de tickets utilisÃƒÂ©s (prÃƒÂ©sents) pour un ÃƒÂ©vÃƒÂ©nement
+     * Compter le nombre de tickets utilisés (présents) pour un événement
      */
     public int countUsedTicketsByEvent(int eventId) {
-        // VÃƒÂ©rifier la connexion
+        // Vérifier la connexion
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return 0;
         }
 
@@ -453,14 +412,14 @@ public class EventTicketService {
             }
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur comptage tickets utilisÃƒÂ©s: " + e.getMessage());
+            System.err.println("❌ Erreur comptage tickets utilisés: " + e.getMessage());
             e.printStackTrace();
         }
 
         return 0;
     }
 
-    // ==================== MÃƒâ€°THODES PRIVÃƒâ€°ES ====================
+    // ==================== MÉTHODES PRIVÉES ====================
 
     /**
      * Extraire un ticket depuis un ResultSet
@@ -488,22 +447,22 @@ public class EventTicketService {
         return ticket;
     }
 
-    // ==================== GÃƒâ€°NÃƒâ€°RATION QR CODES MANQUANTS ====================
+    // ==================== GÉNÉRATION QR CODES MANQUANTS ====================
 
     /**
-     * GÃƒÂ©nÃƒÂ©rer les QR codes manquants pour les anciens tickets avec qr_code = NULL
-     * Utilise QuickChart.io pour gÃƒÂ©nÃƒÂ©rer les QR codes dynamiques
-     * @return Le nombre de tickets mis ÃƒÂ  jour
+     * Générer les QR codes manquants pour les anciens tickets avec qr_code = NULL
+     * Utilise QuickChart.io pour générer les QR codes dynamiques
+     * @return Le nombre de tickets mis à jour
      */
     public int generateMissingQRCodes() {
         if (connection == null) {
-            System.err.println("Ã¢ÂÅ’ Pas de connexion ÃƒÂ  la base de donnÃƒÂ©es");
+            System.err.println("❌ Pas de connexion à la base de données");
             return 0;
         }
 
         int updatedCount = 0;
 
-        // 1. RÃƒÂ©cupÃƒÂ©rer tous les tickets sans QR code
+        // 1. Récupérer tous les tickets sans QR code
         String selectSql = "SELECT id, ticket_code FROM event_ticket WHERE qr_code IS NULL OR qr_code = ''";
 
         try (Statement stmt = connection.createStatement();
@@ -513,11 +472,11 @@ public class EventTicketService {
                 int ticketId = rs.getInt("id");
                 String ticketCode = rs.getString("ticket_code");
 
-                // 2. GÃƒÂ©nÃƒÂ©rer l'URL du QR code via QuickChart.io
+                // 2. Générer l'URL du QR code via QuickChart.io
                 String qrUrl = buildQrUrl(ticketCode);
 
                 if (qrUrl != null) {
-                    // 3. Mettre ÃƒÂ  jour le ticket dans la base de donnÃƒÂ©es
+                    // 3. Mettre à jour le ticket dans la base de données
                     String updateSql = "UPDATE event_ticket SET qr_code = ? WHERE id = ?";
 
                     try (PreparedStatement pstmt = connection.prepareStatement(updateSql)) {
@@ -527,21 +486,22 @@ public class EventTicketService {
                         int rowsAffected = pstmt.executeUpdate();
                         if (rowsAffected > 0) {
                             updatedCount++;
-                            System.out.println("Ã¢Å“â€¦ QR code gÃƒÂ©nÃƒÂ©rÃƒÂ© pour ticket ID=" + ticketId + " (" + ticketCode + ")");
+                            System.out.println("✅ QR code généré pour ticket ID=" + ticketId + " (" + ticketCode + ")");
                         }
                     }
                 } else {
-                    System.err.println("Ã¢Å¡Â Ã¯Â¸Â Impossible de gÃƒÂ©nÃƒÂ©rer QR code pour ticket ID=" + ticketId);
+                    System.err.println("⚠️ Impossible de générer QR code pour ticket ID=" + ticketId);
                 }
             }
 
-            System.out.println("Ã¢Å“â€¦ " + updatedCount + " tickets ont ÃƒÂ©tÃƒÂ© mis ÃƒÂ  jour avec des QR codes");
+            System.out.println("✅ " + updatedCount + " tickets ont été mis à jour avec des QR codes");
 
         } catch (SQLException e) {
-            System.err.println("Ã¢ÂÅ’ Erreur gÃƒÂ©nÃƒÂ©ration QR codes manquants: " + e.getMessage());
+            System.err.println("❌ Erreur génération QR codes manquants: " + e.getMessage());
             e.printStackTrace();
         }
 
         return updatedCount;
     }
 }
+

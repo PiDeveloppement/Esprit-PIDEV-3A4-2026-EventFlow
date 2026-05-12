@@ -5,15 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<ScrollPane fitToWidth="true"
-            hbarPolicy="NEVER"
-            vbarPolicy="AS_NEEDED"
-            style="-fx-background-color: transparent; -fx-border-color: transparent;"
-            xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.pidev.controller.resource.ReservationController">
-<content>
-<VBox spacing="15.0" style="-fx-background-color: #f8fafc;">
+<VBox spacing="15.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.ReservationController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -62,5 +54,3 @@
         </columnResizePolicy>
     </TableView>
 </VBox>
-</content>
-</ScrollPane>

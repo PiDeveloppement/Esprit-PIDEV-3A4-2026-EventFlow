@@ -4,8 +4,6 @@ import com.example.pidev.MainController;
 import com.example.pidev.model.event.Event;
 import com.example.pidev.model.questionnaire.Question;
 import com.example.pidev.service.questionnaire.QuestionService;
-import com.example.pidev.service.user.UserService;
-import com.example.pidev.utils.UserSession;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -178,11 +176,7 @@ public class QuestionController {
             }
 
             int points = Integer.parseInt(txtPoints.getText().trim());
-            int idUtilisateurConnecte = resolveQuestionUserId();
-            if (idUtilisateurConnecte <= 0) {
-                afficherAlerte("Utilisateur manquant", "Impossible de determiner un utilisateur valide pour enregistrer la question.");
-                return;
-            }
+            int idUtilisateurConnecte = 1;
 
             if (questionEnCours == null) {
                 // AJOUT : On passe les options au constructeur ou via setters
@@ -201,7 +195,6 @@ public class QuestionController {
                 questionEnCours.setOption1(txtOption1.getText());
                 questionEnCours.setOption2(txtOption2.getText());
                 questionEnCours.setOption3(txtOption3.getText());
-                questionEnCours.setIdUser(idUtilisateurConnecte);
 
                 qs.modifier(questionEnCours);
                 questionEnCours = null;
@@ -462,25 +455,6 @@ public class QuestionController {
         }
     }
 
-    private int resolveQuestionUserId() {
-        int sessionUserId = UserSession.getInstance().getUserId();
-        if (sessionUserId > 0) {
-            return sessionUserId;
-        }
-
-        try {
-            UserService userService = new UserService();
-            List<com.example.pidev.model.user.UserModel> users = userService.getAllUsers();
-            if (users != null && !users.isEmpty()) {
-                return users.get(0).getId_User();
-            }
-        } catch (Exception e) {
-            System.err.println("Impossible de recuperer un utilisateur pour le QCM: " + e.getMessage());
-        }
-
-        return -1;
-    }
-
     private void afficherAlerte(String t, String m) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(t);
@@ -522,7 +496,6 @@ public class QuestionController {
                 String fausse1 = json.optString("option1", "");
                 String fausse2 = json.optString("option2", "");
                 String fausse3 = json.optString("option3", "");
-                int points = json.optInt("points", 10);
 
                 Platform.runLater(() -> {
                     // Remplissage de l'énoncé
@@ -532,10 +505,9 @@ public class QuestionController {
                     txtReponse.setText(bonneReponse);
 
                     // Remplissage des OPTIONS FAUSSES (Vérifie bien tes fx:id dans le contrôleur)
-                    if (txtOption1 != null) txtOption1.setText(fausse1);
-                    if (txtOption2 != null) txtOption2.setText(fausse2);
-                    if (txtOption3 != null) txtOption3.setText(fausse3);
-                    if (txtPoints != null) txtPoints.setText(String.valueOf(Math.max(1, points)));
+                    txtOption1.setText(fausse1);
+                    txtOption2.setText(fausse2);
+                    txtOption3.setText(fausse3);
 
                     lblSuggestionIA.setText("✨ QCM et options générés avec succès !");
                     lblSuggestionIA.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
@@ -566,3 +538,4 @@ public class QuestionController {
         return texte;
     }
 }
+

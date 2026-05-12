@@ -211,7 +211,8 @@ public class ParticipantController {
                 com.example.pidev.service.questionnaire.CertificateService certService = new com.example.pidev.service.questionnaire.CertificateService();
                 String nomGagnant = fs.getNomUserComplet(idParticipantConnecte);
                 String scoreFinal = nombreBonnesReponses + " / " + listeQuestions.size();
-                String cheminLogo = "/com/example/pidev/images/logo.png";
+                String cheminLogo = "C:\\Users\\USER\\Desktop\\pigestion\\src\\main\\java\\com\\example\\pidev\\images\\logo.png";
+
                 certService.genererCertificat(nomGagnant, scoreFinal, cheminLogo);
             }
 

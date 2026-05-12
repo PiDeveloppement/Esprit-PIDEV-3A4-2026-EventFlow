@@ -20,7 +20,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -68,21 +67,7 @@ public class SalleController implements Initializable {
                     setGraphic(null);
                 } else {
                     try {
-                        String normalized = path.replace("file:/", "").replace("%20", " ").replace("\\", "/");
-                        String fileName = new File(normalized).getName();
-                        File imageFile = new File(normalized);
-                        if (!imageFile.exists()) {
-                            imageFile = new File("uploads/" + fileName);
-                        }
-                        if (!imageFile.exists()) {
-                            imageFile = new File("src/uploads/" + fileName);
-                        }
-
-                        String imagePath = imageFile.exists()
-                                ? imageFile.toURI().toString()
-                                : (path.startsWith("file:") ? path : "file:/" + path.replace("\\", "/"));
-
-                        view.setImage(new Image(imagePath, 40, 40, true, true));
+                        view.setImage(new Image(path, 40, 40, true, true));
                         setGraphic(view);
                     } catch (Exception e) { setGraphic(null); }
                 }

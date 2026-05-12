@@ -662,7 +662,7 @@ public class SponsorFormController {
 
         String docUrlFinal = editing == null ? null : editing.getDocument_url();
         try {
-            if (selectedDocFile != null) docUrlFinal = cloud.uploadDocument(selectedDocFile);
+            if (selectedDocFile != null) docUrlFinal = cloud.uploadPdfContract(selectedDocFile);
         } catch (Exception ex) { error("Upload document échoué : " + ex.getMessage()); return; }
 
         Sponsor out = new Sponsor();

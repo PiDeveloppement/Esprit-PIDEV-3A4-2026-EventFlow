@@ -477,11 +477,11 @@ public class LoginController implements Initializable {
         try {
             // Créer le ticket service
             com.example.pidev.service.event.EventTicketService ticketService =
-                    new com.example.pidev.service.event.EventTicketService();
+                new com.example.pidev.service.event.EventTicketService();
 
             // Récupérer l'event service pour obtenir le nom de l'événement
             com.example.pidev.service.event.EventService eventService =
-                    new com.example.pidev.service.event.EventService();
+                new com.example.pidev.service.event.EventService();
 
             com.example.pidev.model.event.Event event = eventService.getEventById(eventId);
 
@@ -499,22 +499,22 @@ public class LoginController implements Initializable {
             if (ticket != null) {
                 // Succès : afficher le ticket généré
                 javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                        javafx.scene.control.Alert.AlertType.INFORMATION
+                    javafx.scene.control.Alert.AlertType.INFORMATION
                 );
                 alert.setTitle("✅ Participation confirmée");
                 alert.setHeaderText("Bienvenue ! Votre participation est enregistrée");
                 alert.setContentText(
-                        "Vous participez à l'événement :\n" +
-                                event.getTitle() + "\n\n" +
-                                "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
-                                "Un email de confirmation vous sera envoyé.\n" +
-                                "Conservez votre code de ticket pour accéder à l'événement."
+                    "Vous participez à l'événement :\n" +
+                    event.getTitle() + "\n\n" +
+                    "Votre ticket : " + ticket.getTicketCode() + "\n\n" +
+                    "Un email de confirmation vous sera envoyé.\n" +
+                    "Conservez votre code de ticket pour accéder à l'événement."
                 );
 
                 // Style personnalisé
                 alert.getDialogPane().setStyle(
-                        "-fx-background-color: white; " +
-                                "-fx-font-size: 14px;"
+                    "-fx-background-color: white; " +
+                    "-fx-font-size: 14px;"
                 );
 
                 alert.showAndWait();
@@ -526,13 +526,13 @@ public class LoginController implements Initializable {
                 System.err.println("❌ Échec de la création du ticket différé");
 
                 javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                        javafx.scene.control.Alert.AlertType.WARNING
+                    javafx.scene.control.Alert.AlertType.WARNING
                 );
                 alert.setTitle("Participation incomplète");
                 alert.setHeaderText("Impossible de créer votre ticket");
                 alert.setContentText(
-                        "Votre connexion a réussi, mais nous n'avons pas pu créer votre ticket.\n\n" +
-                                "Veuillez réessayer de participer à l'événement depuis la page des événements."
+                    "Votre connexion a réussi, mais nous n'avons pas pu créer votre ticket.\n\n" +
+                    "Veuillez réessayer de participer à l'événement depuis la page des événements."
                 );
                 alert.showAndWait();
             }

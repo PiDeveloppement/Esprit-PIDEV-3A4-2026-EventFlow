@@ -14,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import org.json.JSONObject;
 
-import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -129,18 +128,7 @@ public class ReservationFormController {
 
     private void handleVoiceCommand(String command) {
         System.out.println("🎙️ Analyse de l'ordre : " + command);
-        String lowerCmd = normalizeVoiceText(command);
-
-        if (lowerCmd.contains("annule") || lowerCmd.contains("quitter") || lowerCmd.contains("retour") || lowerCmd.contains("back")) {
-            goBack();
-            return;
-        }
-        if (lowerCmd.contains("reserve") || lowerCmd.contains("reserver")
-                || lowerCmd.contains("valide")
-                || lowerCmd.contains("confirme") || lowerCmd.contains("confirmer")) {
-            validerAction();
-            return;
-        }
+        String lowerCmd = command.toLowerCase();
 
         // 1. GESTION DES ACTIONS (ANNULER / RÉSERVER)
         if (lowerCmd.contains("annule") || lowerCmd.contains("quitter") || lowerCmd.contains("retour")) {
@@ -165,11 +153,6 @@ public class ReservationFormController {
         }
 
         // 3. DÉTECTION DE LA QUANTITÉ (Support Chiffres ET Lettres)
-        if (lowerCmd.contains("equipement") || lowerCmd.contains("materiel")) {
-            typeCombo.setValue("EQUIPEMENT");
-            chargerRessources();
-        }
-
         String numeric = lowerCmd.replaceAll("[^0-9]", "");
         if (!numeric.isEmpty()) {
             quantityField.setText(numeric);
@@ -197,20 +180,8 @@ public class ReservationFormController {
 
         // 5. DÉTECTION DE LA RESSOURCE (RECHERCHE DYNAMIQUE)
         // On compare les mots dits avec les noms dans la liste
-        if (lowerCmd.contains("debut") || lowerCmd.contains("commence") || lowerCmd.contains("start")) {
-            LocalDate date = parseVoiceDate(lowerCmd);
-            if (date != null) {
-                startDatePicker.setValue(date);
-            }
-        } else if (lowerCmd.contains("fin") || lowerCmd.contains("termine") || lowerCmd.contains("end")) {
-            LocalDate date = parseVoiceDate(lowerCmd);
-            if (date != null) {
-                endDatePicker.setValue(date);
-            }
-        }
-
         itemCombo.getItems().stream()
-                .filter(item -> lowerCmd.contains(normalizeVoiceText(item.toString())))
+                .filter(item -> lowerCmd.contains(item.toString().toLowerCase()))
                 .findFirst()
                 .ifPresent(item -> {
                     itemCombo.setValue(item);
@@ -219,7 +190,6 @@ public class ReservationFormController {
     }
     private LocalDate parseVoiceDate(String text) {
         try {
-            text = normalizeVoiceText(text);
             int day = 1;
             // Extraction du jour
             String numeric = text.replaceAll("[^0-9]", "");
@@ -241,29 +211,10 @@ public class ReservationFormController {
             else if (text.contains("novembre")) month = 11;
             else if (text.contains("décembre")) month = 12;
 
-            if (text.contains("fevrier")) month = 2;
-            else if (text.contains("aout")) month = 8;
-            else if (text.contains("decembre")) month = 12;
-
-            int year = LocalDate.now().getYear();
-            if (text.contains("annee prochaine") || text.contains("prochaine annee")) {
-                year = year + 1;
-            }
-
-            return LocalDate.of(year, month, day);
+            return LocalDate.of(2026, month, day);
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private String normalizeVoiceText(String value) {
-        if (value == null) {
-            return "";
-        }
-        return Normalizer.normalize(value, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}+", "")
-                .toLowerCase()
-                .trim();
     }
 
     // --- TES MÉTHODES ORIGINALES (NON MODIFIÉES) ---
@@ -300,6 +251,7 @@ public class ReservationFormController {
             }
         }
     }
+
     @FXML
     void validerAction() {
         try {
@@ -315,27 +267,9 @@ public class ReservationFormController {
                 return;
             }
 
-            // --- NOUVEAU : CONTRÔLE DES DATES ---
-            LocalDate aujourdhui = LocalDate.now();
-            LocalDate dateDebutSaisie = startDatePicker.getValue();
-            LocalDate dateFinSaisie = endDatePicker.getValue();
-
-            // Bloquer si la date de début est avant aujourd'hui
-            if (dateDebutSaisie.isBefore(aujourdhui)) {
-                new Alert(Alert.AlertType.ERROR, "❌ Erreur : Vous ne pouvez pas réserver à une date passée.").show();
-                return;
-            }
-
-            // Bloquer si la date de fin est renseignée et qu'elle est avant le début
-            if (dateFinSaisie != null && dateFinSaisie.isBefore(dateDebutSaisie)) {
-                new Alert(Alert.AlertType.ERROR, "❌ Erreur : La date de fin ne peut pas être antérieure à la date de début.").show();
-                return;
-            }
-            // -------------------------------------
-
             // 3. Gestion des dates (Heure par défaut 08:00 à 18:00)
-            LocalDateTime s = dateDebutSaisie.atTime(8, 0);
-            LocalDateTime e = (dateFinSaisie == null) ? s.plusHours(2) : dateFinSaisie.atTime(18, 0);
+            LocalDateTime s = startDatePicker.getValue().atTime(8, 0);
+            LocalDateTime e = endDatePicker.getValue() == null ? s.plusHours(2) : endDatePicker.getValue().atTime(18, 0);
 
             Object sel = itemCombo.getValue();
 
@@ -355,7 +289,7 @@ public class ReservationFormController {
 
             // 5. Vérification de la disponibilité (Stock/Occupation)
             int dispo = 0;
-            String nomRessource = "";
+            String nomRessource = ""; // On prépare le nom pour l'email
 
             if (sel instanceof Salle sa) {
                 dispo = resService.isSalleOccupee(sa.getId(), s, e, currentId) ? 0 : 1;
@@ -384,11 +318,17 @@ public class ReservationFormController {
             // 7. Enregistrement et Envoi de l'Email
             String message;
             if (selectedReservation == null) {
+                // AJOUT
                 resService.ajouter(res);
                 message = "✅ Réservation créée avec succès pour " + currentUserName;
+
+                // --- DÉCLENCHEMENT DE L'EMAIL ---
                 System.out.println("📧 Tentative d'envoi d'email pour : " + nomRessource);
                 envoyerEmailConfirmation(res, nomRessource);
+                // --------------------------------
+
             } else {
+                // MODIFICATION
                 resService.modifier(res);
                 message = "✅ Réservation modifiée avec succès";
             }
@@ -408,6 +348,7 @@ public class ReservationFormController {
             new Alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage()).show();
         }
     }
+
     private void chargerRessources() {
         itemCombo.getItems().clear();
         if ("SALLE".equals(typeCombo.getValue())) {
@@ -493,6 +434,7 @@ public class ReservationFormController {
         // 1. Tes identifiants Gmail
         final String username = "mecherguisouhail8@gmail.com";
 
+        // ⚠️ ATTENTION : Ne mets pas ton vrai mdp ici.
         // Génère un code de 16 lettres ici : https://myaccount.google.com/apppasswords
         final String password = "xknx cbvx piuc upbb";
 
@@ -556,5 +498,4 @@ public class ReservationFormController {
         // Appliquer la règle aux deux DatePickers
         startDatePicker.setDayCellFactory(dayCellFactory);
         endDatePicker.setDayCellFactory(dayCellFactory);
-    }
-}
+    }}

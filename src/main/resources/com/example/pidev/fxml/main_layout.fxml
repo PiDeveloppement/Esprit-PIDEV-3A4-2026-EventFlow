@@ -38,7 +38,7 @@
                 </VBox>
             </VBox>
 
-            <ScrollPane fitToWidth="true" vbarPolicy="NEVER"
+            <ScrollPane fitToWidth="true" vbarPolicy="AS_NEEDED"
                         style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"
                         VBox.vgrow="ALWAYS">
                 <VBox spacing="6" alignment="CENTER" style="-fx-padding: 25 15;">
@@ -156,10 +156,6 @@
 
             <VBox style="-fx-padding: 0 15 25 15; -fx-background-color: transparent;">
                 <Region prefHeight="6"/>
-                <Button fx:id="settingsBtn" text="Paramètres" maxWidth="190" prefHeight="45" styleClass="main-menu-button">
-                    <graphic><Text text="⚙️" style="-fx-font-size: 16px; -fx-fill: white;"/></graphic>
-                </Button>
-                <Region prefHeight="6"/>
                 <Button fx:id="logoutBtn" text="Déconnexion" maxWidth="190" prefHeight="45" styleClass="logout-button">
                     <graphic><Text text="🚪" style="-fx-font-size: 16px; -fx-fill: #ffcdd2;"/></graphic>
                 </Button>
@@ -214,10 +210,10 @@
                             </HBox>
                         </graphic>
                         <items>
-                        <MenuItem text="👤 Mon Profil" onAction="#showProfile"/>
-                        <MenuItem text="⚙️ Paramètres" onAction="#showSettings"/>
-                        <SeparatorMenuItem/>
-                        <MenuItem text="🚪 Déconnexion" onAction="#logout"/>
+                            <MenuItem text="👤 Mon Profil" onAction="#showProfile"/>
+                            <MenuItem text="⚙️ Paramètres" onAction="#showSettings"/>
+                            <SeparatorMenuItem/>
+                            <MenuItem text="🚪 Déconnexion" onAction="#logout"/>
                         </items>
                     </MenuButton>
                 </HBox>

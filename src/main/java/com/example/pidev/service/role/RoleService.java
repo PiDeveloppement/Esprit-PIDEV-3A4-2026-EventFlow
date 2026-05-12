@@ -43,31 +43,31 @@ public class RoleService {
             return false;
         }
     }
-    //getAll Roles
-    public ObservableList<Role> getAllRoles() {
-        ObservableList<Role> roles = FXCollections.observableArrayList();
-        String query = "SELECT * FROM role";
+//getAll Roles 
+public ObservableList<Role> getAllRoles() {
+    ObservableList<Role> roles = FXCollections.observableArrayList();
+    String query = "SELECT * FROM role";
 
 
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+    try (Statement stmt = connection.createStatement();
+         ResultSet rs = stmt.executeQuery(query)) {
 
-            while (rs.next()) {
+        while (rs.next()) {
+            
+            Role role = new Role(
+                    rs.getInt("Id_Role"),
+                    rs.getString("RoleName")
+            );
+            
 
-                Role role = new Role(
-                        rs.getInt("Id_Role"),
-                        rs.getString("RoleName")
-                );
-
-
-                roles.add(role);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            roles.add(role);
         }
-        return roles;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return roles;
+}
     // 🔹 Modifier un role
     public boolean updateRole(Role role) {
 
