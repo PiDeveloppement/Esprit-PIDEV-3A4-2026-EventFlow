@@ -35,8 +35,8 @@ public class ParticipantController {
     private int etoilesSelectionnees = 0;
     private String reponseSelectionnee = "";
     // Simulation de l'utilisateur connecté (A remplacer par votre session utilisateur)
-    private final int idParticipantConnecte = 1;
-    private final int idEventActuel = 1;
+    private final int idParticipantConnecte = 3;
+    private final int idEventActuel = 23;
 
     private final FeedbackService fs = new FeedbackService();
     private final CertificateService certificateService = new CertificateService();

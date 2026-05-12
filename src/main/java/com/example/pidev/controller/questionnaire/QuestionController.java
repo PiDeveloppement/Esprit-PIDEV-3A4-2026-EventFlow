@@ -176,7 +176,7 @@ public class QuestionController {
             }
 
             int points = Integer.parseInt(txtPoints.getText().trim());
-            int idUtilisateurConnecte = 1;
+            int idUtilisateurConnecte = 3;
 
             if (questionEnCours == null) {
                 // AJOUT : On passe les options au constructeur ou via setters

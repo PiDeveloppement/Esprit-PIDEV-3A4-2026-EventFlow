@@ -21,7 +21,7 @@ public class FeedbackService {
     public List<Question> chargerQuestionsAleatoires(int idEvent) throws SQLException {
         List<Question> questions = new ArrayList<>();
         // On ajoute option1, option2, option3 à la requête
-        String req = "SELECT id_question, id_event, texte_question, bonne_reponse, points, option1, option2, option3 FROM questions WHERE id_event = ? ORDER BY RAND() LIMIT 10";
+        String req = "SELECT id_question, id_event, texte, reponse, points, option1, option2, option3 FROM questions WHERE id_event = ? ORDER BY RAND() LIMIT 10";
 
         try (PreparedStatement pst = conn.prepareStatement(req)) {
             pst.setInt(1, idEvent);
@@ -30,8 +30,8 @@ public class FeedbackService {
                     questions.add(new Question(
                             rs.getInt("id_question"),
                             rs.getInt("id_event"),
-                            rs.getString("texte_question"),
-                            rs.getString("bonne_reponse"),
+                            rs.getString("texte"),
+                            rs.getString("reponse"),
                             rs.getInt("points"),
                             rs.getString("option1"),
                             rs.getString("option2"),
@@ -44,14 +44,13 @@ public class FeedbackService {
     }
 
     public int enregistrerFeedbackComplet(int idUser, int idEvent, int idQuest, String rep, String comm, int stars) throws SQLException {
-        String req = "INSERT INTO feedbacks (id_user, id_event, id_question, reponse_donnee, comments, etoiles) VALUES (?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO feedbacks (id_user, id_question, reponse_donnee, comments, etoiles) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pst = conn.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             pst.setInt(1, idUser);
-            pst.setInt(2, idEvent);
-            pst.setInt(3, idQuest);
-            pst.setString(4, rep);
-            pst.setString(5, comm);
-            pst.setInt(6, stars);
+            pst.setInt(2, idQuest);
+            pst.setString(3, rep);
+            pst.setString(4, comm);
+            pst.setInt(5, stars);
             pst.executeUpdate();
             try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) return rs.getInt(1);

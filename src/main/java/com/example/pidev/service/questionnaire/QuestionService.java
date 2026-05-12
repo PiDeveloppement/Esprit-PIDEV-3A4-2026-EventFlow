@@ -78,7 +78,7 @@ public class QuestionService {
      */
     public void ajouter(Question q) throws SQLException {
         // Vérifiez que option1, option2, option3 sont bien dans la liste des colonnes
-        String req = "INSERT INTO questions (id_event, texte_question, bonne_reponse, points, option1, option2, option3, id_user) " +
+        String req = "INSERT INTO questions (id_event, texte, reponse, points, option1, option2, option3, id_user) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = conn.prepareStatement(req);
@@ -97,14 +97,18 @@ public class QuestionService {
     /**
      * Modifie une question existante.
      */
+    // APRÈS (correct - avec les options)
     public void modifier(Question q) throws SQLException {
-        String req = "UPDATE questions SET id_event=?, texte_question=?, bonne_reponse=?, points=? WHERE id_question=?";
+        String req = "UPDATE questions SET id_event=?, texte=?, reponse=?, points=?, option1=?, option2=?, option3=? WHERE id_question=?";
         try (PreparedStatement pst = conn.prepareStatement(req)) {
             pst.setInt(1, q.getIdEvent());
             pst.setString(2, q.getTexte());
             pst.setString(3, q.getReponse());
             pst.setInt(4, q.getPoints());
-            pst.setInt(5, q.getIdQuestion());
+            pst.setString(5, q.getOption1());
+            pst.setString(6, q.getOption2());
+            pst.setString(7, q.getOption3());
+            pst.setInt(8, q.getIdQuestion());
             pst.executeUpdate();
         }
     }
@@ -164,8 +168,8 @@ public class QuestionService {
         Question q = new Question(
                 rs.getInt("id_question"),
                 rs.getInt("id_event"),
-                rs.getString("texte_question"),
-                rs.getString("bonne_reponse"),
+                rs.getString("texte"),
+                rs.getString("reponse"),
                 rs.getInt("points"),
                 rs.getString("option1"),
                 rs.getString("option2"),
