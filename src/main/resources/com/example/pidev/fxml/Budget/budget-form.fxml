@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.budget.BudgetFormController"
+            style="-fx-background-color:white; -fx-padding:18;">
+
+    <VBox spacing="12" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+
+        <Label fx:id="titleLabel" text="➕ Nouveau Budget"
+               style="-fx-font-size:20px; -fx-font-weight:900; -fx-text-fill:#0f172a;"/>
+
+        <Label fx:id="errorLabel" text=""
+               style="-fx-text-fill:#dc2626; -fx-font-weight:700;"/>
+
+        <GridPane hgap="12" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="35"/>
+                <ColumnConstraints percentWidth="65"/>
+            </columnConstraints>
+
+            <Label text="Événement" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight:800;"/>
+            <ComboBox fx:id="eventComboBox" promptText="Choisir un événement" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Budget Initial" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight:800;"/>
+            <TextField fx:id="initialField" promptText="ex: 5000" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Revenus" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight:800;"/>
+            <TextField fx:id="revenueField" promptText="ex: 3000" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        </GridPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Button text="Annuler"
+                    onAction="#onCancel"
+                    style="-fx-background-color:#e2e8f0; -fx-text-fill:#0f172a; -fx-font-weight:900; -fx-background-radius:10; -fx-padding:10 16;"/>
+            <Button text="Enregistrer"
+                    onAction="#onSave"
+                    style="-fx-background-color:#10b981; -fx-text-fill:white; -fx-font-weight:900; -fx-background-radius:10; -fx-padding:10 16;"/>
+        </HBox>
+
+    </VBox>
+</AnchorPane>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.sponsor.SponsorCardController"
+            style="-fx-background-color: white;
+                   -fx-background-radius: 16;
+                   -fx-border-radius: 16;
+                   -fx-border-color: #e2e8f0;
+                   -fx-border-width: 1;
+                   -fx-padding: 14;">
+
+    <HBox spacing="14" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
+          AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
+
+        <!-- LOGO -->
+        <StackPane prefHeight="78" prefWidth="78"
+                   style="-fx-background-color:#f1f5f9;
+                          -fx-background-radius:14;
+                          -fx-border-radius:14;
+                          -fx-border-color:#e2e8f0;">
+            <ImageView fx:id="logoView" fitHeight="54" fitWidth="54" preserveRatio="true"/>
+        </StackPane>
+
+        <!-- INFOS -->
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+
+            <!-- ENTREPRISE + CONTRIBUTION -->
+            <HBox alignment="CENTER_LEFT">
+                <Label fx:id="companyLabel"
+                       maxWidth="320"
+                       wrapText="true"
+                       text="Entreprise"
+                       style="-fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="contributionLabel"
+                       text="0,00 DT"
+                       style="-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #059669;"/>
+            </HBox>
+
+            <!-- EMAIL -->
+            <Label fx:id="emailLabel"
+                   maxWidth="360"
+                   wrapText="true"
+                   text="email@company.tn"
+                   style="-fx-text-fill: #2563eb; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+
+            <!-- EVENT -->
+            <Label fx:id="eventLabel"
+                   maxWidth="360"
+                   wrapText="true"
+                   text="Événement: —"
+                   style="-fx-text-fill: #334155; -fx-font-weight: 700;"/>
+
+            <!-- ACTIONS : une seule ligne, alignée -->
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 8 0 0 0;">
+                <Button fx:id="detailsBtn"
+                        text="Détails"
+                        style="-fx-background-color:#2563eb; -fx-text-fill:white; -fx-font-weight:800;
+                               -fx-background-radius:12; -fx-padding: 8 14;"/>
+
+                <Button fx:id="pdfBtn"
+                        text="📄 Contrat"
+                        style="-fx-background-color: linear-gradient(to right,#fb923c,#f97316);
+                               -fx-text-fill:white; -fx-font-weight:800;
+                               -fx-background-radius:12; -fx-padding: 8 14;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button fx:id="editBtn"
+                        text="Modifier"
+                        style="-fx-background-color:#e0f2fe; -fx-text-fill:#0369a1; -fx-font-weight:900;
+                               -fx-background-radius:12; -fx-padding: 8 12;"/>
+
+                <Button fx:id="deleteBtn"
+                        text="Supprimer"
+                        style="-fx-background-color:#fee2e2; -fx-text-fill:#b91c1c; -fx-font-weight:900;
+                               -fx-background-radius:12; -fx-padding: 8 12;"/>
+            </HBox>
+
+        </VBox>
+    </HBox>
+</AnchorPane>

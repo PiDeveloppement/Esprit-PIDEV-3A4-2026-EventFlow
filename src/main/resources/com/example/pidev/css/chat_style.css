@@ -1,0 +1,60 @@
+/* Messages utilisateur */
+.user-message .text-flow {
+    -fx-background-color: #E3F2FD;
+    -fx-background-radius: 15 15 5 15;
+}
+
+/* Messages du bot */
+.bot-message .text-flow {
+    -fx-background-color: #F1F3F4;
+    -fx-background-radius: 15 15 15 5;
+}
+
+/* Message d'avertissement (confirmation suppression) */
+.warning .text-flow {
+    -fx-background-color: #FFF3E0;
+    -fx-border-color: #FF9800;
+    -fx-border-width: 2;
+    -fx-border-radius: 15;
+}
+
+/* Message de succès */
+.success .text-flow {
+    -fx-background-color: #E8F5E8;
+    -fx-border-color: #4CAF50;
+    -fx-border-width: 2;
+    -fx-border-radius: 15;
+}
+
+/* Message d'erreur */
+.error .text-flow {
+    -fx-background-color: #FFEBEE;
+    -fx-border-color: #F44336;
+    -fx-border-width: 2;
+    -fx-border-radius: 15;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background: white;
+    -fx-background-color: white;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: white;
+}
+
+/* Barre de défilement */
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #B0BEC5;
+    -fx-background-radius: 6;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #90A4AE;
+}

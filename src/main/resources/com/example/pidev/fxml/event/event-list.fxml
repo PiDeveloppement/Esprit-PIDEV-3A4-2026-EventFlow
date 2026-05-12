@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox spacing="0" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.event.EventListController"
+      style="-fx-background-color: #f8fafc;">
+
+    <!-- Barre de filtres (COMPACTE, une seule ligne) -->
+    <HBox style="-fx-background-color: #f1f5f9; -fx-padding: 12 30; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+          spacing="10" alignment="CENTER_LEFT" prefHeight="50">
+
+        <!-- Barre de recherche réduite -->
+        <TextField fx:id="searchField"
+                   promptText="🔍 Rechercher..."
+                   prefWidth="300"
+                   style="-fx-background-color: white; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 11px;
+                          -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 6;"/>
+
+        <!-- Filtres compacts -->
+        <ComboBox fx:id="statusFilter"
+                  promptText="📊 Statut"
+                  prefWidth="130"
+                  style="-fx-background-color: white; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 10px;
+                         -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 6;"/>
+
+        <ComboBox fx:id="categoryFilter"
+                  promptText="📂 Catégorie"
+                  prefWidth="130"
+                  style="-fx-background-color: white; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 10px;
+                         -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 6;"/>
+
+        <ComboBox fx:id="sortOrder"
+                  promptText="🔽 Ordre"
+                  prefWidth="130"
+                  style="-fx-background-color: white; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 10px;
+                         -fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 6;"/>
+
+        <!-- Espace flexible minimal -->
+        <Region HBox.hgrow="ALWAYS" minWidth="8"/>
+
+        <!-- Boutons compacts alignés à droite -->
+        <Button text="📅 Calendrier"
+                onAction="#handleShowCalendar"
+                style="-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-padding: 6 15; -fx-font-size: 11px;
+                       -fx-background-radius: 6; -fx-cursor: hand;"
+                prefWidth="115"/>
+
+        <Button text="📄 Exporter PDF"
+                onAction="#handleExportPDF"
+                style="-fx-background-color: #0D47A1; -fx-text-fill: white; -fx-padding: 6 15; -fx-font-size: 11px;
+                       -fx-background-radius: 6; -fx-cursor: hand;"
+                prefWidth="120"/>
+
+        <Button fx:id="addBtn" text="➕ Créer évènement"
+                onAction="#handleAdd"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 6 15; -fx-font-size: 11px;
+                       -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;"
+                prefWidth="150"/>
+    </HBox>
+
+    <!-- SCROLLPANE GLOBAL -->
+    <ScrollPane fitToWidth="true"
+                vbarPolicy="AS_NEEDED"
+                hbarPolicy="NEVER"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                VBox.vgrow="ALWAYS">
+
+        <VBox spacing="20" style="-fx-padding: 20 30;">
+
+            <!-- Barre info résultats -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button onAction="#handleFilter"
+                        style="-fx-background-color: #1565C0; -fx-text-fill: white; -fx-padding: 8 20;
+                               -fx-background-radius: 8; -fx-cursor: hand;">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER">
+                            <Label text="⏷" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                            <Label text="Filtrer" style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 600;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <Button onAction="#handleRefresh"
+                        style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 15;
+                               -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                               -fx-border-radius: 8; -fx-cursor: hand;">
+                    <graphic>
+                        <Label text="🔄" style="-fx-font-size: 16px;"/>
+                    </graphic>
+                </Button>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label fx:id="resultLabel"
+                       text="0 résultat(s) trouvé(s)"
+                       style="-fx-text-fill: #64748b; -fx-font-size: 13px;
+                              -fx-background-color: white; -fx-padding: 5 15;
+                              -fx-background-radius: 20; -fx-border-color: #e2e8f0;
+                              -fx-border-radius: 20; -fx-border-width: 1;"/>
+            </HBox>
+
+            <!-- Table -->
+            <TableView fx:id="eventTable"
+                       VBox.vgrow="NEVER"
+                       prefHeight="400"
+                       style="-fx-background-color: white; -fx-border-color: #e2e8f0;
+                              -fx-border-width: 1; -fx-border-radius: 16; -fx-background-radius: 16;">
+                <columns>
+                    <TableColumn fx:id="titleCol" text="📅 Titre" prefWidth="200"/>
+                    <TableColumn fx:id="startDateCol" text="⏱️ Début" prefWidth="140"/>
+                    <TableColumn fx:id="endDateCol" text="⏱️ Fin" prefWidth="140"/>
+                    <TableColumn fx:id="locationCol" text="📍 Lieu" prefWidth="200"/>
+                    <TableColumn fx:id="categoryCol" text="📂 Catégorie" prefWidth="150"/>
+                    <TableColumn fx:id="statusCol" text="📊 Statut" prefWidth="100"/>
+                    <TableColumn fx:id="priceCol" text="💰 Prix" prefWidth="100"/>
+                    <TableColumn fx:id="actionsCol" text="⚡ Actions" prefWidth="150"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+
+            <!-- Pagination CORRECTE -->
+            <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                <HBox spacing="8" alignment="CENTER">
+                    <!-- Garde le bouton Précédent -->
+                    <Button fx:id="prevBtn" text="« Précédent"
+                            style="-fx-background-color: white; -fx-text-fill: #475569; -fx-padding: 8 16;
+                       -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-background-radius: 8; -fx-cursor: hand;"/>
+
+                    <!-- Ce conteneur recevra TOUS les boutons (pages + Suivant) -->
+                    <HBox fx:id="paginationContainer" spacing="4" alignment="CENTER">
+                        <!-- Les boutons de pagination seront générés dynamiquement -->
+                    </HBox>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label fx:id="pageInfoLabel" text="Page 1 sur 1"
+                       style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+            </HBox>
+            <!-- Footer -->
+            <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
+                <Label text="© 2026 EventFlow - Gestion des événements"
+                       style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>

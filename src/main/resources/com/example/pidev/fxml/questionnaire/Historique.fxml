@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="700.0" prefWidth="1000.0" spacing="20.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.questionnaire.HistoriqueController">
+    <children>
+        <VBox spacing="5.0">
+            <children>
+                <Label text="📊 Mon Historique &amp; Statistiques" style="-fx-text-fill: #1e293b; -fx-font-weight: bold;">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+                <Label text="Retrouvez ici tous vos scores et feedbacks passés." style="-fx-text-fill: #64748b;">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+            </children>
+            <VBox.margin>
+                <Insets bottom="10.0" />
+            </VBox.margin>
+        </VBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+            <content>
+                <FlowPane fx:id="cardsContainer" hgap="25.0" prefWrapLength="1000.0" vgap="25.0">
+                    <padding>
+                        <Insets bottom="30.0" left="5.0" right="5.0" top="10.0" />
+                    </padding>
+                </FlowPane>
+            </content>
+        </ScrollPane>
+    </children>
+    <padding>
+        <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+    </padding>
+</VBox>

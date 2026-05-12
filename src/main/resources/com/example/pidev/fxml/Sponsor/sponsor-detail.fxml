@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.sponsor.SponsorDetailsController"
+            style="-fx-background-color: #f8fafc;"
+            prefWidth="900" prefHeight="540">
+
+    <top>
+        <HBox spacing="14" alignment="CENTER_LEFT"
+              style="-fx-padding: 18 22; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+            <ImageView fx:id="appLogoView" fitWidth="42" fitHeight="42" preserveRatio="true"/>
+            <VBox spacing="2">
+                <Label text="Détails du Sponsor"
+                       style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+                <Label text="Récapitulatif des informations saisies"
+                       style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="EventFlow"
+                   style="-fx-font-weight: 800; -fx-text-fill: #0ea5e9;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox spacing="18" style="-fx-padding: 22;">
+            <VBox spacing="12" prefWidth="560"
+                  style="-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #e2e8f0; -fx-padding: 18;">
+                <Label text="Informations"
+                       style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+
+                <GridPane hgap="12" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="140"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <Label text="Entreprise :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="companyLabel" text="—" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Email :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="emailLabel" text="—" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Contribution :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="contributionLabel" text="—"
+                           style="-fx-text-fill:#059669; -fx-font-weight:800;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Logo URL :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <Label fx:id="logoUrlLabel" text="—" wrapText="true" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <Label text="Contract URL :" style="-fx-text-fill:#334155; -fx-font-weight:700;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <Label fx:id="contractUrlLabel" text="—" wrapText="true" style="-fx-text-fill:#0f172a;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                </GridPane>
+            </VBox>
+
+            <VBox spacing="12" prefWidth="300"
+                  style="-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #e2e8f0; -fx-padding: 18;"
+                  alignment="TOP_CENTER">
+                <Label text="Logo Sponsor"
+                       style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+
+                <StackPane prefHeight="220" prefWidth="260"
+                           style="-fx-background-color:#f1f5f9; -fx-background-radius: 14; -fx-border-radius:14; -fx-border-color:#e2e8f0;">
+                    <ImageView fx:id="sponsorLogoView" fitWidth="180" fitHeight="180" preserveRatio="true"/>
+                </StackPane>
+
+                <Button fx:id="openContractBtn"
+                        text="📄 Ouvrir le contrat"
+                        onAction="#onOpenContract"
+                        style="-fx-background-color: linear-gradient(to right,#fb923c,#f97316);
+                               -fx-text-fill: white; -fx-font-weight: 800;
+                               -fx-background-radius: 12; -fx-padding: 10 14;"/>
+            </VBox>
+        </HBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="10"
+              style="-fx-padding: 14 22; -fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;">
+            <Button fx:id="okBtn"
+                    text="OK"
+                    onAction="#onOk"
+                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: 800;
+                           -fx-background-radius: 12; -fx-padding: 10 18;"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<!-- SCROLLPANE PRINCIPAL -->
+<ScrollPane fitToWidth="true" fitToHeight="true"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.pidev.controller.auth.SignupController"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+
+    <!-- Contenu principal qui défile -->
+    <BorderPane prefHeight="800" prefWidth="1200"
+                style="-fx-background-color: linear-gradient(to bottom right, #f0f8ff, #e6f2ff);">
+
+        <!-- BOUTON RETOUR EN HAUT À GAUCHE -->
+        <top>
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 20 0 0 40;">
+                <Button text="← Retour à l'accueil"
+                        onAction="#goToLanding"
+                        style="-fx-background-color: transparent; -fx-text-fill: #2196F3;
+                               -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;
+                               -fx-border-color: #2196F3; -fx-border-width: 1;
+                               -fx-border-radius: 20; -fx-background-radius: 20;
+                               -fx-padding: 8 20;"/>
+            </HBox>
+        </top>
+
+        <center>
+            <GridPane alignment="CENTER" hgap="60">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="45"/>
+                    <ColumnConstraints percentWidth="55"/>
+                </columnConstraints>
+
+                <!-- Partie gauche : Présentation avec logo -->
+                <VBox alignment="CENTER" spacing="40" GridPane.columnIndex="0"
+                      style="-fx-padding: 40 60 40 40;">
+
+                    <ImageView fitHeight="222" fitWidth="222" preserveRatio="true">
+                        <Image url="@images/logo.png" />
+                    </ImageView>
+
+                    <!-- Points forts -->
+                    <VBox spacing="25" prefWidth="380">
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane>
+                                <Circle radius="22" fill="rgba(33, 150, 243, 0.1)"/>
+                                <Label text="📅" style="-fx-font-size: 18px; -fx-text-fill: #2196F3;"/>
+                            </StackPane>
+                            <VBox spacing="3">
+                                <Label text="Créez des événements"
+                                       style="-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                <Label text="Organisez et planifiez facilement"
+                                       style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane>
+                                <Circle radius="22" fill="rgba(33, 150, 243, 0.1)"/>
+                                <Label text="👥" style="-fx-font-size: 18px; -fx-text-fill: #2196F3;"/>
+                            </StackPane>
+                            <VBox spacing="3">
+                                <Label text="Gérez les participants"
+                                       style="-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                <Label text="Suivi en temps réel des inscriptions"
+                                       style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane>
+                                <Circle radius="22" fill="rgba(33, 150, 243, 0.1)"/>
+                                <Label text="💰" style="-fx-font-size: 18px; -fx-text-fill: #2196F3;"/>
+                            </StackPane>
+                            <VBox spacing="3">
+                                <Label text="Suivez votre budget"
+                                       style="-fx-text-fill: #333333; -fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                <Label text="Contrôlez les dépenses et recettes"
+                                       style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Partie droite : Formulaire d'inscription -->
+                <VBox alignment="CENTER" spacing="0" GridPane.columnIndex="1"
+                      style="-fx-padding: 60;">
+
+                    <!-- Carte blanche centrée -->
+                    <VBox alignment="TOP_CENTER" spacing="30"
+                          style="-fx-padding: 40 45; -fx-background-color: white;
+                                 -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+                                 -fx-max-width: 480;">
+
+                        <!-- En-tête centré -->
+                        <VBox alignment="CENTER" spacing="8">
+                            <Label text="Inscription"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
+                            <Label text="Rejoignez notre communauté universitaire"
+                                   style="-fx-text-fill: #718096; -fx-font-size: 14px;"/>
+                        </VBox>
+
+                        <!-- Formulaire compact -->
+                        <VBox spacing="18" prefWidth="380">
+                            <TextField fx:id="First_Name" promptText="Nom *"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12 15;"/>
+
+                            <TextField fx:id="Last_Name" promptText="Prénom *"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12 15;"/>
+
+                            <Label fx:id="emailLabel" textFill="red"/>
+                            <TextField fx:id="Email" promptText="Email universitaire *"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12 15;"/>
+
+                            <TextField fx:id="Faculte" promptText="Faculté (optionnel)"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12 15;"/>
+
+                            <PasswordField fx:id="Password" promptText="Mot de passe *"
+                                           style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12 15;"/>
+
+                            <Label fx:id="ConfirmerPasswordLabel" textFill="red"/>
+                            <PasswordField fx:id="ConfirmerPassword" promptText="Confirmer le mot de passe *"
+                                           style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12 15;"/>
+
+                            <Label fx:id="RegistrationMessageLabel" textFill="green"/>
+                        </VBox>
+
+                        <!-- Conditions et bouton -->
+                        <VBox spacing="20" alignment="CENTER" prefWidth="380">
+                            <CheckBox fx:id="conditionsCheckbox"
+                                      text="J'accepte les conditions d'utilisation"
+                                      style="-fx-text-fill: #4a5568; -fx-font-size: 13px;"/>
+
+                            <Button fx:id="btnSave" text="Créer mon compte"
+                                    onAction="#registerButtonOnAction"
+                                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;
+                                           -fx-background-radius: 10; -fx-padding: 12 40; -fx-font-size: 14px;"
+                                    prefWidth="300"/>
+
+                            <!-- Liens de navigation -->
+                            <VBox spacing="10" alignment="CENTER">
+                                <HBox alignment="CENTER" spacing="5">
+                                    <Label text="Déjà membre?" style="-fx-text-fill: #718096;"/>
+                                    <Hyperlink text="Se connecter"
+                                               onAction="#goToLogin"
+                                               style="-fx-text-fill: #2196F3; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                                </HBox>
+
+                            </VBox>
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </GridPane>
+        </center>
+
+        <!-- Barre de copyright en bas -->
+        <bottom>
+            <VBox alignment="CENTER" spacing="10"
+                  style="-fx-padding: 20; -fx-background-color: rgba(33, 150, 243, 0.05);">
+
+                <Label text="© 2026 EventFlow - Tous droits réservés"
+                       style="-fx-text-fill: #666666; -fx-font-size: 12px;"/>
+                <HBox spacing="20" alignment="CENTER">
+                    <Hyperlink text="Conditions d'utilisation"
+                               style="-fx-text-fill: #2196F3; -fx-font-size: 12px;"/>
+                    <Hyperlink text="Politique de confidentialité"
+                               style="-fx-text-fill: #2196F3; -fx-font-size: 12px;"/>
+                    <Hyperlink text="Support"
+                               style="-fx-text-fill: #2196F3; -fx-font-size: 12px;"/>
+                </HBox>
+            </VBox>
+        </bottom>
+    </BorderPane>
+</ScrollPane>
+
+
