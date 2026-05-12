@@ -570,6 +570,24 @@ public class EventFormController {
             java.net.HttpURLConnection conn = null;
             java.io.InputStream inputStream = null;
             try {
+                String hfToken;
+                try {
+                    hfToken = com.example.pidev.utils.HFTokenLoader.getHFToken();
+                } catch (Exception tokenEx) {
+                    Platform.runLater(() -> {
+                        btnGenererAffiche.setDisable(false);
+                        loadingSpinner.setVisible(false);
+                        loadingSpinner.setManaged(false);
+                        afficheStatus.setText("HF_TOKEN manquant");
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Token manquant");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Le token Hugging Face n'est pas configuré. Configure HF_TOKEN puis réessaie.");
+                        alert.showAndWait();
+                    });
+                    return;
+                }
+
                 String prompt = String.format(
                         "professional university event poster, title: %s, category: %s, location: %s, modern design, vibrant colors, no text overlay",
                         titre, categorie, gouvernorat);
@@ -580,7 +598,7 @@ public class EventFormController {
 
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "image/png");
-                conn.setRequestProperty("Authorization", "Bearer " + com.example.pidev.utils.HFTokenLoader.getHFToken());
+                conn.setRequestProperty("Authorization", "Bearer " + hfToken);
                 conn.setDoOutput(true);
                 conn.setConnectTimeout(60000); conn.setReadTimeout(60000);
 

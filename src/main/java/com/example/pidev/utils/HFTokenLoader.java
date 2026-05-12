@@ -13,49 +13,34 @@ import io.github.cdimascio.dotenv.Dotenv;
  */
 public class HFTokenLoader {
 
-    private static final Dotenv dotenv = Dotenv.configure()
-        .directory(".") // Cherche .env dans la racine du projet
-        .ignoreIfMissing() // Ne crash pas si .env n'existe pas
-        .load();
+    private static Dotenv dotenv() {
+        try {
+            return Dotenv.configure().directory(".").ignoreIfMissing().load();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
-    private static final String HF_TOKEN = loadHFToken();
-
-    /**
-     * Charger le HF_TOKEN de manière sécurisée
-     */
     private static String loadHFToken() {
-        // 1. Essayer d'abord depuis les variables d'environnement système (production)
         String hfToken = System.getenv("HF_TOKEN");
-
-        // 2. Si pas trouvé, chercher dans .env (développement)
-        if (hfToken == null || hfToken.isEmpty()) {
-            hfToken = dotenv.get("HF_TOKEN");
+        if (hfToken == null || hfToken.isBlank()) {
+            Dotenv env = dotenv();
+            if (env != null) {
+                hfToken = env.get("HF_TOKEN");
+            }
         }
-
-        // 3. Valider
-        if (hfToken == null || hfToken.isEmpty()) {
-            String errorMsg = "❌ HF_TOKEN non configuré!\n" +
-                "Ajoute le dans l'une de ces options:\n" +
-                "  1. Variables d'environnement système: setx HF_TOKEN hf_xxxxx\n" +
-                "  2. Fichier .env local (jamais à committer): HF_TOKEN=hf_xxxxx";
-            System.err.println(errorMsg);
-            throw new RuntimeException(errorMsg);
-        }
-
-        System.out.println("✅ HF_TOKEN chargé depuis: " +
-            (System.getenv("HF_TOKEN") != null ? "variables système" : "fichier .env"));
-
-        return hfToken;
+        return (hfToken == null || hfToken.isBlank()) ? null : hfToken;
     }
 
     /**
      * Récupère le token HF (JAMAIS l'afficher entièrement!)
      */
     public static String getHFToken() {
-        if (HF_TOKEN == null || HF_TOKEN.isEmpty()) {
-            throw new RuntimeException("❌ HF_TOKEN vide ou non chargé");
+        String token = loadHFToken();
+        if (token == null) {
+            throw new IllegalStateException("HF_TOKEN non configuré");
         }
-        return HF_TOKEN;
+        return token;
     }
 
     /**
@@ -74,8 +59,12 @@ public class HFTokenLoader {
      * Vérifie que le token est valide
      */
     public static boolean isTokenValid() {
-        String token = getHFToken();
-        return token.startsWith("hf_") && token.length() > 20;
+        try {
+            String token = getHFToken();
+            return token.startsWith("hf_") && token.length() > 20;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -93,4 +82,3 @@ public class HFTokenLoader {
         }
     }
 }
-
