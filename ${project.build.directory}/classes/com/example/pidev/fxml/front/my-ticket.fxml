@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.front.MyTicketController"
+      spacing="0"
+      style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
+      alignment="TOP_CENTER">
+
+    <!-- Header -->
+    <HBox style="-fx-padding: 20 40; -fx-background-color: rgba(255,255,255,0.1);"
+          alignment="CENTER_LEFT" spacing="20">
+
+        <Button fx:id="backBtn" text="← Retour aux événements" onAction="#handleBackToEvents"
+                style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 14px;
+                       -fx-background-radius: 8; -fx-padding: 10 20; -fx-border-color: white;
+                       -fx-border-width: 1; -fx-cursor: hand; -fx-font-weight: 600;"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Label text="EventFlow" style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: white;"/>
+    </HBox>
+
+    <!-- Main Content -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+        <VBox alignment="TOP_CENTER" spacing="30" style="-fx-padding: 40;">
+
+            <!-- Titre -->
+            <VBox alignment="CENTER" spacing="10">
+                <Label text="🎫 Mon Billet"
+                       style="-fx-font-size: 36px; -fx-font-weight: 700; -fx-text-fill: white;"/>
+                <Label text="Votre participation est confirmée !"
+                       style="-fx-font-size: 16px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+            </VBox>
+
+            <!-- Carte du billet -->
+            <VBox spacing="0" style="-fx-background-color: white; -fx-background-radius: 20;
+                                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 5);"
+                  maxWidth="600" alignment="CENTER">
+
+                <!-- En-tête coloré -->
+                <VBox spacing="15" style="-fx-padding: 30; -fx-background-color: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
+                                          -fx-background-radius: 20 20 0 0;" alignment="CENTER">
+                    <Label text="🎉" style="-fx-font-size: 48px;"/>
+                    <Label fx:id="eventTitleLabel" text="Nom de l'événement"
+                           style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: white; -fx-wrap-text: true;"
+                           alignment="CENTER" wrapText="true" maxWidth="500"/>
+                </VBox>
+
+                <!-- Contenu du billet -->
+                <VBox spacing="25" style="-fx-padding: 30;">
+
+                    <!-- Code du ticket -->
+                    <VBox spacing="8" alignment="CENTER">
+                        <Label text="CODE DU BILLET"
+                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                        <Label fx:id="ticketCodeLabel" text="EVT-XXX-XXX"
+                               style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: #0D47A1;
+                                      -fx-background-color: #E3F2FD; -fx-padding: 10 20; -fx-background-radius: 10;"/>
+                    </VBox>
+
+                    <Separator style="-fx-background-color: #e9ecef;"/>
+
+                    <!-- Informations de l'événement -->
+                    <GridPane hgap="20" vgap="15">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                        </columnConstraints>
+
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="📅 DATE" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                            <Label fx:id="eventDateLabel" text="DD/MM/YYYY HH:MM"
+                                   style="-fx-font-size: 15px; -fx-font-weight: 500; -fx-text-fill: #1e293b;"/>
+                        </VBox>
+
+                        <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="📍 LIEU" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                            <Label fx:id="eventLocationLabel" text="Lieu de l'événement"
+                                   style="-fx-font-size: 15px; -fx-font-weight: 500; -fx-text-fill: #1e293b; -fx-wrap-text: true;"
+                                   wrapText="true"/>
+                        </VBox>
+
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label text="🎫 STATUT" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                            <Label fx:id="ticketStatusLabel" text="Non utilisé"
+                                   style="-fx-padding: 5 15; -fx-background-radius: 20; -fx-font-size: 13px; -fx-font-weight: 600;
+                                          -fx-background-color: #d1fae5; -fx-text-fill: #065f46;"/>
+                        </VBox>
+
+                        <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label text="💰 PRIX" style="-fx-font-size: 11px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                            <Label fx:id="eventPriceLabel" text="Gratuit"
+                                   style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #10b981;"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Separator style="-fx-background-color: #e9ecef;"/>
+
+                    <!-- QR Code -->
+                    <VBox spacing="15" alignment="CENTER">
+                        <Label text="SCANNEZ POUR ENTRER"
+                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #64748b;"/>
+                        <VBox style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-background-radius: 12;
+                                     -fx-border-color: #e9ecef; -fx-border-width: 2; -fx-border-radius: 12;">
+                            <ImageView fx:id="qrCodeImageView" fitHeight="250" fitWidth="250" preserveRatio="true"/>
+                        </VBox>
+                        <Label text="Présentez ce QR code à l'entrée de l'événement"
+                               style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-wrap-text: true;"
+                               alignment="CENTER" wrapText="true" maxWidth="400"/>
+                    </VBox>
+
+                </VBox>
+            </VBox>
+
+            <!-- Actions -->
+            <HBox spacing="15" alignment="CENTER" style="-fx-padding: 20 0;">
+                <Button text="📧 Envoyer par email" onAction="#handleSendEmail"
+                        style="-fx-background-color: white; -fx-text-fill: #0D47A1; -fx-font-size: 14px;
+                               -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand;
+                               -fx-font-weight: 600; -fx-border-color: #0D47A1; -fx-border-width: 2;"/>
+
+                <Button text="📥 Télécharger PDF" onAction="#handleDownloadPDF"
+                        style="-fx-background-color: white; -fx-text-fill: #0D47A1; -fx-font-size: 14px;
+                               -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand;
+                               -fx-font-weight: 600; -fx-border-color: #0D47A1; -fx-border-width: 2;"/>
+            </HBox>
+
+            <!-- Footer -->
+            <VBox alignment="CENTER" spacing="10" style="-fx-padding: 20 0;">
+                <Label text="Conservez ce billet jusqu'à la fin de l'événement"
+                       style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 13px;"/>
+                <Label text="© 2026 EventFlow - Plateforme de gestion d'événements"
+                       style="-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 11px;"/>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+
+</VBox>
+

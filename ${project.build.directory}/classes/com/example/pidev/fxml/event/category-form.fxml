@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.event.CategoryFormController"
+      spacing="0"
+      styleClass="page-background"
+      stylesheets="@../../css/atlantafx-custom.css">
+
+    <!-- ===================== NAVBAR DYNAMIQUE ===================== -->
+
+    <!-- ===================== SCROLLPANE ===================== -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                hbarPolicy="AS_NEEDED"
+                vbarPolicy="AS_NEEDED"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+        <VBox spacing="0">
+
+            <!-- ===================== HEADER FORMULAIRE ===================== -->
+            <HBox style="-fx-background-color: white; -fx-padding: 15 40; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"
+                  alignment="CENTER_LEFT" spacing="20">
+
+                <Button fx:id="backBtn" text="⬅ Retour" onAction="#handleBack"
+                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px;
+                               -fx-background-radius: 8; -fx-padding: 8 15; -fx-border-color: #cbd5e1;
+                               -fx-border-width: 1; -fx-cursor: hand;"/>
+
+                <VBox spacing="5">
+                    <Label fx:id="titleLabel" text="Nouvelle Catégorie"
+                           style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: #1e293b;"/>
+                    <Label text="Créez une nouvelle catégorie"
+                           style="-fx-text-fill: #6c757d; -fx-font-size: 13px;"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="12">
+                    <Button text="✖ Annuler" onAction="#handleCancel"
+                            style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px;
+                                   -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-padding: 8 20;
+                                   -fx-cursor: hand;"/>
+                    <Button fx:id="saveBtn" text="✔ Enregistrer" onAction="#handleSave"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px;
+                                   -fx-background-radius: 8; -fx-padding: 8 20; -fx-cursor: hand;
+                                   -fx-font-weight: 600;"/>
+                </HBox>
+            </HBox>
+
+            <!-- ===================== FORMULAIRE ===================== -->
+            <VBox style="-fx-padding: 30; -fx-spacing: 25;">
+
+                <!-- CARD PRINCIPALE -->
+                <VBox spacing="25" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 16;
+                                          -fx-border-color: #e9ecef; -fx-border-width: 1; -fx-border-radius: 16;
+                                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 10, 0, 0, 2);">
+
+                    <!-- SECTION 1: INFORMATIONS -->
+                    <VBox spacing="15">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="🧾" style="-fx-font-size: 18px;"/>
+                            <Label text="INFORMATIONS"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
+                                          -fx-letter-spacing: 0.5px;"/>
+                        </HBox>
+
+                        <!-- Nom -->
+                        <VBox spacing="6">
+                            <HBox spacing="5" alignment="CENTER_LEFT">
+                                <Label text="Nom"
+                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label text="*" style="-fx-text-fill: #dc3545; -fx-font-size: 14px;"/>
+                            </HBox>
+                            <TextField fx:id="nameField" promptText="Ex: Conférence, Atelier, Forum..."
+                                       style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
+                                              -fx-border-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"
+                                       prefHeight="42"
+                                       prefWidth="400"
+                                       maxWidth="400"/>
+                            <Label fx:id="nameError" text=""
+                                   style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
+                        </VBox>
+
+                        <!-- Description avec largeur identique au Nom -->
+                        <VBox spacing="6">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Description"
+                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <Label fx:id="descriptionCounter" text="(0/200)"
+                                       style="-fx-text-fill: #6c757d; -fx-font-size: 12px;"/>
+                            </HBox>
+                            <TextArea fx:id="descriptionArea" promptText="Décrivez cette catégorie..."
+                                      prefRowCount="4"
+                                      wrapText="true"
+                                      style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
+                                             -fx-border-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"
+                                      prefHeight="100"
+                                      prefWidth="400"
+                                      maxWidth="400"/>
+                            <Label fx:id="descriptionError" text=""
+                                   style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- SÉPARATEUR -->
+                    <Separator style="-fx-background-color: transparent;"/>
+
+                    <!-- SECTION 2: APPARENCE avec aperçu dynamique -->
+                    <VBox spacing="15">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="🎨" style="-fx-font-size: 18px;"/>
+                            <Label text="APPARENCE"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
+                                          -fx-letter-spacing: 0.5px;"/>
+                        </HBox>
+
+                        <!-- Ligne Icône + Couleur avec aperçus -->
+                        <HBox spacing="20">
+                            <!-- Icône avec aperçu -->
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Icône"
+                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <ComboBox fx:id="iconCombo" prefWidth="160"
+                                              style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
+                                                     -fx-border-radius: 8; -fx-padding: 8 12;"
+                                              promptText="Choisir"/>
+                                    <!-- Aperçu icône dynamique -->
+                                    <Label fx:id="iconPreview" text="⭐"
+                                           style="-fx-font-size: 24px; -fx-min-width: 40; -fx-alignment: CENTER;
+                                                  -fx-background-color: #f8f9fa; -fx-padding: 6; -fx-background-radius: 8;
+                                                  -fx-border-color: #ced4da; -fx-border-width: 1; -fx-border-radius: 8;"/>
+                                </HBox>
+                            </VBox>
+
+                            <!-- Couleur avec aperçu -->
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Couleur"
+                                       style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2c3e50;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <ColorPicker fx:id="colorPicker"
+                                                 style="-fx-background-radius: 8; -fx-min-height: 42;"/>
+                                    <TextField fx:id="colorField" prefWidth="90"
+                                               editable="false"
+                                               style="-fx-background-color: #f8f9fa; -fx-border-color: #ced4da;
+                                                      -fx-border-radius: 8; -fx-padding: 8 12; -fx-font-family: monospace;"/>
+                                    <!-- Aperçu couleur dynamique -->
+                                    <Region fx:id="colorPreview"
+                                            style="-fx-min-width: 30; -fx-min-height: 30; -fx-background-radius: 6;
+                                                   -fx-background-color: #2196F3; -fx-border-color: #ced4da;
+                                                   -fx-border-width: 1; -fx-border-radius: 6;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- SÉPARATEUR -->
+                    <Separator style="-fx-background-color: transparent;"/>
+
+                    <!-- SECTION 3: STATUT -->
+                    <VBox spacing="15">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="🛠️" style="-fx-font-size: 18px;"/>
+                            <Label text="STATUT"
+                                   style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #1e293b;
+                                          -fx-letter-spacing: 0.5px;"/>
+                        </HBox>
+
+                        <HBox spacing="25" alignment="CENTER_LEFT">
+                            <RadioButton fx:id="activeRadio" text="Actif" selected="true">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="statusGroup"/>
+                                </toggleGroup>
+                            </RadioButton>
+                            <RadioButton fx:id="inactiveRadio" text="Inactif" toggleGroup="$statusGroup"/>
+                        </HBox>
+                        <Label fx:id="statusError" text=""
+                               style="-fx-text-fill: #ef4444; -fx-font-size: 12px;" visible="false"/>
+                    </VBox>
+
+                </VBox> <!-- Fin VBox CARD PRINCIPALE -->
+
+                <!-- Footer -->
+                <HBox alignment="CENTER" style="-fx-padding: 20 0 10 0;">
+                    <Label text="© 2026 EventFlow - Gestion des catégories"
+                           style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+                </HBox>
+
+            </VBox> <!-- Fin VBox FORMULAIRE -->
+        </VBox> <!-- Fin VBox SCROLLPANE CONTENT -->
+    </ScrollPane> <!-- Fin ScrollPane -->
+</VBox> <!-- Fin VBox PRINCIPAL -->

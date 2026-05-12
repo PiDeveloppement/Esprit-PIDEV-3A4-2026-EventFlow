@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+
+<StackPane prefHeight="750.0" prefWidth="1100.0" style="-fx-background-color: #f0f2f5;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.questionnaire.QuestionController">
+    <children>
+        <VBox maxWidth="500.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 35; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);" StackPane.alignment="CENTER">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label text="✨" style="-fx-font-size: 24px;" />
+                        <VBox HBox.hgrow="ALWAYS">
+                            <Label text="Éditeur de Questions" textFill="#1a202c">
+                                <font>
+                                    <Font name="System Bold" size="26.0" />
+                                </font>
+                            </Label>
+                        </VBox>
+                        <Button onAction="#switchToList" text="Voir la liste 📋"
+                                style="-fx-background-color: #f1f5f9; -fx-text-fill: #4f46e5; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 8 15;" />
+                    </children>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.5;" />
+
+                <VBox spacing="15.0">
+                    <children>
+                        <VBox spacing="8.0">
+                            <Label text="Événement associé" style="-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;" />
+                            <ComboBox fx:id="comboEvent" maxWidth="Infinity" promptText="Choisir l'événement"
+                                      style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-pref-height: 45;" />
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <Label text="Énoncé de la Question" style="-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;" />
+                            <TextArea fx:id="txtTexte" prefHeight="120.0" promptText="Saisissez l'énoncé ici..." wrapText="true"
+                                      style="-fx-control-inner-background: #f8fafc; -fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
+                            <Label fx:id="lblSuggestionIA" text="" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <Label text="Réponse attendue" style="-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;" />
+                            <TextField fx:id="txtReponse" promptText="Saisissez la bonne réponse"
+                                       style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-pref-height: 45;" />
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <Label text="Nombre de points" style="-fx-font-weight: bold; -fx-text-fill: #4a5568; -fx-font-size: 14px;" />
+                            <TextField fx:id="txtPoints" promptText="Ex: 10"
+                                       style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-pref-height: 45;" />
+                        </VBox>
+                    </children>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+
+                <VBox spacing="12.0">
+                    <children>
+                        <Button maxWidth="Infinity" onAction="#handleSave" prefHeight="50.0"
+                                style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-background-radius: 12; -fx-cursor: hand;"
+                                text="ENREGISTRER" />
+
+                        <Button maxWidth="Infinity" onAction="#viderChampsSaufCombo" prefHeight="45.0"
+                                style="-fx-background-color: white; -fx-text-fill: #64748b; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-cursor: hand;"
+                                text="Réinitialiser" />
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+</StackPane>

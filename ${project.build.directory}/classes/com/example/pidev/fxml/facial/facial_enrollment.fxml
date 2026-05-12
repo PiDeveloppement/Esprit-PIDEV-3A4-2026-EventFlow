@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.facial.FacialEnrollmentController"
+      prefWidth="700" prefHeight="600">
+
+    <Label text="📸 Enregistrement Facial"
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
+
+    <Label text="Suivez les instructions pour enregistrer votre visage"
+           style="-fx-text-fill: #666; -fx-font-size: 14px;"/>
+
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+        <!-- Zone caméra -->
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label text="Aperçu caméra" style="-fx-font-weight: bold;"/>
+            <ImageView fx:id="cameraView" fitWidth="400" fitHeight="300"
+                       style="-fx-background-color: #000; -fx-background-radius: 10;"
+                       preserveRatio="true"/>
+        </VBox>
+
+        <!-- Zone de contrôle -->
+        <VBox spacing="15" prefWidth="200" alignment="TOP_CENTER">
+            <Button fx:id="startCameraBtn" text="📷 Démarrer caméra"
+                    onAction="#handleStartCamera"
+                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;
+                           -fx-padding: 12; -fx-background-radius: 8;"
+                    prefWidth="180"/>
+
+            <Button fx:id="captureFaceBtn" text="📸 Capturer visage"
+                    onAction="#handleCaptureFace"
+                    style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;
+                           -fx-padding: 12; -fx-background-radius: 8;"
+                    prefWidth="180" disable="true"/>
+
+            <ProgressIndicator fx:id="progressIndicator" prefWidth="40" prefHeight="40" visible="false"/>
+
+            <Label fx:id="statusLabel" wrapText="true" textAlignment="CENTER"/>
+
+            <Separator prefWidth="180"/>
+
+            <VBox fx:id="facePreviewBox" spacing="10" visible="false">
+                <Label text="Aperçu du visage" style="-fx-font-weight: bold;"/>
+                <Rectangle width="100" height="100" style="-fx-fill: #f0f0f0; -fx-stroke: #2196F3; -fx-stroke-width: 2;"/>
+                <Button fx:id="enrollBtn" text="💾 Enregistrer"
+                        onAction="#handleEnroll"
+                        style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-font-weight: bold;
+                               -fx-padding: 10; -fx-background-radius: 8;"
+                        prefWidth="180" disable="true"/>
+            </VBox>
+
+            <Button text="❌ Annuler" onAction="#handleCancel"
+                    style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-padding: 8; -fx-background-radius: 8;"
+                    prefWidth="180"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="5" style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 8;">
+        <Label text="📝 Instructions :" style="-fx-font-weight: bold;"/>
+        <Label text="1. Assurez-vous d'être dans un endroit bien éclairé"/>
+        <Label text="2. Regardez directement la caméra"/>
+        <Label text="3. Enlevez vos lunettes si possible"/>
+        <Label text="4. Gardez une expression neutre"/>
+    </VBox>
+</VBox>

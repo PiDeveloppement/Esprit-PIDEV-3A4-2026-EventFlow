@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+
+<VBox spacing="25" styleClass="main-container" stylesheets="@style.css"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.resource.EquipementController">
+
+    <padding>
+        <Insets bottom="30" left="30" right="30" top="30" />
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Gestion des Équipements" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            <Label text="Consultez et gérez l'inventaire de votre matériel" style="-fx-text-fill: #64748b;"/>
+        </VBox>
+
+        <HBox spacing="15">
+            <HBox styleClass="stat-card-mini">
+                <VBox>
+                    <Label text="TOTAL" styleClass="stat-label-mini"/>
+                    <Label fx:id="totalArticlesLabel" text="124" styleClass="stat-value-mini"/>
+                </VBox>
+            </HBox>
+            <HBox styleClass="stat-card-mini" style="-fx-border-color: #fee2e2;">
+                <VBox>
+                    <Label text="EN PANNE" styleClass="stat-label-mini" style="-fx-text-fill: #ef4444;"/>
+                    <Label fx:id="aReparerLabel" text="12" styleClass="stat-value-mini" style="-fx-text-fill: #ef4444;"/>
+                </VBox>
+            </HBox>
+        </HBox>
+    </HBox>
+
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="toolbar">
+        <StackPane>
+            <TextField fx:id="searchField" promptText="Rechercher un équipement..." prefWidth="350" styleClass="search-field"/>
+        </StackPane>
+
+        <ComboBox fx:id="categoryFilter" prefWidth="200" promptText="Catégorie" styleClass="filter-combo"/>
+
+        <Region HBox.hgrow="ALWAYS" /> <Button onAction="#ouvrirAjout" text="Ajouter Équipement" styleClass="btn-primary">
+        <graphic>
+        </graphic>
+    </Button>
+    </HBox>
+
+    <VBox styleClass="table-container" VBox.vgrow="ALWAYS">
+        <TableView fx:id="equipementTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="imageCol" text="Aperçu" prefWidth="80" />
+                <TableColumn fx:id="nameCol" text="Désignation" prefWidth="250" />
+                <TableColumn fx:id="typeCol" text="Catégorie" prefWidth="150" />
+                <TableColumn fx:id="quantityCol" text="Stock" prefWidth="100" />
+                <TableColumn fx:id="statusCol" text="État" prefWidth="150" />
+                <TableColumn fx:id="actionCol" text="Actions" prefWidth="150" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
+</VBox>

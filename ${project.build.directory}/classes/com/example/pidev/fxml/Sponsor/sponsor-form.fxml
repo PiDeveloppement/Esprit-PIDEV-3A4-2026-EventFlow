@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.sponsor.SponsorFormController"
+            style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 18;"
+            prefWidth="520" prefHeight="720">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 8 8 18 8;">
+            <Label fx:id="titleLabel" text="Sponsor"
+                   style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="EventFlow" style="-fx-text-fill: #64748b; -fx-font-weight: 700;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color:transparent; -fx-border-color:transparent;">
+            <VBox spacing="12" style="-fx-padding: 0 8 0 8;">
+
+                <VBox spacing="6">
+                    <Label text="Événement" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
+                    <ComboBox fx:id="eventComboBox" promptText="Choisir un événement"
+                              style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="Entreprise" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
+                    <TextField fx:id="companyField" promptText="Nom entreprise"
+                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="Email contact" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
+                    <TextField fx:id="emailField" promptText="ex: sponsor@gmail.com"
+                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                </VBox>
+
+                <Separator/>
+
+                <VBox spacing="8">
+                    <Label text="Logo (upload Cloudinary)" style="-fx-font-weight: 800; -fx-text-fill: #0f172a;"/>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="Choisir Logo" onAction="#onChooseLogo"
+                                style="-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8;
+                                       -fx-font-weight: 800; -fx-background-radius: 10; -fx-padding: 10 14;"/>
+                        <Label fx:id="logoFileLabel" text="Aucun fichier choisi" style="-fx-text-fill: #334155;"/>
+                    </HBox>
+
+                    <!-- ✅ preview -->
+                    <StackPane prefHeight="140"
+                               style="-fx-background-color:#f1f5f9; -fx-background-radius: 14; -fx-border-radius:14; -fx-border-color:#e2e8f0;">
+                        <ImageView fx:id="logoPreview" fitWidth="110" fitHeight="110" preserveRatio="true"/>
+                    </StackPane>
+
+                    <!-- URL cachée / readonly -->
+                    <TextField fx:id="logoField" editable="false"
+                               promptText="URL logo (remplie automatiquement)"
+                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                </VBox>
+
+                <Separator/>
+
+                <VBox spacing="6">
+                    <Label text="Contribution (DT)" style="-fx-font-weight: 700; -fx-text-fill: #0f172a;"/>
+                    <TextField fx:id="contributionField" promptText="ex: 3500"
+                               style="-fx-background-radius: 10; -fx-border-radius: 10;"/>
+                </VBox>
+
+                <Label fx:id="errorLabel" text=""
+                       style="-fx-text-fill: #dc2626; -fx-font-weight: 700;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 18 8 8 8;">
+            <Button text="Annuler" onAction="#onCancel"
+                    style="-fx-background-color: #f1f5f9; -fx-text-fill: #0f172a;
+                           -fx-font-weight: 700; -fx-background-radius: 10; -fx-padding: 10 16;"/>
+            <Button text="Enregistrer" onAction="#onSave"
+                    style="-fx-background-color: #10b981; -fx-text-fill: white;
+                           -fx-font-weight: 800; -fx-background-radius: 10; -fx-padding: 10 16;"/>
+        </HBox>
+    </bottom>
+</BorderPane>

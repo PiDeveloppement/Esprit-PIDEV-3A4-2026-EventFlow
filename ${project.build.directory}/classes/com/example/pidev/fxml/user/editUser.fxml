@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.user.EditUserController"
+            style="-fx-background-color: #f8fafc;">
+
+    <top>
+        <VBox spacing="10" style="-fx-padding: 20 30 10 30;">
+            <Label text="✏️ Modifier l'utilisateur"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            <Label fx:id="userInfoLabel"
+                   style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="20" style="-fx-padding: 0 30 20 30;">
+            <VBox spacing="20"
+                  style="-fx-background-color: white; -fx-background-radius: 12;
+                         -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);
+                         -fx-padding: 25;">
+
+                <GridPane hgap="20" vgap="15">
+                    <padding><Insets top="10" bottom="10"/></padding>
+
+                    <Label text="Prénom *" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                           style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <TextField fx:id="firstnameField" promptText="Entrez le prénom"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               prefWidth="400"
+                               style="-fx-background-color: white; -fx-background-radius: 8;
+                                      -fx-padding: 10 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+                    <Label text="Nom *" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                           style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <TextField fx:id="lastnameField" promptText="Entrez le nom"
+                               GridPane.rowIndex="1" GridPane.columnIndex="1"
+                               prefWidth="400"
+                               style="-fx-background-color: white; -fx-background-radius: 8;
+                                      -fx-padding: 10 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+                    <Label text="Email *" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                           style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <TextField fx:id="emailField" promptText="exemple@universite.edu"
+                               GridPane.rowIndex="2" GridPane.columnIndex="1"
+                               prefWidth="400"
+                               style="-fx-background-color: white; -fx-background-radius: 8;
+                                      -fx-padding: 10 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+                    <Label text="Faculté" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                           style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <TextField fx:id="faculteField" promptText="Faculté d'appartenance"
+                               GridPane.rowIndex="3" GridPane.columnIndex="1"
+                               prefWidth="400"
+                               style="-fx-background-color: white; -fx-background-radius: 8;
+                                      -fx-padding: 10 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+
+                    <Label text="Rôle *" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                           style="-fx-text-fill: #475569; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <ComboBox fx:id="roleComboBox" promptText="Sélectionnez un rôle"
+                              GridPane.rowIndex="4" GridPane.columnIndex="1"
+                              prefWidth="400"
+                              style="-fx-background-color: white; -fx-background-radius: 8;
+                                     -fx-padding: 10 15; -fx-border-color: #cbd5e1; -fx-border-width: 1;"/>
+                </GridPane>
+
+                <HBox spacing="15" alignment="CENTER_RIGHT">
+                    <Button text="Annuler"
+                            onAction="#handleCancel"
+                            style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151;
+                                   -fx-font-weight: bold; -fx-font-size: 14px;
+                                   -fx-background-radius: 8; -fx-padding: 10 24;
+                                   -fx-cursor: hand;"/>
+                    <Button text="Enregistrer"
+                            onAction="#handleSave"
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-font-size: 14px;
+                                   -fx-background-radius: 8; -fx-padding: 10 24;
+                                   -fx-cursor: hand;"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" style="-fx-padding: 10 30 20 30;">
+            <Label text="ℹ️ Les champs marqués d'un * sont obligatoires"
+                   style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+        </HBox>
+    </bottom>
+</BorderPane>
