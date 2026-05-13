@@ -3,6 +3,7 @@ package com.example.pidev.controller.sponsor;
 import com.example.pidev.model.event.Event;
 import com.example.pidev.model.sponsor.Sponsor;
 import com.example.pidev.service.currency.CurrencyService;
+import com.example.pidev.service.event.EventService;
 import com.example.pidev.service.sponsor.SponsorService;
 import com.example.pidev.service.upload.CloudinaryUploadService;
 import com.example.pidev.service.whatsapp.WhatsAppService;
@@ -51,6 +52,7 @@ public class SponsorFormController {
     @FXML private Label     titleLabel;
     @FXML private TextField companyField;
     @FXML private TextField emailField;
+    @FXML private ComboBox<EventOption> eventComboBox;
     @FXML private TextField logoField;
     @FXML private Label     logoFileLabel;
     @FXML private ImageView logoPreview;
@@ -86,6 +88,22 @@ public class SponsorFormController {
     // ── Services ──────────────────────────────────────────────────────────────
     private final CloudinaryUploadService cloud          = new CloudinaryUploadService();
     private final SponsorService          sponsorService = new SponsorService();
+    private final EventService            eventService   = new EventService();
+
+    private static final class EventOption {
+        private final int id;
+        private final String title;
+
+        private EventOption(int id, String title) {
+            this.id = id;
+            this.title = title;
+        }
+
+        @Override
+        public String toString() {
+            return title;
+        }
+    }
 
     // ── Constantes ────────────────────────────────────────────────────────────
     private static final Pattern EMAIL_RX  = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
@@ -183,6 +201,8 @@ public class SponsorFormController {
             taxIdField.focusedProperty().addListener((obs, old, focused) -> {
                 if (!focused) validateTaxId();
             });
+
+        loadEventOptions();
     }
 
     // =========================================================================
@@ -219,6 +239,7 @@ public class SponsorFormController {
         selectedLogoFile = null; selectedDocFile = null; removeLogoRequested = false;
         logoField.clear();
         logoPreview.setImage(null);
+        selectEventById(null);
 
         if (currencyComboBox     != null) currencyComboBox.setValue("TND");
         if (convertedAmountLabel != null) convertedAmountLabel.setText("");
@@ -244,6 +265,7 @@ public class SponsorFormController {
         String existingLogo = safe(sponsor.getLogo_url());
         logoField.setText(existingLogo);
         selectedLogoFile = null; selectedDocFile = null; removeLogoRequested = false;
+        selectEventById(selectedEventId);
 
         if (!existingLogo.isBlank()) {
             try {
@@ -269,7 +291,10 @@ public class SponsorFormController {
     }
 
     public void preSelectEvent(Event event) {
-        if (event != null) selectedEventId = event.getId();
+        if (event != null) {
+            selectedEventId = event.getId();
+            selectEventById(selectedEventId);
+        }
     }
 
     // =========================================================================
@@ -620,11 +645,16 @@ public class SponsorFormController {
         // Annuler toute recherche de logo en cours
         if (debounceTimer != null) { debounceTimer.cancel(); debounceTimer = null; }
 
-        int eventId;
-        if (editing != null)             eventId = editing.getEvent_id();
-        else if (selectedEventId != null) eventId = selectedEventId;
-        else if (fixedEmail == null || fixedEmail.isBlank()) eventId = 0;
-        else { error("Choisissez un événement via le bouton Sponsoriser."); return; }
+        Integer chosenEventId = getSelectedEventId();
+        if (chosenEventId == null) chosenEventId = selectedEventId;
+        if (chosenEventId == null && editing != null && editing.getEvent_id() > 0) {
+            chosenEventId = editing.getEvent_id();
+        }
+        if (chosenEventId == null || chosenEventId <= 0) {
+            error("Veuillez choisir un evenement.");
+            return;
+        }
+        int eventId = chosenEventId;
 
         String company         = safe(companyField.getText());
         String email           = fixedEmail != null ? fixedEmail : safe(emailField.getText());
@@ -774,6 +804,45 @@ public class SponsorFormController {
         if (at <= 0 || at >= v.length() - 1) return "";
         String domain = v.substring(at + 1).trim();
         return (domain.isEmpty() || !domain.contains(".")) ? "" : domain;
+    }
+
+    private void loadEventOptions() {
+        if (eventComboBox == null) return;
+        eventComboBox.getItems().clear();
+        try {
+            List<Event> events = eventService.getAllEvents();
+            for (Event event : events) {
+                if (event == null || event.getId() <= 0) continue;
+                String title = safe(event.getTitle());
+                if (title.isEmpty()) title = "Evenement #" + event.getId();
+                eventComboBox.getItems().add(new EventOption(event.getId(), title));
+            }
+            if (selectedEventId != null) {
+                selectEventById(selectedEventId);
+            }
+        } catch (Exception ignored) {
+            error("Impossible de charger les evenements.");
+        }
+    }
+
+    private void selectEventById(Integer eventId) {
+        if (eventComboBox == null) return;
+        if (eventId == null || eventId <= 0) {
+            eventComboBox.getSelectionModel().clearSelection();
+            return;
+        }
+        for (EventOption option : eventComboBox.getItems()) {
+            if (option != null && option.id == eventId) {
+                eventComboBox.getSelectionModel().select(option);
+                return;
+            }
+        }
+    }
+
+    private Integer getSelectedEventId() {
+        if (eventComboBox == null) return null;
+        EventOption selected = eventComboBox.getSelectionModel().getSelectedItem();
+        return selected == null ? null : selected.id;
     }
 
     private void closeWindowIfModal() {

@@ -58,9 +58,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public class SponsorPortalController implements Initializable {
 
@@ -458,8 +460,9 @@ public class SponsorPortalController implements Initializable {
             return sorted;
         }
 
+        Set<Integer> sponsoredEventIds = getSponsoredEventIds();
         for (Event event : source) {
-            if (event != null && isEventActive(event)) {
+            if (event != null && isEventActive(event) && !sponsoredEventIds.contains(event.getId())) {
                 sorted.add(event);
             }
         }
@@ -469,6 +472,19 @@ public class SponsorPortalController implements Initializable {
                 Comparator.nullsLast(LocalDateTime::compareTo)
         ));
         return sorted;
+    }
+
+    private Set<Integer> getSponsoredEventIds() {
+        Set<Integer> ids = new HashSet<>();
+        if (sponsorBaseList == null || sponsorBaseList.isEmpty()) {
+            return ids;
+        }
+        for (Sponsor sponsor : sponsorBaseList) {
+            if (sponsor != null && sponsor.getEvent_id() > 0) {
+                ids.add(sponsor.getEvent_id());
+            }
+        }
+        return ids;
     }
 
     private void refreshSponsorFilterCombos() {

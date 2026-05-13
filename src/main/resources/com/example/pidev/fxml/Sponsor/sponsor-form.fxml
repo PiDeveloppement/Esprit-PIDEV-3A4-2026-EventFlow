@@ -75,8 +75,8 @@
 
                     <Label text="WhatsApp"
                            style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
-                           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <VBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+                           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="3" GridPane.columnIndex="1">
                         <VBox.margin><Insets bottom="12"/></VBox.margin>
                         <TextField fx:id="phoneField" promptText="216XXXXXXXX"
                                    style="-fx-background-radius: 10; -fx-border-radius: 10;
@@ -85,10 +85,23 @@
                                    maxWidth="Infinity"/>
                     </VBox>
 
+                    <Label text="Evenement"
+                           style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
+                           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <VBox.margin><Insets bottom="12"/></VBox.margin>
+                        <ComboBox fx:id="eventComboBox"
+                                  promptText="Selectionner un evenement"
+                                  style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                         -fx-padding: 9 14; -fx-background-color: #f8fafc;
+                                         -fx-border-color: #cbd5e1; -fx-border-width: 1.5;"
+                                  maxWidth="Infinity"/>
+                    </VBox>
+
                     <Label text="Secteur"
                            style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
-                           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <VBox GridPane.rowIndex="3" GridPane.columnIndex="1">
+                           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="4" GridPane.columnIndex="1">
                         <VBox.margin><Insets bottom="12"/></VBox.margin>
                         <TextField fx:id="industryField" promptText="ex: Technologie, Marketing"
                                    style="-fx-background-radius: 10; -fx-border-radius: 10;
@@ -99,8 +112,8 @@
 
                     <Label text="No Fiscal"
                            style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
-                           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                    <VBox GridPane.rowIndex="4" GridPane.columnIndex="1">
+                           GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="5" GridPane.columnIndex="1">
                         <VBox.margin><Insets bottom="12"/></VBox.margin>
                         <TextField fx:id="taxIdField" promptText="ex: 1234567A"
                                    style="-fx-background-radius: 10; -fx-border-radius: 10;
@@ -111,8 +124,8 @@
 
                     <Label text="Justificatif"
                            style="-fx-font-weight: 700; -fx-text-fill: #334155; -fx-font-size: 13px;"
-                           GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                    <VBox GridPane.rowIndex="5" GridPane.columnIndex="1">
+                           GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <VBox GridPane.rowIndex="6" GridPane.columnIndex="1">
                         <VBox.margin><Insets bottom="16"/></VBox.margin>
                         <HBox spacing="10" alignment="CENTER_LEFT">
                             <Button fx:id="uploadDocBtn" text="Choisir fichier"
