@@ -41,16 +41,10 @@
 
         <VBox spacing="0">
 
-<<<<<<< HEAD
             <!-- HERO SECTION AVEC AFFICHE (350px avec image dynamique) -->
             <StackPane fx:id="heroImage" prefHeight="350" minHeight="350"
                        style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <!-- L'image affiche sera définie dynamiquement lors du chargement de l'événement -->
-=======
-            <!-- HERO SECTION COMPACT (150px avec gradient dynamique) -->
-            <StackPane fx:id="heroImage" maxHeight="150" prefHeight="150" style="-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <!-- L'image ou gradient sera défini dynamiquement selon la catégorie -->
->>>>>>> 3b6d915494769658a424ed4d4ebfc03a4ec6bc88
             </StackPane>
 
             <!-- CONTENU PRINCIPAL (Layout moderne asymétrique) -->

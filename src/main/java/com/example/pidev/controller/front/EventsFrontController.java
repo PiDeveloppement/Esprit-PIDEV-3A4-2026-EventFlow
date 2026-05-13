@@ -269,6 +269,24 @@ public class EventsFrontController {
                     }
                 }
 
+                // === Nouveau fallback : vérifier le dossier public Symfony si le chemin commence par /uploads/posters/ ===
+                if (image == null) {
+                    try {
+                        if (posterPath != null && posterPath.startsWith("/uploads/posters/")) {
+                            File symfonyFile = new File("C:\\pidev-web-arij\\public" + posterPath);
+                            System.out.println("   🔍 Vérification Symfony public: " + symfonyFile.getAbsolutePath());
+                            if (symfonyFile.exists()) {
+                                image = new Image(symfonyFile.toURI().toString(), true);
+                                System.out.println("   ✅ Méthode Symfony public - Image chargée: " + symfonyFile.getAbsolutePath());
+                            } else {
+                                System.out.println("   ⚠️ Symfony public file not found: " + symfonyFile.getAbsolutePath());
+                            }
+                        }
+                    } catch (Exception eFb) {
+                        System.out.println("   ❌ Méthode Symfony échouée: " + eFb.getMessage());
+                    }
+                }
+
                 // Méthode 3 : Chemin direct file:
                 if (image == null) {
                     try {
@@ -566,3 +584,4 @@ public class EventsFrontController {
         }
     }
 }
+

@@ -689,17 +689,12 @@ public class EventFormController {
         try {
             if (affichePreview == null || affichePreview.getChildren().isEmpty()) return null;
 
-            // Sauvegarder dans le dossier assets/posters (qui sera au runtime dans target/classes)
-            File postersDir = new File("target/classes/assets/posters");
-
-            // Si target/classes n'existe pas, utiliser src/main/resources
+            String fileName = "poster_" + System.currentTimeMillis() + ".png";
+            File postersDir = new File("C:\\pidev-web-arij\\public\\uploads\\posters");
             if (!postersDir.exists()) {
-                postersDir = new File("src/main/resources/assets/posters");
+                postersDir.mkdirs();
             }
 
-            if (!postersDir.exists()) postersDir.mkdirs();
-
-            String fileName = "poster_" + System.currentTimeMillis() + ".png";
             File outputFile = new File(postersDir, fileName);
 
             WritableImage snapshot = affichePreview.snapshot(new SnapshotParameters(), null);
@@ -711,8 +706,7 @@ public class EventFormController {
 
             if (!ImageIO.write(img, "png", outputFile)) return null;
 
-            // Retourner le chemin relatif pour le stockage en DB
-            String path = "assets/posters/" + fileName;
+            String path = "/uploads/posters/" + fileName;
             System.out.println("✅ Affiche sauvegardée à: " + outputFile.getAbsolutePath());
             System.out.println("📊 Chemin stocké en DB: " + path);
             return path;

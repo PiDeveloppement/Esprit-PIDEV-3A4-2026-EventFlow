@@ -214,6 +214,29 @@ public class EventDetailController {
                     } else {
                         System.out.println("❌ Fichier n'existe pas à: " + absolutePath);
                         // Vérifier les emplacements alternatifs
+
+                        // === Nouveau fallback : vérifier le dossier public Symfony si le chemin commence par /uploads/posters/ ===
+                        try {
+                            if (imageUrl != null && imageUrl.startsWith("/uploads/posters/")) {
+                                File symfonyFile = new File("C:\\pidev-web-arij\\public" + imageUrl);
+                                System.out.println("🔍 Vérification Symfony public: " + symfonyFile.getAbsolutePath());
+                                if (symfonyFile.exists()) {
+                                    try {
+                                        String canonicalPath = symfonyFile.getCanonicalPath();
+                                        String fileUrl = "file:/" + canonicalPath.replace("\\", "/");
+                                        image = new Image(fileUrl, 600, 300, false, true);
+                                        System.out.println("✅ Image chargée depuis Symfony public folder: " + symfonyFile.getAbsolutePath());
+                                    } catch (Exception exSym) {
+                                        System.out.println("❌ Erreur chargement depuis Symfony public: " + exSym.getMessage());
+                                    }
+                                } else {
+                                    System.out.println("❌ Symfony public file not found: " + symfonyFile.getAbsolutePath());
+                                }
+                            }
+                        } catch (Exception fbEx) {
+                            System.out.println("❌ Fallback Symfony erreur: " + fbEx.getMessage());
+                        }
+
                         String[] alternativePaths = {
                                 "target/classes/" + imageUrl,
                                 "src/main/resources/" + imageUrl,

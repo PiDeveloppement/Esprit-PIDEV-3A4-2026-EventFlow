@@ -7,6 +7,11 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.io.IOException;
 
 /**
  * Service pour gérer les opérations CRUD sur les événements
@@ -48,7 +53,11 @@ public class EventService {
             pstmt.setTimestamp(4, event.getEndDate() != null ? Timestamp.valueOf(event.getEndDate()) : null);
             pstmt.setString(5, event.getLocation());
             pstmt.setInt(6, event.getCapacity());
-            pstmt.setString(7, event.getImageUrl());
+
+            // Traiter le chemin de l'image et copier le fichier si nécessaire
+            String imageUrlForDb = processImageUrlForDb(event.getImageUrl());
+            pstmt.setString(7, imageUrlForDb);
+
             pstmt.setInt(8, event.getCategoryId());
             pstmt.setInt(9, event.getCreatedBy());
             pstmt.setString(10, event.getStatus() != null ? event.getStatus().name() : "DRAFT");
@@ -237,7 +246,11 @@ public class EventService {
             pstmt.setTimestamp(4, event.getEndDate() != null ? Timestamp.valueOf(event.getEndDate()) : null);
             pstmt.setString(5, event.getLocation());
             pstmt.setInt(6, event.getCapacity());
-            pstmt.setString(7, event.getImageUrl());
+
+            // Traiter chemin image et copie si nécessaire
+            String imageUrlForDb = processImageUrlForDb(event.getImageUrl());
+            pstmt.setString(7, imageUrlForDb);
+
             pstmt.setInt(8, event.getCategoryId());
             pstmt.setInt(9, event.getCreatedBy());
             pstmt.setString(10, event.getStatus() != null ? event.getStatus().name() : "DRAFT");
@@ -548,5 +561,46 @@ public class EventService {
             System.err.println("❌ Erreur getAverageParticipationRate: " + e.getMessage());
         }
         return 0.0;
+    }
+
+    /**
+     * Si `imageUrl` provient de `assets/posters/...` (fichier généré en dev),
+     * copie le fichier dans le dossier public cible et retourne le chemin relatif
+     * à stocker en DB (ex: /uploads/posters/nom.png).
+     * Sinon retourne la valeur reçue.
+     */
+    private String processImageUrlForDb(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) return null;
+
+        // Si déjà au bon format (/uploads/...), on renvoie tel quel
+        if (imageUrl.startsWith("/uploads/")) return imageUrl;
+
+        // Si le chemin vient des ressources (assets/posters/...)
+        if (imageUrl.startsWith("assets/posters/")) {
+            String filename = Paths.get(imageUrl).getFileName().toString();
+            String dbPath = "/uploads/posters/" + filename;
+
+            // Source (dans le repo) et destination (serveur web)
+            Path src = Paths.get("src", "main", "resources", imageUrl.replace('/', java.io.File.separatorChar));
+            Path dest = Paths.get("C:", "pidev-web-arij", "public", "uploads", "posters", filename);
+
+            try {
+                Files.createDirectories(dest.getParent());
+                if (Files.exists(src)) {
+                    Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("✅ Poster copié vers: " + dest.toAbsolutePath());
+                } else {
+                    System.err.println("⚠️ Source affiche introuvable: " + src.toAbsolutePath());
+                }
+            } catch (IOException e) {
+                System.err.println("❌ Erreur copie affiche: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            return dbPath;
+        }
+
+        // Par défaut, renvoyer tel quel
+        return imageUrl;
     }
 }

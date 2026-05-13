@@ -195,6 +195,23 @@ public class EventViewController {
                 }
             }
 
+            // Méthode 3 : Si le chemin est du type /uploads/posters/..., chercher dans le dossier public Symfony
+            if (image == null) {
+                try {
+                    if (posterPath != null && posterPath.startsWith("/uploads/posters/")) {
+                        File symfonyFile = new File("C:\\pidev-web-arij\\public" + posterPath);
+                        if (symfonyFile.exists()) {
+                            image = new Image(symfonyFile.toURI().toString(), true);
+                            System.out.println("   ✅ Via Symfony public folder");
+                        } else {
+                            System.out.println("   ⚠️ Symfony public file not found: " + symfonyFile.getAbsolutePath());
+                        }
+                    }
+                } catch (Exception e3) {
+                    System.out.println("   ❌ Symfony File: " + e3.getMessage());
+                }
+            }
+
             if (image != null && !image.isError()) {
                 posterImageView.setImage(image);
                 posterImageView.setPreserveRatio(true);
