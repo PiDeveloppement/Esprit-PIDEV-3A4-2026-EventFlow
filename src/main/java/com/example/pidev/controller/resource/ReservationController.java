@@ -1,5 +1,6 @@
 package com.example.pidev.controller.resource;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +26,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -77,19 +79,7 @@ public class ReservationController implements Initializable {
                 }
             });
         }
-        // Afficher les informations utilisateur
-        if (session.isLoggedIn()) {
-            if (welcomeLabel != null) {
-                welcomeLabel.setText("Bienvenue, " + session.getFullName());
-            }
-            if (userInfoLabel != null) {
-                userInfoLabel.setText("Connecté en tant que: " + userRole +
-                        " (ID: " + currentUserId + ")");
-            }
-            System.out.println("📌 ReservationController - Utilisateur: " +
-                    session.getFullName() + " (ID: " + currentUserId +
-                    ", Rôle: " + userRole + ")");
-        }
+      
 
         setupTableColumns();
         setupSearchAndSort();
@@ -157,30 +147,57 @@ public class ReservationController implements Initializable {
         imgCol.setCellFactory(param -> new TableCell<>() {
             private final ImageView v = new ImageView();
             {
-                v.setFitHeight(40);
-                v.setFitWidth(40);
+                v.setFitHeight(45);
+                v.setFitWidth(45);
                 v.setPreserveRatio(true);
+                v.setSmooth(true);
             }
 
             @Override
             protected void updateItem(String path, boolean empty) {
                 super.updateItem(path, empty);
-                if (empty || path == null) {
+                if (empty || path == null || path.isBlank()) {
                     setGraphic(null);
-                } else {
-                    try {
-                        String finalPath = path;
-                        if (path.contains(":/") || path.contains(":\\")) {
-                            if (!path.startsWith("file:")) {
-                                finalPath = "file:/" + path.replace("\\", "/");
-                            }
-                        }
-                        v.setImage(new Image(finalPath, 40, 40, true, true));
-                        setGraphic(v);
-                    } catch (Exception ex) {
-                        setGraphic(null);
-                    }
+                    setText(null);
+                    return;
                 }
+
+                Image image = loadImage(path, 45, 45);
+                if (image != null && !image.isError()) {
+                    v.setImage(image);
+                    setGraphic(v);
+                    setText(null);
+                } else {
+                    setGraphic(new Label("🚫"));
+                    setText(null);
+                }
+                setAlignment(Pos.CENTER);
+            }
+
+            private Image loadImage(String rawPath, double width, double height) {
+                if (rawPath == null || rawPath.isBlank()) return null;
+                String clean = rawPath.trim();
+                try {
+                    if (clean.startsWith("http://") || clean.startsWith("https://")) {
+                        return new Image(clean.replace(" ", "%20"), width, height, true, true);
+                    }
+                    if (clean.startsWith("file:")) {
+                        return new Image(clean, width, height, true, true);
+                    }
+                    File file = new File(clean);
+                    if (!file.exists()) {
+                        file = new File(System.getProperty("user.dir"), clean);
+                    }
+                    if (!file.exists()) {
+                        file = new File("uploads", new File(clean).getName());
+                    }
+                    if (file.exists()) {
+                        return new Image(file.toURI().toString(), width, height, true, true);
+                    }
+                } catch (Exception ex) {
+                    System.err.println("❌ Failed to load reservation image: " + rawPath + " -> " + ex.getMessage());
+                }
+                return null;
             }
         });
 

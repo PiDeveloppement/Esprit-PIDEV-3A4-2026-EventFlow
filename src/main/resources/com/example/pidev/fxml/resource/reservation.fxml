@@ -3,54 +3,157 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.ImageView?>
 
-<VBox spacing="15.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.ReservationController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
+<VBox spacing="0"
+      style="-fx-background-color: #f1f5f9;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pidev.controller.resource.ReservationController">
 
-    <HBox alignment="CENTER_LEFT" spacing="20">
-        <VBox spacing="5">
-            <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
-            <Label fx:id="userInfoLabel" text="Session active" style="-fx-font-size: 12px; -fx-text-fill: #64748b;" />
+    <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+
+    <!-- ===== GRADIENT BORDER WRAPPER ===== -->
+    <VBox style="-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
+                 -fx-background-radius: 16; -fx-padding: 2;">
+        <VBox style="-fx-background-color: white; -fx-background-radius: 14; -fx-padding: 30;">
+
+            <!-- ===== HEADER ROW ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <VBox.margin><Insets bottom="30"/></VBox.margin>
+
+                <!-- Title + subtitle -->
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📅" style="-fx-font-size: 20;"/>
+                        <Label text="Liste des Réservations"
+                               style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    </HBox>
+        
+                </VBox>
+
+                <!-- Buttons row (right) -->
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+
+                    <!-- Stats (purple like Historique) -->
+                    <Button text="📊  Statistiques"
+                            onAction="#goToStats"
+                            style="-fx-background-color: #8b5cf6;
+                                   -fx-text-fill: white; -fx-font-weight: bold;
+                                   -fx-padding: 12 20; -fx-background-radius: 10;
+                                   -fx-font-size: 13; -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.3), 10, 0, 0, 3);"/>
+
+                    <!-- PDF (green like Télécharger PDF) -->
+                    <Button text="📄  Télécharger PDF"
+                            onAction="#exportToPDF"
+                            style="-fx-background-color: #10b981;
+                                   -fx-text-fill: white; -fx-font-weight: bold;
+                                   -fx-padding: 12 20; -fx-background-radius: 10;
+                                   -fx-font-size: 13; -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.3), 10, 0, 0, 3);"/>
+
+                    <!-- Refresh -->
+                    <Button text="🔄"
+                            onAction="#refreshTable"
+                            style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569;
+                                   -fx-font-weight: bold; -fx-padding: 12 14;
+                                   -fx-background-radius: 10; -fx-font-size: 14; -fx-cursor: hand;"/>
+
+                    <!-- Nouvelle Réservation (gradient) -->
+                    <Button text="＋  Nouvelle Réservation"
+                            onAction="#goToAdd"
+                            style="-fx-background-color: linear-gradient(to right, #667eea, #764ba2);
+                                   -fx-text-fill: white; -fx-font-weight: bold;
+                                   -fx-padding: 12 20; -fx-background-radius: 10;
+                                   -fx-font-size: 13; -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(102,126,234,0.3), 10, 0, 0, 3);"/>
+                </HBox>
+            </HBox>
+
+            <!-- ===== FILTER BAR ===== -->
+            <VBox spacing="14"
+                  style="-fx-background-color: #f8fafc;
+                         -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                         -fx-border-radius: 12; -fx-background-radius: 12;
+                         -fx-padding: 18;">
+                <VBox.margin><Insets bottom="22"/></VBox.margin>
+
+                <!-- Bar title + Sort button -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🔍" style="-fx-font-size: 14;"/>
+                    <Label text="Filtres et Recherche"
+                           style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+                           HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <!-- Trier par Date button -->
+                    <ComboBox fx:id="sortCombo"
+                              promptText="Trier par Date"
+                              prefWidth="160"
+                              style="-fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                     -fx-border-radius: 8; -fx-background-radius: 8;
+                                     -fx-font-size: 13; -fx-background-color: white;"/>
+                </HBox>
+
+                <!-- Filter controls -->
+                <HBox spacing="15" alignment="BOTTOM_LEFT">
+
+                    <!-- Search by name -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="🏷  Nom de Salle ou Équipement"
+                               style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                        <TextField fx:id="searchField"
+                                   promptText="Rechercher..."
+                                   style="-fx-padding: 10 12; -fx-border-color: #e5e7eb;
+                                          -fx-border-width: 2; -fx-border-radius: 8;
+                                          -fx-background-radius: 8; -fx-font-size: 13;"/>
+                    </VBox>
+
+                    <!-- Type filter -->
+                    <VBox spacing="6" prefWidth="200">
+                        <Label text="⚙  Type de Ressource"
+                               style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                        <ComboBox fx:id="filterCombo"
+                                  promptText="Tous les types"
+                                  maxWidth="Infinity"
+                                  style="-fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                         -fx-border-radius: 8; -fx-background-radius: 8;
+                                         -fx-font-size: 13; -fx-background-color: white;"/>
+                    </VBox>
+
+                    <!-- Reset button -->
+                    <VBox spacing="6">
+                        <Label text=" " style="-fx-font-size: 13;"/>
+                        <Button text="✕  Réinitialiser"
+                                onAction="#refreshTable"
+                                style="-fx-background-color: #64748b; -fx-text-fill: white;
+                                       -fx-font-weight: bold; -fx-padding: 10 16;
+                                       -fx-background-radius: 8; -fx-font-size: 13; -fx-cursor: hand;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- ===== TABLE ===== -->
+            <TableView fx:id="reservationTable"
+                       VBox.vgrow="ALWAYS"
+                       minHeight="420"
+                       style="-fx-background-color: transparent;
+                              -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                              -fx-border-radius: 12; -fx-background-radius: 12;">
+                <columns>
+                    <TableColumn fx:id="imgCol"    text="Aperçu"      prefWidth="80"  resizable="false"/>
+                    <TableColumn fx:id="typeCol"   text="Type"        prefWidth="110"/>
+                    <TableColumn fx:id="nameCol"   text="Ressource"   prefWidth="180"/>
+                    <TableColumn fx:id="startCol"  text="Date Début"  prefWidth="160"/>
+                    <TableColumn fx:id="endCol"    text="Date Fin"    prefWidth="160"/>
+                    <TableColumn fx:id="qtyCol"    text="Quantité"    prefWidth="80"/>
+                    <TableColumn fx:id="actionCol" text="Actions"     prefWidth="130" resizable="false"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+
         </VBox>
-        <Region HBox.hgrow="ALWAYS" />
-        <Button onAction="#goToAdd" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="+ Nouvelle Réservation" />
-    </HBox>
-
-    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 5);">
-        <TextField fx:id="searchField" prefWidth="250" promptText="🔍 Rechercher une ressource..." style="-fx-background-radius: 20; -fx-padding: 8 15;" />
-
-        <Separator orientation="VERTICAL" />
-
-        <Label text="Filtrer :" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" />
-        <ComboBox fx:id="filterCombo" prefWidth="150.0" promptText="Toutes" style="-fx-background-radius: 8;" />
-
-        <Label text="Trier :" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" />
-        <ComboBox fx:id="sortCombo" prefWidth="130.0" promptText="Date" style="-fx-background-radius: 8;" />
-
-        <Region HBox.hgrow="ALWAYS" />
-
-        <HBox spacing="10">
-            <Button onAction="#goToStats" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;" text="📊 Statistiques" />
-            <Button onAction="#exportToPDF" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;" text="📄 PDF" />
-            <Button onAction="#refreshTable" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 15;" text="🔄" />
-        </HBox>
-    </HBox>
-
-    <TableView fx:id="reservationTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-overflow-x: hidden;">
-        <columns>
-            <TableColumn fx:id="imgCol" prefWidth="80" resizable="false" text="Aperçu" />
-            <TableColumn fx:id="typeCol" prefWidth="110" text="Type" />
-            <TableColumn fx:id="nameCol" prefWidth="180" text="Ressource" />
-            <TableColumn fx:id="startCol" prefWidth="160" text="Date Début" />
-            <TableColumn fx:id="endCol" prefWidth="160" text="Date Fin" />
-            <TableColumn fx:id="qtyCol" prefWidth="70" text="Qté" />
-            <TableColumn fx:id="actionCol" prefWidth="140" resizable="false" text="Actions" />
-        </columns>
-        <columnResizePolicy>
-            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-        </columnResizePolicy>
-    </TableView>
+    </VBox>
 </VBox>

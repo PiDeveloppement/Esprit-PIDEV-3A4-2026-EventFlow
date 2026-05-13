@@ -60,39 +60,55 @@ public class EquipementController implements Initializable {
             @Override
             protected void updateItem(String path, boolean empty) {
                 super.updateItem(path, empty);
-                if (empty || path == null || path.isEmpty()) {
+                if (empty || path == null || path.isBlank()) {
                     setGraphic(null);
+                    setText(null);
+                    return;
+                }
+
+                Image image = loadImage(path, 45, 45);
+                if (image != null && !image.isError()) {
+                    view.setImage(image);
+                    view.setFitHeight(45);
+                    view.setFitWidth(45);
+                    view.setPreserveRatio(true);
+                    view.setSmooth(true);
+                    Circle clip = new Circle(22.5, 22.5, 22.5);
+                    view.setClip(clip);
+                    setGraphic(view);
+                    setText(null);
                 } else {
-                    try {
-                        // Nettoyage du chemin stocké en base
-                        String cleanPath = path.replace("file:/", "").replace("%20", " ");
-                        File file = new File(cleanPath);
-
-                        // FALLBACK : Si le chemin complet src/uploads ne marche pas,
-                        // on cherche dans le dossier uploads à la racine du projet
-                        if (!file.exists()) {
-                            String fileName = new File(path).getName();
-                            file = new File("uploads/" + fileName);
-                        }
-
-                        if (file.exists()) {
-                            Image img = new Image(file.toURI().toString(), 100, 100, true, true);
-                            view.setImage(img);
-                            view.setFitHeight(45);
-                            view.setFitWidth(45);
-                            Circle clip = new Circle(22.5, 22.5, 22.5);
-                            view.setClip(clip);
-                            setGraphic(view);
-                        } else {
-                            // Si l'image n'existe nulle part
-                            setGraphic(new Label("🚫"));
-                            System.out.println("❌ Image manquante : " + path);
-                        }
-                    } catch (Exception e) {
-                        setGraphic(new Label("⚠️"));
-                    }
+                    setGraphic(new Label("🚫"));
+                    setText(null);
+                    System.out.println("❌ Image manquante : " + path);
                 }
                 setAlignment(Pos.CENTER);
+            }
+
+            private Image loadImage(String rawPath, double width, double height) {
+                if (rawPath == null || rawPath.isBlank()) return null;
+                String clean = rawPath.trim();
+                try {
+                    if (clean.startsWith("http://") || clean.startsWith("https://")) {
+                        return new Image(clean.replace(" ", "%20"), width, height, true, true);
+                    }
+                    if (clean.startsWith("file:")) {
+                        return new Image(clean, width, height, true, true);
+                    }
+                    File file = new File(clean);
+                    if (!file.exists()) {
+                        file = new File(System.getProperty("user.dir"), clean);
+                    }
+                    if (!file.exists()) {
+                        file = new File("uploads", new File(clean).getName());
+                    }
+                    if (file.exists()) {
+                        return new Image(file.toURI().toString(), width, height, true, true);
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ Failed to load equipment image: " + rawPath + " -> " + e.getMessage());
+                }
+                return null;
             }
         });
 

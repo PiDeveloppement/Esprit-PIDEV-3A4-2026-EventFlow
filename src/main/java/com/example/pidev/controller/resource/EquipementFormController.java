@@ -36,6 +36,7 @@ public class EquipementFormController implements Initializable {
     private final EquipementService service = new EquipementService();
     private String currentImagePath = "";
     private int selectedId = -1;
+    private int originalQuantity = 0;
 
     private final UnsplashService unsplashService = new UnsplashService();
 
@@ -120,6 +121,7 @@ public class EquipementFormController implements Initializable {
         nameField.setText(e.getName());
         typeField.setText(e.getType());
         quantityField.setText(String.valueOf(e.getQuantity()));
+        originalQuantity = e.getOriginalQuantity();
         statusCombo.setValue(e.getStatus());
         currentImagePath = e.getImagePath();
         if (currentImagePath != null && !currentImagePath.isEmpty()) {
@@ -174,6 +176,7 @@ public class EquipementFormController implements Initializable {
                         typeField.getText().trim(),
                         statusCombo.getValue(),
                         Integer.parseInt(quantityField.getText().trim()),
+                        selectedId == -1 ? Integer.parseInt(quantityField.getText().trim()) : originalQuantity,
                         currentImagePath
                 );
                 if (selectedId == -1) service.ajouter(e);

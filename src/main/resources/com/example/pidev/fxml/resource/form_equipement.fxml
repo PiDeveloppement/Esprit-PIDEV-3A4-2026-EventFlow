@@ -1,84 +1,237 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox spacing="25" styleClass="form-container" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.resource.EquipementFormController">
-    <padding><Insets bottom="30" left="30" right="30" top="30" /></padding>
+<!--
+    Design fidèle au screenshot Symfony (form) :
+    - Fond blanc, barre bleue en haut
+    - Carte blanche avec bordure violette (border-left style)
+    - Header : icône chip violet, titre "Ajouter un Équipement", bouton mic rouge centré,
+               3 badges (Nouveau bleu, Disponible vert, Voice violet)
+    - Champs dans des sections grises séparées par des lignes
+    - Quantité + État initial côte à côte
+    - Boutons Annuler (gris) + Enregistrer (vert)
+-->
 
-    <HBox alignment="CENTER_LEFT" spacing="15">
-        <StackPane style="-fx-background-color: #3b82f6; -fx-background-radius: 10; -fx-padding: 10;">
-            <Text style="-fx-fill: white; -fx-font-size: 20;" text="🛠️" />
-        </StackPane>
-        <VBox spacing="2" HBox.hgrow="ALWAYS">
-            <Label fx:id="titleLabel" styleClass="form-title" text="Ajouter un Équipement" />
-            <Label styleClass="form-subtitle" text="Mise à jour de l'inventaire en temps réel" />
-        </VBox>
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+            style="-fx-background: white; -fx-background-color: white;"
+            stylesheets="@style.css"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.EquipementFormController">
 
-        <VBox alignment="CENTER_RIGHT" spacing="5">
-            <Button fx:id="voiceBtn" onAction="#toggleVoiceControl" prefHeight="45" prefWidth="45" style="-fx-background-color: #ef4444; -fx-background-radius: 50; -fx-cursor: hand;" text="🎙" textFill="WHITE">
-                <tooltip><Tooltip text="Activer la commande vocale" /></tooltip>
-            </Button>
-            <Label fx:id="voiceStatusLabel" style="-fx-font-size: 10; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" text="Micro Off" />
-        </VBox>
-    </HBox>
+    <VBox spacing="0" style="-fx-background-color: white;">
 
-    <Separator style="-fx-opacity: 0.3;" />
+        <!-- Barre bleue du haut -->
+        <HBox style="-fx-background-color: #2563eb; -fx-min-height: 4; -fx-max-height: 4;"/>
 
-    <GridPane hgap="20" vgap="20">
-        <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
-        </columnConstraints>
+        <VBox spacing="0">
+            <padding><Insets bottom="30" left="30" right="30" top="20"/></padding>
 
-        <VBox spacing="8" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
-            <Label styleClass="field-label" text="Nom de l'équipement" />
-            <HBox spacing="10">
-                <TextField fx:id="nameField" promptText="Ex: Vidéoprojecteur Epson" styleClass="modern-text-field" HBox.hgrow="ALWAYS" />
-                <Button onAction="#rechercherImageAutomatique" styleClass="btn-secondary" text="🔍 Auto-Image" />
-            </HBox>
-        </VBox>
+            <!-- ═══════════════════════════════════════
+                 CARTE PRINCIPALE (bordure violette)
+            ════════════════════════════════════════ -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white; -fx-border-color: #6366f1; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 2);">
 
-        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
-            <Label styleClass="field-label" text="Catégorie" />
-            <TextField fx:id="typeField" promptText="Ex: Multimédia" styleClass="modern-text-field" />
-        </VBox>
+                <VBox spacing="0">
+                    <padding><Insets bottom="30" left="30" right="30" top="25"/></padding>
 
-        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <Label styleClass="field-label" text="Quantité" />
-            <TextField fx:id="quantityField" promptText="0" styleClass="modern-text-field" />
-        </VBox>
+                    <!-- ─── HEADER ─── -->
+                    <HBox alignment="CENTER_LEFT" spacing="16">
 
-        <VBox spacing="8" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
-            <Label styleClass="field-label" text="Statut de disponibilité" />
-            <ComboBox fx:id="statusCombo" maxWidth="Infinity" promptText="Choisir un état..." styleClass="modern-combo-box" />
-        </VBox>
+                        <!-- Icône chip violet -->
+                        <StackPane style="-fx-background-color: #7c3aed; -fx-background-radius: 10; -fx-min-width: 50; -fx-min-height: 50; -fx-max-width: 50; -fx-max-height: 50;">
+                            <Label text="⚙" style="-fx-font-size: 22; -fx-text-fill: white;"/>
+                        </StackPane>
 
-        <VBox spacing="10" styleClass="image-upload-card" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3">
-            <Label styleClass="field-label" text="Visuel de l'article" />
-            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-border-style: dashed;">
-                <VBox spacing="10" HBox.hgrow="ALWAYS">
-                    <Text style="-fx-fill: #94a3b8; -fx-font-size: 11;" text="Format supporté : PNG, JPG, URL" />
-                    <Button onAction="#choisirImage" styleClass="btn-secondary" text="🖼️ Sélectionner un fichier" />
+                        <!-- Titre -->
+                        <VBox spacing="3" HBox.hgrow="ALWAYS">
+                            <Label fx:id="titleLabel" text="Ajouter un Équipement"
+                                   style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                            <Label text="Gestion de l'inventaire EventFlow"
+                                   style="-fx-font-size: 13; -fx-text-fill: #6b7280;"/>
+                        </VBox>
+
+                        <!-- Bouton mic (centré, rouge) -->
+                        <VBox alignment="CENTER" spacing="5">
+                            <Button fx:id="voiceBtn" text="🎙" onAction="#toggleVoiceControl"
+                                    style="-fx-background-color: #ef4444; -fx-background-radius: 50; -fx-text-fill: white; -fx-font-size: 18; -fx-min-width: 52; -fx-min-height: 52; -fx-max-width: 52; -fx-max-height: 52; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.4), 10, 0, 0, 3);"/>
+                            <Label fx:id="voiceStatusLabel" text="Micro Off"
+                                   style="-fx-font-size: 10; -fx-text-fill: #9ca3af; -fx-font-weight: bold;"/>
+                        </VBox>
+
+                        <!-- 3 badges stats -->
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <!-- Nouveau (bleu) -->
+                            <VBox alignment="CENTER" spacing="3"
+                                  style="-fx-background-color: #2563eb; -fx-background-radius: 8; -fx-padding: 12 22; -fx-min-width: 115;">
+                                <HBox alignment="CENTER" spacing="5">
+                                    <Label text="✚" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.85);"/>
+                                    <Label text="Nouveau" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.85);"/>
+                                </HBox>
+                                <Label text="Équipement"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                            </VBox>
+                            <!-- Disponible (vert) -->
+                            <VBox alignment="CENTER" spacing="3"
+                                  style="-fx-background-color: #16a34a; -fx-background-radius: 8; -fx-padding: 12 22; -fx-min-width: 115;">
+                                <HBox alignment="CENTER" spacing="5">
+                                    <Label text="✔" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.85);"/>
+                                    <Label text="Disponible" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.85);"/>
+                                </HBox>
+                                <Label text="Immédiat"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                            </VBox>
+                            <!-- Voice (violet) -->
+                            <VBox alignment="CENTER" spacing="3"
+                                  style="-fx-background-color: #7c3aed; -fx-background-radius: 8; -fx-padding: 12 22; -fx-min-width: 100;">
+                                <HBox alignment="CENTER" spacing="5">
+                                    <Label text="🎙" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.85);"/>
+                                    <Label text="Voice" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.85);"/>
+                                </HBox>
+                                <Label text="Actif"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                            </VBox>
+                        </HBox>
+                    </HBox>
+
+                    <!-- Séparateur -->
+                    <Separator style="-fx-opacity: 0.4; -fx-padding: 0 0 20 0;">
+                        <VBox.margin><Insets bottom="20" top="20"/></VBox.margin>
+                    </Separator>
+
+                    <!-- ─── CHAMPS DU FORMULAIRE ─── -->
+                    <VBox spacing="0">
+
+                        <!-- Désignation -->
+                        <VBox spacing="10"
+                              style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 20 0;">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="🏷" style="-fx-font-size: 13;"/>
+                                <Label text="Désignation"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            </HBox>
+                            <TextField fx:id="nameField" promptText="Ex: Projecteur LED 4K"
+                                       maxWidth="Infinity"
+                                       style="-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #d1d5db; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 11 14; -fx-font-size: 14; -fx-text-fill: #374151;"/>
+                        </VBox>
+
+                        <!-- Catégorie -->
+                        <VBox spacing="10"
+                              style="-fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0; -fx-padding: 20 0;">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="🗂" style="-fx-font-size: 13;"/>
+                                <Label text="Catégorie"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            </HBox>
+                            <TextField fx:id="typeField" promptText="Ex: Mobilier"
+                                       maxWidth="Infinity"
+                                       style="-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #d1d5db; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 11 14; -fx-font-size: 14; -fx-text-fill: #374151;"/>
+                        </VBox>
+
+                        <!-- Quantité + État initial (côte à côte) -->
+                        <HBox spacing="20"
+                              style="-fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0; -fx-padding: 20 0;">
+
+                            <!-- Quantité -->
+                            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label text="📦" style="-fx-font-size: 13;"/>
+                                    <Label text="Quantité en stock"
+                                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                </HBox>
+                                <TextField fx:id="quantityField" promptText="0"
+                                           maxWidth="Infinity"
+                                           style="-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #d1d5db; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 11 14; -fx-font-size: 14; -fx-text-fill: #374151;"/>
+                            </VBox>
+
+                            <!-- État initial -->
+                            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label text="📊" style="-fx-font-size: 13;"/>
+                                    <Label text="État initial"
+                                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                </HBox>
+                                <ComboBox fx:id="statusCombo" maxWidth="Infinity" promptText="Disponible"
+                                          style="-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #d1d5db; -fx-border-width: 1; -fx-border-radius: 6; -fx-font-size: 14;"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Image de l'équipement -->
+                        <VBox spacing="14"
+                              style="-fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0; -fx-padding: 20 0;">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="📷" style="-fx-font-size: 13;"/>
+                                <Label text="Image de l'équipement"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            </HBox>
+
+                            <HBox alignment="CENTER_LEFT" spacing="20"
+                                  style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-border-color: #d1d5db; -fx-border-width: 2; -fx-border-radius: 8; -fx-border-style: dashed; -fx-padding: 18;">
+
+                                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                    <Label text="Format supporté : PNG, JPG, URL"
+                                           style="-fx-text-fill: #9ca3af; -fx-font-size: 12;"/>
+                                    <HBox spacing="10">
+                                        <Button onAction="#choisirImage" text="🖼  Choisir un fichier"
+                                                prefHeight="36"
+                                                style="-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #6366f1; -fx-border-width: 1; -fx-border-radius: 6; -fx-text-fill: #6366f1; -fx-font-weight: bold; -fx-font-size: 12; -fx-padding: 0 14; -fx-cursor: hand;"/>
+                                        <Button onAction="#rechercherImageAutomatique" text="🔍 Auto-Image"
+                                                prefHeight="36"
+                                                style="-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #6366f1; -fx-border-width: 1; -fx-border-radius: 6; -fx-text-fill: #6366f1; -fx-font-weight: bold; -fx-font-size: 12; -fx-padding: 0 14; -fx-cursor: hand;"/>
+                                    </HBox>
+                                    <!-- Info banner -->
+                                    <HBox spacing="8" alignment="CENTER_LEFT"
+                                          style="-fx-background-color: #dbeafe; -fx-background-radius: 6; -fx-padding: 9 12; -fx-border-color: #3b82f6; -fx-border-radius: 6; -fx-border-width: 0 0 0 3;">
+                                        <Label text="ℹ" style="-fx-text-fill: #1d4ed8; -fx-font-size: 12;"/>
+                                        <Label text="Formats acceptés : JPEG, PNG, WebP (max 5 MB)"
+                                               style="-fx-text-fill: #1d4ed8; -fx-font-size: 11;"/>
+                                    </HBox>
+                                </VBox>
+
+                                <!-- Preview -->
+                                <StackPane style="-fx-background-color: #e5e7eb; -fx-background-radius: 8; -fx-min-width: 85; -fx-min-height: 85; -fx-max-width: 85; -fx-max-height: 85;">
+                                    <ImageView fx:id="previewImage" fitHeight="75" fitWidth="75" preserveRatio="true"/>
+                                </StackPane>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Note informative (bleu clair) -->
+                        <HBox spacing="14" alignment="CENTER_LEFT"
+                              style="-fx-background-color: #eff6ff; -fx-background-radius: 8; -fx-border-color: rgba(59,130,246,0.3); -fx-border-radius: 8; -fx-border-width: 1; -fx-padding: 16; -fx-margin: 20 0 0 0;">
+                            <VBox.margin><Insets top="20"/></VBox.margin>
+                            <StackPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-min-width: 38; -fx-min-height: 38; -fx-max-width: 38; -fx-max-height: 38; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);">
+                                <Label text="ℹ" style="-fx-font-size: 16; -fx-text-fill: #3b82f6;"/>
+                            </StackPane>
+                            <Label wrapText="true" HBox.hgrow="ALWAYS"
+                                   text="Note importante : L'équipement sera immédiatement disponible pour les réservations d'événements une fois enregistré."
+                                   style="-fx-text-fill: #1e40af; -fx-font-size: 13;"/>
+                        </HBox>
+
+                    </VBox>
+
+                    <!-- ─── BOUTONS ACTION ─── -->
+                    <HBox spacing="14" alignment="CENTER_RIGHT">
+                        <VBox.margin><Insets top="28"/></VBox.margin>
+
+                        <!-- Annuler -->
+                        <Button onAction="#annuler" text="✖  Annuler"
+                                prefWidth="155" prefHeight="44"
+                                style="-fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-border-color: #d1d5db; -fx-border-width: 1; -fx-border-radius: 8; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13; -fx-cursor: hand;"/>
+
+                        <!-- Enregistrer (vert) -->
+                        <Button fx:id="btnValider" onAction="#enregistrer" text="💾  Enregistrer"
+                                prefWidth="215" prefHeight="44"
+                                style="-fx-background-color: #16a34a; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(22,163,74,0.3), 8, 0, 0, 3);"/>
+                    </HBox>
+
                 </VBox>
-                <StackPane prefHeight="80" prefWidth="80" styleClass="image-preview-wrapper">
-                    <ImageView fx:id="previewImage" fitHeight="70" fitWidth="70" preserveRatio="true" />
-                </StackPane>
-            </HBox>
+            </VBox>
         </VBox>
-        <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-        </rowConstraints>
-    </GridPane>
-
-    <HBox alignment="CENTER_RIGHT" spacing="15">
-        <Button onAction="#annuler" styleClass="btn-cancel" text="✖ Annuler" />
-        <Button fx:id="btnValider" onAction="#enregistrer" styleClass="btn-save" text="💾 Confirmer l'enregistrement" />
-    </HBox>
-</VBox>
+    </VBox>
+</ScrollPane>

@@ -13,13 +13,14 @@ public class EquipementService {
 
     public void ajouter(Equipement e) {
         // CORRECTION : Vérifiez que le nom de la colonne est 'equipement_type' ou 'type' dans votre BD
-        String sql = "INSERT INTO equipement (name, equipement_type, status, quantity, image_path) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO equipement (name, equipement_type, status, quantity, image_path, original_quantity) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, e.getName());
             pst.setString(2, e.getType());
             pst.setString(3, e.getStatus());
             pst.setInt(4, e.getQuantity());
             pst.setString(5, e.getImagePath());
+            pst.setInt(6, e.getOriginalQuantity());
             pst.executeUpdate();
             System.out.println("Équipement ajouté avec succès !");
         } catch (SQLException ex) {
@@ -28,14 +29,15 @@ public class EquipementService {
     }
 
     public void modifier(Equipement e) {
-        String sql = "UPDATE equipement SET name=?, equipement_type=?, status=?, quantity=?, image_path=? WHERE id=?";
+        String sql = "UPDATE equipement SET name=?, equipement_type=?, status=?, quantity=?, image_path=?, original_quantity=? WHERE id=?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, e.getName());
             pst.setString(2, e.getType());
             pst.setString(3, e.getStatus());
             pst.setInt(4, e.getQuantity());
             pst.setString(5, e.getImagePath());
-            pst.setInt(6, e.getId());
+            pst.setInt(6, e.getOriginalQuantity());
+            pst.setInt(7, e.getId());
             pst.executeUpdate();
             System.out.println("Équipement modifié avec succès !");
         } catch (SQLException ex) {
@@ -66,6 +68,7 @@ public class EquipementService {
                         rs.getString("equipement_type"),
                         rs.getString("status"),
                         rs.getInt("quantity"),
+                        rs.getInt("original_quantity"),
                         rs.getString("image_path")
                 ));
             }

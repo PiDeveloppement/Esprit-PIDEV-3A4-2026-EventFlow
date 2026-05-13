@@ -1,95 +1,246 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
 
-<VBox spacing="20.0" style="-fx-background-color: #f1f5f9; -fx-padding: 30;"
-      xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pidev.controller.resource.ReservationFormController">
+<ScrollPane fitToWidth="true"
+            style="-fx-background-color: #f1f5f9; -fx-background: #f1f5f9;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.resource.ReservationFormController">
 
-    <!-- HEADER -->
-    <HBox spacing="15" alignment="CENTER_LEFT">
-        <Button text="← Retour" onAction="#goBack"
-                style="-fx-background-color: #64748b; -fx-text-fill: white;"/>
-        <Label text="Formulaire de Réservation"
-               style="-fx-font-size: 20; -fx-font-weight: bold;"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="voiceBtn" onAction="#toggleVoiceControl"
-                style="-fx-background-radius: 50; -fx-min-width: 45; -fx-min-height: 45;
-                       -fx-background-color: #ef4444; -fx-text-fill: white;
-                       -fx-font-size: 18; -fx-cursor: hand;"
-                text="🎙️">
-            <tooltip><Tooltip text="Cliquez pour donner un ordre vocal"/></tooltip>
-        </Button>
-    </HBox>
+    <VBox style="-fx-background-color: #f1f5f9; -fx-padding: 25;">
 
-    <!-- INFO UTILISATEUR -->
-    <Label fx:id="userInfoLabel" style="-fx-text-fill: #2c3e50; -fx-font-weight: bold;"/>
+        <!-- ===== GRADIENT BORDER WRAPPER ===== -->
+        <VBox style="-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
+                     -fx-background-radius: 16; -fx-padding: 2;">
+            <VBox style="-fx-background-color: white; -fx-background-radius: 14; -fx-padding: 30;">
 
-    <!-- FORMULAIRE PRINCIPAL -->
-    <HBox spacing="20.0" style="-fx-background-color: white; -fx-padding: 20;
-                                 -fx-background-radius: 12; -fx-border-color: #e2e8f0;">
-        <VBox spacing="15" HBox.hgrow="ALWAYS">
-            <GridPane hgap="10" vgap="15">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="150"/>
-                    <ColumnConstraints minWidth="150"/>
-                    <ColumnConstraints minWidth="80"/>
-                </columnConstraints>
+                <!-- ===== HEADER ===== -->
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <VBox.margin><Insets bottom="30"/></VBox.margin>
 
-                <!-- DATES -->
-                <Label text="Début :" GridPane.rowIndex="0" GridPane.columnIndex="0"
-                       style="-fx-font-weight: bold;"/>
-                <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="0"
-                            maxWidth="Infinity"/>
-                <Label text="Fin :" GridPane.rowIndex="0" GridPane.columnIndex="1"
-                       style="-fx-font-weight: bold;"/>
-                <DatePicker fx:id="endDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1"
-                            maxWidth="Infinity"/>
+                    <!-- Title + subtitle -->
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="📅" style="-fx-font-size: 20;"/>
+                            <Label text="Formulaire de Réservation"
+                                   style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        </HBox>
+                        <Label text="Réservez une salle ou un équipement pour votre événement"
+                               style="-fx-font-size: 13; -fx-text-fill: #64748b;"/>
+                        <Label fx:id="userInfoLabel"
+                               text=""
+                               style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    </VBox>
 
-                <!-- TYPE / RESSOURCE / QUANTITÉ -->
-                <Label text="Type :" GridPane.rowIndex="2" GridPane.columnIndex="0"
-                       style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="typeCombo" GridPane.rowIndex="3" GridPane.columnIndex="0"
-                          maxWidth="Infinity"/>
-                <Label text="Ressource :" GridPane.rowIndex="2" GridPane.columnIndex="1"
-                       style="-fx-font-weight: bold;"/>
-                <ComboBox fx:id="itemCombo" GridPane.rowIndex="3" GridPane.columnIndex="1"
-                          maxWidth="Infinity"/>
-                <Label text="Qté :" GridPane.rowIndex="2" GridPane.columnIndex="2"
-                       style="-fx-font-weight: bold;"/>
-                <TextField fx:id="quantityField" text="1" GridPane.rowIndex="3"
-                           GridPane.columnIndex="2" prefWidth="60"/>
+                    <!-- Voice button -->
+                    <VBox alignment="CENTER" spacing="5">
+                        <Button fx:id="voiceBtn"
+                                onAction="#toggleVoiceControl"
+                                text="🎙"
+                                prefWidth="45" prefHeight="45"
+                                style="-fx-background-color: linear-gradient(to bottom right, #ef4444, #dc2626);
+                                       -fx-background-radius: 50;
+                                       -fx-text-fill: white; -fx-font-size: 16;
+                                       -fx-cursor: hand;
+                                       -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.35), 10, 0, 0, 3);">
+                            <tooltip><Tooltip text="Activer la commande vocale"/></tooltip>
+                        </Button>
+                        <Label fx:id="voiceStatusLabel"
+                               text="Micro Off"
+                               style="-fx-font-size: 9; -fx-text-fill: #94a3b8; -fx-font-weight: bold;"/>
+                    </VBox>
+                </HBox>
 
-                <!-- ÉVÉNEMENT LIÉ -->
-                <Label text="Événement lié :" GridPane.rowIndex="4" GridPane.columnIndex="0"
-                       GridPane.columnSpan="3" style="-fx-font-weight: bold; -fx-padding: 8 0 0 0;"/>
-                <ComboBox fx:id="eventCombo" GridPane.rowIndex="5" GridPane.columnIndex="0"
-                          GridPane.columnSpan="3" maxWidth="Infinity"
-                          promptText="-- Aucun événement lié (optionnel) --"/>
-            </GridPane>
+                <!-- ===== MAIN GRID: Form left + Preview right ===== -->
+                <HBox spacing="25" alignment="TOP_LEFT">
 
-            <!-- BOUTONS -->
-            <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button onAction="#goBack" text="Annuler" prefWidth="100"/>
-                <Button fx:id="btnValider" onAction="#validerAction" text="Réserver"
-                        style="-fx-background-color: #2563eb; -fx-text-fill: white;
-                               -fx-font-weight: bold;"
-                        prefWidth="120"/>
-            </HBox>
+                    <!-- ============ LEFT: Informations de réservation ============ -->
+                    <VBox HBox.hgrow="ALWAYS" spacing="0"
+                          style="-fx-background-color: #f8fafc;
+                                 -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                                 -fx-border-radius: 12; -fx-background-radius: 12;
+                                 -fx-padding: 22;">
+
+                        <!-- Section title -->
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <VBox.margin><Insets bottom="18"/></VBox.margin>
+                            <Label text="ℹ" style="-fx-font-size: 15; -fx-text-fill: #667eea;"/>
+                            <Label text="Informations de réservation"
+                                   style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        </HBox>
+
+                        <!-- Row 1: Événement + Type -->
+                        <HBox spacing="18">
+                            <VBox.margin><Insets bottom="18"/></VBox.margin>
+
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Événement"
+                                       style="-fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                                <ComboBox fx:id="eventCombo"
+                                          promptText="-- Aucun événement lié (optionnel) --"
+                                          maxWidth="Infinity"
+                                          style="-fx-pref-height: 45; -fx-background-radius: 8;
+                                                 -fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                                 -fx-border-radius: 8; -fx-font-size: 13;
+                                                 -fx-background-color: white;"/>
+                            </VBox>
+
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="Type de ressource"
+                                       style="-fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                                <ComboBox fx:id="typeCombo"
+                                          maxWidth="Infinity"
+                                          style="-fx-pref-height: 45; -fx-background-radius: 8;
+                                                 -fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                                 -fx-border-radius: 8; -fx-font-size: 13;
+                                                 -fx-background-color: white;"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Row 2: Date début + Date fin -->
+                        <HBox spacing="18">
+                            <VBox.margin><Insets bottom="18"/></VBox.margin>
+
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="📅  Date de début"
+                                       style="-fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                                <DatePicker fx:id="startDatePicker"
+                                            maxWidth="Infinity"
+                                            style="-fx-pref-height: 45; -fx-background-radius: 8;
+                                                   -fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                                   -fx-border-radius: 8; -fx-font-size: 13;"/>
+                            </VBox>
+
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="📅  Date de fin"
+                                       style="-fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                                <DatePicker fx:id="endDatePicker"
+                                            maxWidth="Infinity"
+                                            style="-fx-pref-height: 45; -fx-background-radius: 8;
+                                                   -fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                                   -fx-border-radius: 8; -fx-font-size: 13;"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Row 3: Ressource + Quantité -->
+                        <HBox spacing="18">
+                            <VBox.margin><Insets bottom="25"/></VBox.margin>
+
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label text="📦  Ressource"
+                                       style="-fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                                <ComboBox fx:id="itemCombo"
+                                          maxWidth="Infinity"
+                                          style="-fx-pref-height: 45; -fx-background-radius: 8;
+                                                 -fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                                 -fx-border-radius: 8; -fx-font-size: 13;
+                                                 -fx-background-color: white;"/>
+                            </VBox>
+
+                            <VBox spacing="6" prefWidth="110">
+                                <Label text="Quantité"
+                                       style="-fx-text-fill: #374151; -fx-font-weight: bold; -fx-font-size: 13;"/>
+                                <TextField fx:id="quantityField"
+                                           text="1"
+                                           style="-fx-pref-height: 45; -fx-background-radius: 8;
+                                                  -fx-border-color: #e5e7eb; -fx-border-width: 2;
+                                                  -fx-border-radius: 8; -fx-padding: 0 12;
+                                                  -fx-font-size: 13;"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Action buttons (Annuler red + Réserver green like web) -->
+                        <HBox spacing="15" alignment="CENTER_RIGHT">
+                            <!-- Annuler (red like web) -->
+                            <Button text="✕  Annuler"
+                                    onAction="#goBack"
+                                    prefWidth="140" prefHeight="45"
+                                    style="-fx-background-color: #ef4444;
+                                           -fx-text-fill: white; -fx-font-weight: bold;
+                                           -fx-font-size: 14; -fx-background-radius: 10;
+                                           -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.25), 8, 0, 0, 3);"/>
+
+                            <!-- Réserver (green gradient like web) -->
+                            <Button fx:id="btnValider"
+                                    text="✔  Réserver"
+                                    onAction="#validerAction"
+                                    prefWidth="180" prefHeight="45"
+                                    style="-fx-background-color: linear-gradient(to right, #10b981, #059669);
+                                           -fx-text-fill: white; -fx-font-weight: bold;
+                                           -fx-font-size: 14; -fx-background-radius: 10;
+                                           -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.35), 12, 0, 0, 4);"/>
+                        </HBox>
+
+                    </VBox>
+
+                    <!-- ============ RIGHT: Aperçu (preview card) ============ -->
+                    <VBox prefWidth="250" minWidth="220" spacing="0"
+                          style="-fx-background-color: #f8fafc;
+                                 -fx-border-color: #e2e8f0; -fx-border-width: 1;
+                                 -fx-border-radius: 12; -fx-background-radius: 12;
+                                 -fx-padding: 22;">
+
+                        <!-- Section title -->
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <VBox.margin><Insets bottom="18"/></VBox.margin>
+                            <Label text="👁" style="-fx-font-size: 15; -fx-text-fill: #667eea;"/>
+                            <Label text="Aperçu"
+                                   style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        </HBox>
+
+                        <!-- Preview image -->
+                        <VBox alignment="CENTER" spacing="10">
+                            <VBox.margin><Insets bottom="18"/></VBox.margin>
+                            <StackPane style="-fx-background-color: white; -fx-padding: 8;
+                                              -fx-background-radius: 10;
+                                              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 8, 0, 0, 2);">
+                                <ImageView fx:id="imagePreview"
+                                           fitWidth="130" fitHeight="130"
+                                           preserveRatio="true"/>
+                            </StackPane>
+                            <Label text="Sélectionnez une ressource\npour voir l'aperçu"
+                                   style="-fx-font-size: 11; -fx-text-fill: #94a3b8;
+                                          -fx-text-alignment: center;"
+                                   wrapText="true"/>
+                        </VBox>
+
+                        <!-- Separator -->
+                        <Separator style="-fx-opacity: 0.5;">
+                            <VBox.margin><Insets bottom="15"/></VBox.margin>
+                        </Separator>
+
+                        <!-- Info note (yellow box like web) -->
+                        <VBox style="-fx-background-color: #fef3c7;
+                                     -fx-border-color: #fbbf24; -fx-border-width: 1;
+                                     -fx-border-radius: 8; -fx-background-radius: 8;
+                                     -fx-padding: 12;">
+                            <Label text="ℹ  Information"
+                                   style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #92400e;"/>
+                            <Label text="Les réservations dépendent de la disponibilité des ressources."
+                                   style="-fx-font-size: 11; -fx-text-fill: #92400e;"
+                                   wrapText="true"/>
+                        </VBox>
+
+                    </VBox>
+
+                </HBox>
+
+                <!-- ===== VOICE STATUS BAR ===== -->
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox.margin><Insets top="18"/></VBox.margin>
+                    <Label text="🎙" style="-fx-font-size: 12; -fx-text-fill: #94a3b8;"/>
+                    <Label fx:id="voiceStatusLabel"
+                           text="Micro désactivé"
+                           style="-fx-font-size: 12; -fx-text-fill: #94a3b8; -fx-font-style: italic;"/>
+                </HBox>
+
+            </VBox>
         </VBox>
-
-        <!-- APERÇU IMAGE -->
-        <VBox alignment="CENTER" spacing="5"
-              style="-fx-border-color: #cbd5e1; -fx-padding: 10;
-                     -fx-background-color: #f8fafc; -fx-background-radius: 8;">
-            <Label text="Aperçu" style="-fx-font-size: 11; -fx-text-fill: #64748b;"/>
-            <ImageView fx:id="imagePreview" fitHeight="120" fitWidth="120" preserveRatio="true"/>
-        </VBox>
-    </HBox>
-
-    <!-- STATUT VOCAL -->
-    <Label fx:id="voiceStatusLabel" text="Micro désactivé"
-           style="-fx-text-fill: #94a3b8; -fx-font-style: italic;"/>
-</VBox>
+    </VBox>
+</ScrollPane>
