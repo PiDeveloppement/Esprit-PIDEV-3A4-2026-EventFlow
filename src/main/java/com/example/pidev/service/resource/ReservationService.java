@@ -1,13 +1,20 @@
 package com.example.pidev.service.resource;
 
-import com.example.pidev.model.resource.ReservationResource;
-import com.example.pidev.utils.DBConnection;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
+import com.example.pidev.model.resource.ReservationResource;
+import com.example.pidev.utils.DBConnection;
 
 public class ReservationService {
     private Connection connection = DBConnection.getConnection();
@@ -15,15 +22,15 @@ public class ReservationService {
     public void ajouter(ReservationResource r) throws SQLException {
         // Ajout de user_id dans la requête
         String query = "INSERT INTO reservation_resource (resource_type, salle_id, equipement_id, reservation_date_start_time, end_time, quantity, user_id) VALUES (?,?,?,?,?,?,?)";
-        save(r, query, false);
+        save(r, query, false, r.getUserId());
     }
 
     public void modifier(ReservationResource r) throws SQLException {
         String query = "UPDATE reservation_resource SET resource_type=?, salle_id=?, equipement_id=?, reservation_date_start_time=?, end_time=?, quantity=? WHERE id=?";
-        save(r, query, true);
+        save(r, query, true, r.getUserId());
     }
 
-    private void save(ReservationResource r, String query, boolean isUpdate) throws SQLException {
+    private void save(ReservationResource r, String query, boolean isUpdate, int userId) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, r.getResourceType());
 
@@ -40,9 +47,7 @@ public class ReservationService {
             if (isUpdate) {
                 ps.setInt(7, r.getId());
             } else {
-                // IMPORTANT: On envoie l'ID de l'utilisateur (1 par défaut ici)
-                // Si tu as un système de session, remplace 1 par l'ID de l'utilisateur connecté
-                ps.setInt(7, 1);
+                ps.setInt(7, userId);
             }
 
             ps.executeUpdate();
@@ -72,6 +77,7 @@ public class ReservationService {
                 );
                 res.setResourceName(res.getSalleId() != null ? rs.getString("s_name") : rs.getString("e_name"));
                 res.setImagePath(res.getSalleId() != null ? rs.getString("s_img") : rs.getString("e_img"));
+                res.setUserId(rs.getInt("user_id"));
                 list.add(res);
             }
         } catch (SQLException e) { e.printStackTrace(); }
