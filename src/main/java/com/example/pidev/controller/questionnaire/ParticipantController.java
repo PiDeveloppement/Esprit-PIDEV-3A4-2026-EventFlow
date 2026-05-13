@@ -11,7 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
-
+import com.example.pidev.utils.UserSession;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,36 +35,59 @@ public class ParticipantController {
     private int etoilesSelectionnees = 0;
     private String reponseSelectionnee = "";
     // Simulation de l'utilisateur connecté (A remplacer par votre session utilisateur)
-    private final int idParticipantConnecte = 3;
-    private final int idEventActuel = 23;
+    // APRÈS
+    private int idParticipantConnecte;
+    private int idEventActuel;
 
     private final FeedbackService fs = new FeedbackService();
     private final CertificateService certificateService = new CertificateService();
     private final com.example.pidev.service.questionnaire.BadWordService badWordService = new com.example.pidev.service.questionnaire.BadWordService();
     @FXML
-    public void initialize() {
+    public void initData(int idEvent) {
+        this.idParticipantConnecte = UserSession.getInstance().getUserId();
+        this.idEventActuel = idEvent;
+        // Recharger les questions avec le bon event
         try {
             listeQuestions = fs.chargerQuestionsAleatoires(idEventActuel);
-
             if (listeQuestions.isEmpty()) {
-                lblQuestion.setText("Désolé, aucune question n'est configurée pour cet événement.");
+                lblQuestion.setText("Aucune question pour cet événement.");
                 btnSuivant.setDisable(true);
                 return;
             }
-
             setupStars();
-
-            // Cacher la section évaluation (étoiles + commentaire) au début
             if (vboxEvaluation != null) {
                 vboxEvaluation.setVisible(false);
                 vboxEvaluation.setManaged(false);
             }
-
             afficherQuestion();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    @FXML
+    public void initialize() {
         setupEmojiPicker();
+        setupStars();
+        if (vboxEvaluation != null) {
+            vboxEvaluation.setVisible(false);
+            vboxEvaluation.setManaged(false);
+        }
+
+        this.idParticipantConnecte = UserSession.getInstance().getUserId();
+        this.idEventActuel = UserSession.getInstance().getPendingEventId();
+
+        try {
+            listeQuestions = fs.chargerQuestionsAleatoires(idEventActuel);
+            if (listeQuestions.isEmpty()) {
+                lblQuestion.setText("Aucune question pour cet événement.");
+                btnSuivant.setDisable(true);
+                return;
+            }
+            setupStars();
+            afficherQuestion();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupStars() {

@@ -4,7 +4,7 @@ import com.example.pidev.model.event.Event;
 import com.example.pidev.utils.DBConnection;
 import com.example.pidev.model.questionnaire.Question;
 
-
+import com.example.pidev.utils.UserSession;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public class QuestionService {
         ps.setString(5, q.getOption1()); // Assurez-vous que ce n'est pas null
         ps.setString(6, q.getOption2());
         ps.setString(7, q.getOption3());
-        ps.setInt(8, q.getIdUser());
+        ps.setInt(8, UserSession.getInstance().getUserId());
 
         ps.executeUpdate();
     }

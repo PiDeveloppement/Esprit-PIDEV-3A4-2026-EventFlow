@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-
+import com.example.pidev.utils.UserSession;
 public class QuestionController {
 
     @FXML private ComboBox<Event> comboEvent, comboEventList;
@@ -176,8 +176,8 @@ public class QuestionController {
             }
 
             int points = Integer.parseInt(txtPoints.getText().trim());
-            int idUtilisateurConnecte = 3;
-
+// APRÈS
+            int idUtilisateurConnecte = UserSession.getInstance().getUserId();
             if (questionEnCours == null) {
                 // AJOUT : On passe les options au constructeur ou via setters
                 Question nouvelleQ = new Question(

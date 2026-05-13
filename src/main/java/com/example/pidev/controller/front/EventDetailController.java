@@ -489,17 +489,17 @@ public class EventDetailController {
         try {
             System.out.println("🎓 Chargement du certificat pour : " + currentEvent.getTitle());
 
-            // Charger le FXML du participant/certificat
+            // ✅ Sauvegarder l'event dans la session
+            UserSession.getInstance().setPendingEventId(currentEvent.getId());
+
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/example/pidev/fxml/questionnaire/Participant.fxml")
             );
 
             Parent root = loader.load();
 
-            // On récupère la scène actuelle à partir d'un élément existant (ex: titleLabel)
             VBox mainRoot = (VBox) titleLabel.getScene().getRoot();
 
-            // On remplace le contenu principal (généralement l'index 1 si l'index 0 est la Navbar)
             if (mainRoot.getChildren().size() > 1) {
                 mainRoot.getChildren().set(1, root);
             } else {
