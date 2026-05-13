@@ -1,65 +1,116 @@
-    <?import javafx.geometry.Insets?>
-    <?import javafx.scene.control.*?>
-    <?import javafx.scene.layout.*?>
-    <?import javafx.scene.text.Font?>
+<?xml version="1.0" encoding="UTF-8"?>
 
-    <AnchorPane prefHeight="700.0" prefWidth="1100.0" style="-fx-background-color: #f1f5f9;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pidev.controller.questionnaire.QuestionController">
-        <children>
-            <VBox spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="20.0">
-                <children>
-                    <HBox alignment="CENTER_LEFT" spacing="15.0">
-                        <children>
-                            <Label text="📋 Aperçu des questions" textFill="#1e293b">
-                                <font><Font name="System Bold" size="26.0" /></font>
-                            </Label>
-                            <Region HBox.hgrow="ALWAYS" />
-                            <Button onAction="#ouvrirPopupStats" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;" text="📊 Analyse" />
-                            <Button onAction="#handleExportPDF" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;" text="📥 Export PDF" />
-                            <Button onAction="#switchToForm" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 10 25; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Nouveau" />
-                        </children>
-                    </HBox>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-                    <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
-                        <children>
-                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <children>
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 12;" text="Rechercher" textFill="#64748b" />
-                                    <TextField fx:id="txtSearch" onKeyReleased="#handleSearch" prefHeight="40.0" promptText="🔍 Rechercher par texte ou réponse..." style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
-                                </children>
-                            </VBox>
+<AnchorPane prefHeight="750.0" prefWidth="1100.0"
+            style="-fx-background-color: #f1f5f9;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pidev.controller.questionnaire.QuestionController">
+    <children>
+        <VBox spacing="20.0"
+              AnchorPane.bottomAnchor="20.0"
+              AnchorPane.leftAnchor="30.0"
+              AnchorPane.rightAnchor="30.0"
+              AnchorPane.topAnchor="20.0">
+            <children>
 
-                            <VBox spacing="5.0" prefWidth="180.0">
-                                <children>
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 12;" text="Trier par" textFill="#64748b" />
-                                    <ComboBox fx:id="comboSort" maxWidth="Infinity" onAction="#handleSort" prefHeight="40.0" promptText="Ordre" style="-fx-background-radius: 10; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" />
-                                </children>
-                            </VBox>
+                <!-- ===== HEADER ===== -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="Questions Quiz"
+                                       style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                                <Label text="Gerez toutes les questions de vos questionnaires d evenements"
+                                       style="-fx-font-size: 13px; -fx-text-fill: #64748b;" />
+                            </children>
+                        </VBox>
+                        <Button onAction="#ouvrirPopupStats"
+                                text="Statistiques"
+                                style="-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 10; -fx-padding: 10 22; -fx-cursor: hand;" />
+                        <Button onAction="#switchToForm"
+                                text="+ Nouvelle question"
+                                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 10; -fx-padding: 10 22; -fx-cursor: hand;" />
+                    </children>
+                </HBox>
 
-                            <VBox spacing="5.0" prefWidth="280.0">
-                                <children>
-                                    <Label style="-fx-font-weight: bold; -fx-font-size: 12;" text="Filtrer par événement" textFill="#64748b" />
-                                    <ComboBox fx:id="comboEventList" maxWidth="Infinity" prefHeight="40.0" promptText="Sélectionner l'événement" style="-fx-background-radius: 10; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10;" />
-                                </children>
-                            </VBox>
-                        </children>
-                    </HBox>
+                <!-- ===== FILTER BAR ===== -->
+                <HBox alignment="CENTER_LEFT" spacing="16.0"
+                      style="-fx-background-color: white; -fx-padding: 16 20; -fx-background-radius: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 10, 0, 0, 4);">
+                    <children>
 
-                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
-                        <content>
-                            <FlowPane fx:id="cardsContainer" hgap="25.0" vgap="25.0">
-                                <padding><Insets bottom="20.0" left="10.0" right="10.0" top="10.0" /></padding>
-                            </FlowPane>
-                        </content>
-                    </ScrollPane>
+                        <!-- Search -->
+                        <TextField fx:id="txtSearch"
+                                   onKeyReleased="#handleSearch"
+                                   prefHeight="40.0"
+                                   HBox.hgrow="ALWAYS"
+                                   promptText="Rechercher une question..."
+                                   style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-font-size: 13px; -fx-padding: 0 14;" />
 
-                    <HBox alignment="CENTER" spacing="30.0" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
-                        <children>
-                            <Button onAction="#pagePrecedente" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand;" text="⬅ Précédent" />
-                            <Label fx:id="lblPagination" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" text="Page 1 / 1" />
-                            <Button onAction="#pageSuivante" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand;" text="Suivant ➡" />
-                        </children>
-                    </HBox>
-                </children>
-            </VBox>
-        </children>
-    </AnchorPane>
+                        <!-- Event label + combo -->
+                        <Label text="Evenement :"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                        <ComboBox fx:id="comboEventList"
+                                  prefHeight="40.0"
+                                  prefWidth="200.0"
+                                  promptText="Tous les evenements"
+                                  style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
+
+                        <!-- Sort label + combo -->
+                        <Label text="Trier :"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748b;" />
+                        <ComboBox fx:id="comboSort"
+                                  onAction="#handleSort"
+                                  prefHeight="40.0"
+                                  prefWidth="150.0"
+                                  promptText="Par defaut"
+                                  style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-background-radius: 10;" />
+
+                        <!-- Count -->
+                        <Label fx:id="lblResultsCount"
+                               text="14 resultats"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #64748b;" />
+
+                    </children>
+                </HBox>
+
+                <!-- ===== CARDS SCROLL ===== -->
+                <ScrollPane fitToWidth="true"
+                            VBox.vgrow="ALWAYS"
+                            style="-fx-background-color: transparent; -fx-background: transparent;">
+                    <content>
+                        <FlowPane fx:id="cardsContainer"
+                                  hgap="20.0"
+                                  vgap="20.0"
+                                  prefWrapLength="1040.0"
+                                  style="-fx-background-color: transparent;">
+                            <padding>
+                                <Insets bottom="20.0" left="2.0" right="2.0" top="10.0" />
+                            </padding>
+                        </FlowPane>
+                    </content>
+                </ScrollPane>
+
+                <!-- ===== PAGINATION ===== -->
+                <HBox alignment="CENTER" spacing="24.0"
+                      style="-fx-background-color: white; -fx-padding: 12 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 3);">
+                    <children>
+                        <Button onAction="#pagePrecedente"
+                                text="Precedent"
+                                style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 18;" />
+                        <Label fx:id="lblPagination"
+                               text="Page 1 / 1"
+                               style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;" />
+                        <Button onAction="#pageSuivante"
+                                text="Suivant"
+                                style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 18;" />
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

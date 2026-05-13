@@ -239,15 +239,17 @@ public class QuestionController {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    // APRÈS
     private void afficherPage() {
         if (cardsContainer == null) return;
         cardsContainer.getChildren().clear();
+        cardColorIndex = 0;  // ← AJOUTE CETTE LIGNE ICI
         int total = questionsFiltrees.size();
         int start = pageActuelle * ITEMS_PER_PAGE;
         int end = Math.min(start + ITEMS_PER_PAGE, total);
 
         for (int i = start; i < end; i++) {
-            cardsContainer.getChildren().add(createPinterestCard(questionsFiltrees.get(i)));
+            cardsContainer.getChildren().add(buildQuestionCard(questionsFiltrees.get(i)));
         }
 
         if (lblPagination != null) {
@@ -537,5 +539,137 @@ public class QuestionController {
         }
         return texte;
     }
+    // ─── Couleurs des cards (cycle automatique) ───────────────────────────────
+    private static final String[] CARD_COLORS = {
+            "#e0fdf4", "#dcfce7", "#ede9fe", "#fef9c3",
+            "#dbeafe", "#fce7f3", "#e0f2fe", "#ecfccb"
+    };
+    private static final String[] CARD_BORDER_COLORS = {
+            "#2dd4bf", "#86efac", "#c4b5fd", "#fde047",
+            "#93c5fd", "#f9a8d4", "#7dd3fc", "#bef264"
+    };
+    private int cardColorIndex = 0;
+
+    private VBox buildQuestionCard(Question q) {
+        String bg     = CARD_COLORS[cardColorIndex % CARD_COLORS.length];
+        String border = CARD_BORDER_COLORS[cardColorIndex % CARD_BORDER_COLORS.length];
+        cardColorIndex++;
+
+        // ── Conteneur principal ──────────────────────────────────────────
+        VBox card = new VBox(12);
+        card.setPrefWidth(245);
+        card.setStyle(
+                "-fx-background-color: " + bg + ";" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-border-color: " + border + ";" +
+                        "-fx-border-width: 0 0 0 5;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-padding: 18;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.07), 10, 0, 0, 4);"
+        );
+
+        // ── Bookmark ─────────────────────────────────────────────────────
+        Button bookmark = new Button("🔖");
+        bookmark.setStyle(
+                "-fx-background-color: white; -fx-border-color: #e2e8f0;" +
+                        "-fx-border-radius: 8; -fx-background-radius: 8;" +
+                        "-fx-cursor: hand; -fx-font-size: 12px; -fx-padding: 4 8;"
+        );
+        HBox bookmarkRow = new HBox(bookmark);
+        bookmarkRow.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+
+        // ── Texte question ────────────────────────────────────────────────
+        Label lblQuestion = new Label(q.getTexte());
+        lblQuestion.setWrapText(true);
+        lblQuestion.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+
+        // ── Réponse correcte ──────────────────────────────────────────────
+        Label lblReponse = new Label("✅  " + q.getReponse());
+        lblReponse.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #059669;");
+
+        // ── Points + badges A B C ─────────────────────────────────────────
+        HBox metaRow = new HBox(8);
+        metaRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Label pts = new Label("⭐ " + q.getPoints() + " pts");
+        pts.setStyle(
+                "-fx-background-color: #fef3c7; -fx-text-fill: #92400e;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;" +
+                        "-fx-padding: 3 8; -fx-background-radius: 20;"
+        );
+        metaRow.getChildren().add(pts);
+
+        for (String opt : new String[]{"A", "B", "C"}) {
+            Label badge = new Label(opt);
+            badge.setStyle(
+                    "-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca;" +
+                            "-fx-font-size: 11px; -fx-font-weight: bold;" +
+                            "-fx-padding: 3 8; -fx-background-radius: 20;"
+            );
+            metaRow.getChildren().add(badge);
+        }
+
+        // ── Badge événement (via getIdEvent + liste chargée) ──────────────
+        HBox eventRow = new HBox();
+        if (comboEventList != null) {
+            comboEventList.getItems().stream()
+                    .filter(ev -> ev.getId() == q.getIdEvent())
+                    .findFirst()
+                    .ifPresent(ev -> {
+                        Label evBadge = new Label("📋  " + ev.getTitle());
+                        evBadge.setStyle(
+                                "-fx-background-color: #f1f5f9; -fx-text-fill: #475569;" +
+                                        "-fx-font-size: 11px; -fx-padding: 3 10; -fx-background-radius: 20;"
+                        );
+                        eventRow.getChildren().add(evBadge);
+                    });
+        }
+
+        // ── Bouton Modifier ───────────────────────────────────────────────
+        Button btnModifier = new Button("✏️  Modifier");
+        btnModifier.setStyle(
+                "-fx-background-color: white; -fx-border-color: #e2e8f0;" +
+                        "-fx-border-radius: 8; -fx-background-radius: 8;" +
+                        "-fx-font-size: 12px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 7 14;"
+        );
+        HBox.setHgrow(btnModifier, javafx.scene.layout.Priority.ALWAYS);
+        btnModifier.setMaxWidth(Double.MAX_VALUE);
+        btnModifier.setOnAction(e -> {
+            questionEnCours = q;
+            switchToForm();
+        });
+
+        // ── Bouton Supprimer ──────────────────────────────────────────────
+        Button btnSuppr = new Button("🗑️");
+        btnSuppr.setStyle(
+                "-fx-background-color: #fff1f2; -fx-border-color: #fecdd3;" +
+                        "-fx-border-radius: 8; -fx-background-radius: 8;" +
+                        "-fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 7 10;"
+        );
+        btnSuppr.setOnAction(e -> {
+            try {
+                qs.supprimer(q.getIdQuestion());
+                refreshData();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        HBox actionsRow = new HBox(8, btnModifier, btnSuppr);
+        actionsRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        // ── Assemblage ────────────────────────────────────────────────────
+        card.getChildren().addAll(bookmarkRow, lblQuestion, lblReponse, metaRow, eventRow, actionsRow);
+        return card;
+    }
+
+    private void afficherCardsPage(List<Question> questions) {
+        cardsContainer.getChildren().clear();
+        cardColorIndex = 0;
+        for (Question q : questions) {
+            cardsContainer.getChildren().add(buildQuestionCard(q));
+        }
+    }
+
 }
 

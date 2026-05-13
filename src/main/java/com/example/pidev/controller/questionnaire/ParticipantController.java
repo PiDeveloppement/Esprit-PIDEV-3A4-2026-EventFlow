@@ -178,15 +178,16 @@ public class ParticipantController {
 
     private void sauvegarderEtChangerPage() {
         try {
-            int dernierIdFeedback = 0;
             int nombreBonnesReponses = 0;
+            int dernierIdFeedback = 0; // ← déclaré ici
+
 
             // --- 1. FILTRAGE DES BAD WORDS (Appel API PurgoMalum) ---
             // On récupère le texte, on le filtre, et on utilise cette version partout
             String commentaireBrut = txtCommentaire.getText();
             String commentaireFiltre = badWordService.filtrerTexte(commentaireBrut);
-
-            // --- 2. SAUVEGARDE EN BASE DE DONNÉES ET CALCUL DU SCORE ---
+            // --- 2. CALCUL DU SCORE SEULEMENT ---
+            // --- 2. CALCUL DU SCORE + SAUVEGARDE UNE RÉPONSE PAR QUESTION ---
             for (int i = 0; i < listeQuestions.size(); i++) {
                 Question q = listeQuestions.get(i);
                 String repDonnee = reponsesUtilisateur.get(i);
@@ -195,16 +196,19 @@ public class ParticipantController {
                     nombreBonnesReponses++;
                 }
 
-                // Utilisation du commentaireFiltre pour la base de données
+                boolean estDerniere = (i == listeQuestions.size() - 1);
+
+                // Commentaire et étoiles seulement pour la dernière question
                 dernierIdFeedback = fs.enregistrerFeedbackComplet(
                         idParticipantConnecte,
                         idEventActuel,
-                        q.getIdQuestion(),
-                        repDonnee,
-                        commentaireFiltre,
-                        etoilesSelectionnees
+                        q.getIdQuestion(),         // ← chaque question son id
+                        repDonnee,                  // ← chaque question sa réponse
+                        estDerniere ? commentaireFiltre : "", // ← commentaire seulement à la fin
+                        estDerniere ? etoilesSelectionnees : 0 // ← étoiles seulement à la fin
                 );
             }
+// Plus rien en dehors de la boucle pour le feedback
 
             // --- 3. GÉNÉRATION DU CERTIFICAT SI ADMIS ---
             if (nombreBonnesReponses >= (listeQuestions.size() / 2.0)) {
