@@ -1,0 +1,272 @@
+# 🔄 DIAGRAMME DE FLUX - AUTO-REFRESH SYSTEM
+
+```
+╔════════════════════════════════════════════════════════════════════════╗
+║                    APPLICATION EVENFLOW - AUTO-REFRESH                 ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         INITIALISATION (T=0)                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  User Lance l'Application                                               │
+│         ↓                                                                │
+│  MainController.initialize()                                            │
+│         ↓                                                                │
+│  SponsorAdminController.initialize()                                    │
+│  BudgetListController.initialize()                                      │
+│  DepenseListController.initialize()                                     │
+│         ↓                                                                │
+│  ✅ Auto-refresh démarré (tous les 5s)                                  │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   BOUCLE DE RAFRAÎCHISSEMENT (T=5s)                    │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │ THREAD 1 : Scheduler (Async)                                     │   │
+│  │                                                                   │   │
+│  │  ScheduledExecutorService.scheduleAtFixedRate()                  │   │
+│  │         ↓                                                         │   │
+│  │  refreshDataFromDatabase()                                       │   │
+│  │         ↓                                                         │   │
+│  │  BudgetService.getAllBudgets()  ← Requête BD                     │   │
+│  │         ↓                                                         │   │
+│  │  List<Budget> newData = [...]                                    │   │
+│  │         ↓                                                         │   │
+│  │  Platform.runLater() → Retour UI Thread                          │   │
+│  │                                                                   │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                              ↓                                            │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │ THREAD 2 : FX Thread (UI)                                        │   │
+│  │                                                                   │   │
+│  │  baseList.setAll(newData)                                        │   │
+│  │         ↓                                                         │   │
+│  │  ┌────────────────────────────────────────┐                      │   │
+│  │  │ Observable Change Detected             │                      │   │
+│  │  │ → renderCards()                        │                      │   │
+│  │  │ → TableView updates                    │                      │   │
+│  │  │ → Cards redraw                         │                      │   │
+│  │  └────────────────────────────────────────┘                      │   │
+│  │         ↓                                                         │   │
+│  │  updateKpis()                                                    │   │
+│  │  ├─ kpiCountLabel.setText()                                      │   │
+│  │  ├─ kpiInitialLabel.setText()                                    │   │
+│  │  ├─ kpiRentLabel.setText()                                       │   │
+│  │  └─ kpiDeficitLabel.setText()                                    │   │
+│  │         ↓                                                         │   │
+│  │  updateCharts()                                                  │   │
+│  │  ├─ updateBudgetComparisonChart()                                │   │
+│  │  ├─ updateRoiTrendChart()                                        │   │
+│  │  └─ initCategoryChart()                                          │   │
+│  │         ↓                                                         │   │
+│  │  applyPredicate()                                                │   │
+│  │  ├─ Filtrer par santé financière                                 │   │
+│  │  ├─ Filtrer par événement                                        │   │
+│  │  └─ Filtrer par statut                                           │   │
+│  │         ↓                                                         │   │
+│  │  statusLabel.setText("✅ Mis à jour")                            │   │
+│  │                                                                   │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  ✨ Interface se met à jour en temps quasi-réel                        │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      EXEMPLE DE CHANGEMENT BD                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  T=0s   User ouvre le Budget                 Interface chargée ✅       │
+│                                                     ↓                     │
+│         INSERT INTO budget VALUES (...)       Nouveau budget en BD      │
+│  (Exécuté dans MySQL)                                ↓                   │
+│                                                     ↓                     │
+│  T=5s   ScheduledExecutorService tire    SELECT * FROM budget           │
+│         refreshDataFromDatabase()                   ↓                    │
+│                                          Retourne 21 budgets             │
+│  T=5.1s Platform.runLater() exécute             ↓                       │
+│         baseList.setAll(21 budgets)                 ↓                    │
+│                                                     ↓                     │
+│  T=5.2s Observable notifie les listeners      renderCards()             │
+│                                                     ↓                     │
+│  T=5.3s UI se met à jour                Interface affiche 21 ✅        │
+│         KPI: "+1 budget"                          ↓                      │
+│         Graphique redessiné                   Utilisateur voit ✅       │
+│                                                                          │
+│  Timing total : ~5 secondes entre INSERT et affichage ✓                │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                      COMPOSANTS IMPACTÉS PAR REFRESH                    ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+SponsorAdminController (Sponsor Admin)
+├─ 🔄 baseList (ObservableList<Sponsor>)
+├─ 🎴 filtered (FilteredList)
+├─ 📊 cardsPane (TilePane) → Sponsor Cards réaffichées
+├─ 📈 contributionsChart (PieChart) → Mis à jour
+├─ 📝 totalSponsorsLabel → Nombre de sponsors
+├─ 💰 totalContributionLabel → Total contributions
+├─ 📊 avgContributionLabel → Moyenne
+└─ 🔍 statusLabel → "✅ Mis à jour"
+
+BudgetListController (Budget)
+├─ 🔄 baseList (ObservableList<Budget>)
+├─ 🎴 filtered (FilteredList)
+├─ 📊 cardsPane (TilePane) → Budget Cards réaffichées
+├─ 📈 budgetChartHolder → Graphique comparaison
+├─ 📈 roiChartHolder → Graphique ROI
+├─ 📝 kpiCountLabel → Nombre de budgets
+├─ 💰 kpiInitialLabel → Budget initial total
+├─ 📊 kpiRentLabel → ROI global
+├─ ❌ kpiDeficitLabel → Budgets en déficit
+└─ 🔍 statusLabel → "✅ Mis à jour"
+
+DepenseListController (Dépenses)
+├─ 🔄 baseList (ObservableList<Depense>)
+├─ 🎴 filtered (FilteredList)
+├─ 📊 cardsPane (TilePane) → Expense Cards réaffichées
+├─ 📈 categoryPieChart (PieChart) → Répartition par catégorie
+├─ 📝 totalDepensesLabel → Total dépenses
+├─ 🔢 countDepensesLabel → Nombre de dépenses
+├─ 📊 avgDepenseLabel → Moyenne par dépense
+├─ 🏷️ categoriesLabel → Nombre de catégories
+└─ 🔍 statusLabel → "✅ Mis à jour"
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                        THREAD SAFETY FLOW                               ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+BD Thread                          FX Thread
+    ├─ Query: SELECT * FROM...       │
+    │  (Database operations)           │
+    ├─ Récupère List<T>              │
+    │                                 │
+    ├─ Platform.runLater(λ) ──────────→ Enqueue sur FX Queue
+    │                                 │
+    │                         Thread-Safe Boundary
+    │                                 │
+    │                    ├─ baseList.setAll()
+    │                    ├─ Déclenche Observable events
+    │                    ├─ renderCards() exécuté
+    │                    ├─ Graphiques redessinés
+    │                    └─ UI mise à jour
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                      CYCLE DE VIE COMPLET (10s)                        ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+T=0s    ├─ Application démarrage
+        ├─ initialize() de chaque contrôleur
+        └─ startAutoRefresh() lancé ✅
+
+T=1s    ├─ Interface affichée avec données initiales
+        └─ ScheduledExecutorService attent...
+
+T=5s    ├─ 🔔 Timer déclenche → refreshDataFromDatabase()
+        ├─ BD Thread : SELECT * FROM budget
+        └─ Attente réponse...
+
+T=5.1s  ├─ Résultat reçu (21 budgets)
+        ├─ Platform.runLater() → FX Thread
+        └─ baseList.setAll(21 budgets)
+
+T=5.2s  ├─ Observable notifie les listeners
+        ├─ renderCards() appelé
+        ├─ Graphiques mis à jour
+        └─ UI refreshed ✅
+
+T=6s    ├─ Interface affiche nouvelles données
+        ├─ User peut interagir normalement
+        └─ En attente du prochain cycle...
+
+T=10s   ├─ 🔔 Timer déclenche à nouveau
+        ├─ refreshDataFromDatabase() s'exécute
+        └─ Cycle 2 commence...
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                        SCENARIO: AJOUT DE SPONSOR                      ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+Avant (❌ Ancien système):
+├─ User clique "Sponsor Admin"
+├─ Interface affiche 42 sponsors (données statiques)
+├─ Autre user ajoute sponsor en BD
+├─ Interface reste à 42 sponsors
+├─ User doit cliquer "Rafraîchir" manuellement
+└─ Interface affiche maintenant 43 sponsors
+
+Après (✅ Nouveau système):
+├─ User clique "Sponsor Admin"
+├─ startAutoRefresh() lancé 🚀
+├─ Interface affiche 42 sponsors
+├─ Autre user ajoute sponsor en BD
+│  (INSERT INTO sponsors VALUES (...))
+├─ ⏱️ 5 secondes passent...
+├─ ScheduledExecutorService déclenche
+├─ refreshDataFromDatabase() exécuté
+├─ Récupère 43 sponsors de la BD
+├─ baseList.setAll() mis à jour
+├─ Observable notifie renderCards()
+├─ Nouvelle carte affichée automatiquement ✅
+├─ KPI "+1 sponsor" ✅
+├─ Graphique mise à jour ✅
+└─ User voit le changement (SANS action!)
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                    RÉSUMÉ VISUEL DE L'ARCHITECTURE                     ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ CONTRÔLEUR (SponsorAdminController, BudgetListController, etc.)     │
+│                                                                      │
+│ initialize() {                                                       │
+│     loadData()                    ← Charge données initiales         │
+│     startAutoRefresh() ✨        ← Lance le scheduler 🔄            │
+│ }                                                                    │
+│                                                                      │
+│ startAutoRefresh() {                                                 │
+│     scheduler = Executors.newScheduledThreadPool(1)                 │
+│     scheduler.scheduleAtFixedRate(                                  │
+│         refreshDataFromDatabase,  ← Fonction appelée toutes les 5s  │
+│         5,                        ← Délai initial                   │
+│         5,                        ← Intervalle                      │
+│         TimeUnit.SECONDS          ← Unité                           │
+│     )                                                                │
+│ }                                                                    │
+│                                                                      │
+│ refreshDataFromDatabase() {                                          │
+│     List<T> newData = service.getAll()  ← BD Query (async)          │
+│     Platform.runLater(() -> {           ← Sur FX Thread             │
+│         baseList.setAll(newData)        ← Mise à jour observable   │
+│         updateKpis()                    ← Statistiques               │
+│         updateCharts()                  ← Graphiques                 │
+│         applyPredicate()                ← Filtres                    │
+│         statusLabel.setText("✅")       ← Statut                    │
+│     })                                                               │
+│ }                                                                    │
+│                                                                      │
+│ Resultat: Observable<T> → UI Updates (Cards, Charts, KPI)          │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎯 Clé du succès :
+  ✅ ScheduledExecutorService pour timing régulier
+  ✅ Platform.runLater() pour thread-safety
+  ✅ baseList.setAll() pour déclencher observers
+  ✅ Filtering et charts réappliqués automatiquement
+
+═══════════════════════════════════════════════════════════════════════════
+

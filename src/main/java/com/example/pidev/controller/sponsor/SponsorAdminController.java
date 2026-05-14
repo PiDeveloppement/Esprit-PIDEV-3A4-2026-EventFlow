@@ -7,6 +7,7 @@ import com.example.pidev.service.pdf.LocalSponsorPdfService;
 import com.example.pidev.service.excel.ExcelExportService;
 import com.example.pidev.service.chart.QuickChartService;
 import com.google.gson.JsonObject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -29,6 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SponsorAdminController implements Initializable {
 
@@ -60,6 +64,10 @@ public class SponsorAdminController implements Initializable {
     private static final String FORM_FXML    = "/com/example/pidev/fxml/Sponsor/sponsor-form.fxml";
     private static final String DETAILS_FXML = "/com/example/pidev/fxml/Sponsor/sponsor-detail.fxml";
 
+    // Auto-refresh toutes les 5 secondes
+    private ScheduledExecutorService scheduler;
+    private static final int REFRESH_INTERVAL_SECONDS = 5;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         filtered = new FilteredList<>(baseList, s -> true);
@@ -89,6 +97,55 @@ public class SponsorAdminController implements Initializable {
         loadData();
         applyPredicate();
         initCharts();
+
+        // Démarrer le rafraîchissement automatique
+        startAutoRefresh();
+    }
+
+    /**
+     * Démarre le rafraîchissement automatique toutes les 5 secondes
+     */
+    private void startAutoRefresh() {
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(
+                    this::refreshDataFromDatabase,
+                    REFRESH_INTERVAL_SECONDS, // délai initial
+                    REFRESH_INTERVAL_SECONDS, // intervalle de répétition
+                    TimeUnit.SECONDS
+            );
+            System.out.println("✅ Auto-refresh Sponsor Admin démarré (tous les " + REFRESH_INTERVAL_SECONDS + "s)");
+        }
+    }
+
+    /**
+     * Arrête le rafraîchissement automatique
+     */
+    private void stopAutoRefresh() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+            System.out.println("⏹️ Auto-refresh Sponsor Admin arrêté");
+        }
+    }
+
+    /**
+     * Rafraîchit les données depuis la base de données
+     */
+    private void refreshDataFromDatabase() {
+        try {
+            List<Sponsor> newData = sponsorService.getAllSponsors();
+            Platform.runLater(() -> {
+                baseList.setAll(newData);
+                updateGlobalStats();
+                initCharts();
+                applyPredicate();
+                if (statusLabel != null) {
+                    statusLabel.setText("✅ Mis à jour: " + System.currentTimeMillis());
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur auto-refresh Sponsor: " + e.getMessage());
+        }
     }
 
     private int computeCols(double width) {

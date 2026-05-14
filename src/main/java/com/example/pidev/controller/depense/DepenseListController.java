@@ -6,6 +6,7 @@ import com.example.pidev.service.depense.DepenseService;
 import com.example.pidev.service.excel.ExcelExportService;
 import com.example.pidev.service.chart.QuickChartService;
 import com.google.gson.JsonObject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -28,6 +29,9 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DepenseListController implements Initializable {
 
@@ -54,6 +58,10 @@ public class DepenseListController implements Initializable {
     private static final String FORM_FXML    = "/com/example/pidev/fxml/Depense/depense-form.fxml";
     private static final String DETAILS_FXML = "/com/example/pidev/fxml/Depense/depense-detail.fxml";
 
+    // Auto-refresh toutes les 5 secondes
+    private ScheduledExecutorService scheduler;
+    private static final int REFRESH_INTERVAL_SECONDS = 5;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -76,6 +84,55 @@ public class DepenseListController implements Initializable {
         setupFilters();
         loadData();
         applyPredicate();
+
+        // Démarrer le rafraîchissement automatique
+        startAutoRefresh();
+    }
+
+    /**
+     * Démarre le rafraîchissement automatique toutes les 5 secondes
+     */
+    private void startAutoRefresh() {
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(
+                    this::refreshDataFromDatabase,
+                    REFRESH_INTERVAL_SECONDS,
+                    REFRESH_INTERVAL_SECONDS,
+                    TimeUnit.SECONDS
+            );
+            System.out.println("✅ Auto-refresh Dépenses démarré (tous les " + REFRESH_INTERVAL_SECONDS + "s)");
+        }
+    }
+
+    /**
+     * Arrête le rafraîchissement automatique
+     */
+    private void stopAutoRefresh() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+            System.out.println("⏹️ Auto-refresh Dépenses arrêté");
+        }
+    }
+
+    /**
+     * Rafraîchit les données depuis la base de données
+     */
+    private void refreshDataFromDatabase() {
+        try {
+            List<Depense> newData = depenseService.getAllDepenses();
+            Platform.runLater(() -> {
+                baseList.setAll(newData);
+                updateKpis();
+                initCategoryChart();
+                applyPredicate();
+                if (statusLabel != null) {
+                    statusLabel.setText("📊 " + baseList.size() + " dépense(s) ✅ Mis à jour");
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur auto-refresh Dépenses: " + e.getMessage());
+        }
     }
 
     private void setupFilters() {

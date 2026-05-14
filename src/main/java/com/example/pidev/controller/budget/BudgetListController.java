@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class BudgetListController implements Initializable {
 
@@ -58,6 +61,10 @@ public class BudgetListController implements Initializable {
     private static final String CARD_FXML    = "/com/example/pidev/fxml/Budget/budget-card.fxml";
     private static final String FORM_FXML    = "/com/example/pidev/fxml/Budget/budget-form.fxml"; // <-- Vérifiez ce chemin
     private static final String DETAILS_FXML = "/com/example/pidev/fxml/Budget/budget-detail.fxml";
+
+    // Auto-refresh toutes les 5 secondes
+    private ScheduledExecutorService scheduler;
+    private static final int REFRESH_INTERVAL_SECONDS = 5;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -94,6 +101,56 @@ public class BudgetListController implements Initializable {
                 });
             }
         });
+
+        // Démarrer le rafraîchissement automatique
+        startAutoRefresh();
+    }
+
+    /**
+     * Démarre le rafraîchissement automatique toutes les 5 secondes
+     */
+    private void startAutoRefresh() {
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(
+                    this::refreshDataFromDatabase,
+                    REFRESH_INTERVAL_SECONDS,
+                    REFRESH_INTERVAL_SECONDS,
+                    TimeUnit.SECONDS
+            );
+            System.out.println("✅ Auto-refresh Budget démarré (tous les " + REFRESH_INTERVAL_SECONDS + "s)");
+        }
+    }
+
+    /**
+     * Arrête le rafraîchissement automatique
+     */
+    private void stopAutoRefresh() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+            System.out.println("⏹️ Auto-refresh Budget arrêté");
+        }
+    }
+
+    /**
+     * Rafraîchit les données depuis la base de données
+     */
+    private void refreshDataFromDatabase() {
+        try {
+            List<Budget> newData = budgetService.getAllBudgets();
+            Platform.runLater(() -> {
+                baseList.setAll(newData);
+                updateKpis();
+                updateBudgetComparisonChart();
+                updateRoiTrendChart();
+                applyPredicate();
+                if (statusLabel != null) {
+                    statusLabel.setText("📊 " + baseList.size() + " budget(s) ✅ Mis à jour");
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur auto-refresh Budget: " + e.getMessage());
+        }
     }
 
     private void setupImageView(StackPane holder, ImageView imageView) {

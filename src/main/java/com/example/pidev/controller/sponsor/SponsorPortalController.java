@@ -63,6 +63,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class SponsorPortalController implements Initializable {
 
@@ -124,6 +127,10 @@ public class SponsorPortalController implements Initializable {
     private static final String CARD_FXML = "/com/example/pidev/fxml/Sponsor/sponsor-card.fxml";
     private static final String FORM_FXML = "/com/example/pidev/fxml/Sponsor/sponsor-form.fxml";
     private static final String DETAILS_FXML = "/com/example/pidev/fxml/Sponsor/sponsor-detail.fxml";
+
+    // ==================== AUTO-REFRESH (UNIQUE) ====================
+    private ScheduledExecutorService scheduler;
+    private static final int REFRESH_INTERVAL_SECONDS = 5;
 
     public void setInitialEmail(String email) {
         if (email == null || email.isBlank()) return;
@@ -193,16 +200,12 @@ public class SponsorPortalController implements Initializable {
         String sessionEmail = UserSession.getInstance().getEmail();
         if (sessionEmail != null && !sessionEmail.isBlank()) {
             setInitialEmail(sessionEmail);
+            startAutoRefresh();
         } else {
             currentEmail = null;
             setPortalEnabled(false);
             sponsorBaseList.clear();
             loadPublicViewWithoutSession();
-        }
-
-        if (currentEmail != null && !currentEmail.isBlank()) {
-            setPortalEnabled(true);
-            reloadMine();
         }
     }
 
@@ -217,6 +220,10 @@ public class SponsorPortalController implements Initializable {
         if (eventFilter != null) eventFilter.setDisable(!enabled);
         if (recommendedSortFilter != null) recommendedSortFilter.setDisable(!enabled);
         if (allEventsSortFilter != null) allEventsSortFilter.setDisable(!enabled);
+
+        if (!enabled) {
+            stopAutoRefresh();
+        }
     }
 
     private void reloadMine() {
@@ -284,12 +291,10 @@ public class SponsorPortalController implements Initializable {
             String industry = "";
             UserModel sessionUser = UserSession.getInstance().getCurrentUser();
 
-            // Priorite: biographie du profil sponsor = secteur.
             if (sessionUser != null) {
                 industry = safe(sessionUser.getBio()).trim();
             }
 
-            // Fallback sur industry du dernier sponsor enregistre.
             if ((industry == null || industry.isBlank()) && currentEmail != null && !currentEmail.isBlank()) {
                 List<Sponsor> sponsors = sponsorService.getSponsorsByContactEmail(currentEmail);
                 industry = sponsors.stream()
@@ -304,11 +309,8 @@ public class SponsorPortalController implements Initializable {
                 events = matchingService.findRelevantEvents(industry);
             }
 
-            // Important: parfois l'IA retourne des evenements deja termines.
-            // On filtre d'abord les evenements actifs, puis on applique le fallback si la liste devient vide.
             events = keepOnlyActiveEventsSortedByDate(events);
 
-            // Si aucun match IA actif, proposer quand meme des evenements actifs (evite une page vide).
             if (events == null || events.isEmpty()) {
                 events = pickDefaultRecommendedEvents();
             }
@@ -443,7 +445,7 @@ public class SponsorPortalController implements Initializable {
     }
 
     private void configureSortFilters() {
-        // Tri manuel retire du portail sponsor (tri automatique par date event).
+        // Tri manuel retiré (tri automatique par date)
     }
 
     private void applyEventSorts() {
@@ -488,7 +490,7 @@ public class SponsorPortalController implements Initializable {
     }
 
     private void refreshSponsorFilterCombos() {
-        // Filtres combo retires du portail sponsor.
+        // Filtres combo retirés
     }
 
     private void applySponsorFilters() {
@@ -565,13 +567,11 @@ public class SponsorPortalController implements Initializable {
         try {
             Platform.runLater(() -> {
                 sponsorRecommendationGrid.getChildren().clear();
-                // Récupération des sponsors recommandés via l'API IA
                 try {
                     List<Sponsor> allSponsors = sponsorService.getAllSponsors();
                     List<Sponsor> recommendedSponsors = new ArrayList<>();
 
                     if (allSponsors != null && !allSponsors.isEmpty()) {
-                        // Utiliser les sponsors actifs comme recommandations
                         recommendedSponsors = allSponsors.stream()
                                 .limit(6)
                                 .collect(java.util.stream.Collectors.toList());
@@ -665,7 +665,6 @@ public class SponsorPortalController implements Initializable {
             return base;
         }
 
-        // Priorite: nom evenement exact (si trouve) => n'afficher que ceux-la.
         List<Event> exactTitleMatches = new ArrayList<>();
         for (Event event : base) {
             String title = normalizeSearch(safe(event.getTitle()));
@@ -836,7 +835,7 @@ public class SponsorPortalController implements Initializable {
             showError("Acces", "Session sponsor invalide. Veuillez vous reconnecter.");
             return;
         }
-        showInfo("Recommander Sponsor", "Voulez-vous recommander un sponsor? Funcionalité en développement.");
+        showInfo("Recommander Sponsor", "Voulez-vous recommander un sponsor? Fonctionnalité en développement.");
     }
 
     private void onEdit(Sponsor existing) {
@@ -1051,24 +1050,142 @@ public class SponsorPortalController implements Initializable {
             if (!eventById.containsKey(eventId)) {
                 Event event = eventService.getEventById(eventId);
                 if (event != null) {
-                    eventById.put(eventId, event);
+                    eventById.put(event.getId(), event);
                 }
             }
         }
         return eventById;
     }
 
-    private boolean isEventActive(Event event) {
-        if (event == null) {
-            return false;
-        }
-        LocalDateTime end = event.getEndDate();
-        return end == null || !end.isBefore(LocalDateTime.now());
-    }
-
     private LocalDateTime getEventStartDate(int eventId, Map<Integer, Event> eventById) {
         Event event = eventById.get(eventId);
-        return event == null ? null : event.getStartDate();
+        if (event != null && event.getStartDate() != null) {
+            return event.getStartDate();
+        }
+        return null;
+    }
+
+    private void showError(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.show();
+        });
+    }
+
+    private void showInfo(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.show();
+        });
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String csv(String value) {
+        if (value == null) return "";
+        return value.replace(";", ",").replace("\r", " ").replace("\n", " ");
+    }
+
+    private void showInlinePage(String title, Parent content, Runnable onClose) {
+        try {
+            if (rootPane == null) return;
+            StackPane overlay = new StackPane();
+            overlay.getStyleClass().add("page-overlay");
+            overlay.setPrefWidth(rootPane.getWidth());
+            overlay.setPrefHeight(rootPane.getHeight());
+
+            VBox container = new VBox(0);
+            container.getStyleClass().add("page-container");
+            container.setPrefWidth(800);
+            container.setPrefHeight(600);
+            container.setAlignment(Pos.TOP_CENTER);
+
+            Label titleLabel = new Label(title);
+            titleLabel.getStyleClass().add("page-title");
+
+            Button closeButton = new Button("Fermer");
+            closeButton.getStyleClass().add("page-close-button");
+            closeButton.setOnAction(e -> {
+                rootPane.getChildren().remove(overlay);
+                if (onClose != null) onClose.run();
+            });
+
+            container.getChildren().addAll(titleLabel, closeButton, content);
+            overlay.getChildren().add(container);
+            rootPane.setCenter(overlay);
+        } catch (Exception e) {
+            showError("UI", "Erreur affichage page: " + e.getMessage());
+        }
+    }
+
+    private void restoreMainContent() {
+        if (rootPane != null && mainContent != null) {
+            rootPane.setCenter(mainContent);
+            if (mainContent instanceof ScrollPane scrollPane) {
+                scrollPane.setVvalue(0.0);
+            }
+        }
+    }
+
+    private String formatDate(LocalDateTime dt) {
+        if (dt == null) return "-";
+        return dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
+    // ==================== AUTO-REFRESH MÉTHODES ====================
+    private void startAutoRefresh() {
+        if (scheduler == null || scheduler.isShutdown()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(
+                    this::refreshDataFromDatabase,
+                    REFRESH_INTERVAL_SECONDS,
+                    REFRESH_INTERVAL_SECONDS,
+                    TimeUnit.SECONDS
+            );
+            System.out.println("✅ Auto-refresh Sponsor Portal démarré (tous les " + REFRESH_INTERVAL_SECONDS + "s)");
+        }
+    }
+
+    private void stopAutoRefresh() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+            System.out.println("⏹️ Auto-refresh Sponsor Portal arrêté");
+        }
+    }
+
+    private void refreshDataFromDatabase() {
+        try {
+            List<Sponsor> newSponsors = sponsorService.getSponsorsByContactEmail(currentEmail);
+            List<Event> newEvents = eventService.getAllEvents();
+
+            Platform.runLater(() -> {
+                sponsorBaseList.setAll(newSponsors);
+                allEvents = newEvents;
+                recommendedEvents = loadRecommendedEventsInternal();
+
+                updateMyKpis();
+                updateAdvancedStats();
+                applyEventSorts();
+                applySponsorFilters();
+                renderRecommendedSponsors();
+            });
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur auto-refresh Portal Sponsor: " + e.getMessage());
+        }
+    }
+
+    private boolean isEventActive(Event event) {
+        if (event == null) return false;
+        LocalDateTime end = event.getEndDate();
+        return end == null || !end.isBefore(LocalDateTime.now());
     }
 
     private String getEventTitle(int eventId, Map<Integer, Event> eventById) {
@@ -1097,10 +1214,8 @@ public class SponsorPortalController implements Initializable {
                         showError("Suppression", "Suppression impossible.");
                         return;
                     }
-
                     sponsorBaseList.removeIf(s -> s.getId() == sponsor.getId());
                     reloadMine();
-
                     if (sponsorBaseList.isEmpty()) {
                         showInfo("Historique", "Aucune sponsorship pour le moment.");
                         restoreMainContent();
@@ -1112,75 +1227,5 @@ public class SponsorPortalController implements Initializable {
                 }
             }
         });
-    }
-
-    private boolean showInlinePage(String title, Parent content, Runnable onBack) {
-        if (rootPane == null) return false;
-        if (mainContent == null) mainContent = rootPane.getCenter();
-
-        Button backBtn = new Button("< Retour");
-        backBtn.setStyle("-fx-background-color: transparent; -fx-border-color: #cbd5e1; -fx-border-radius: 8;" +
-                "-fx-background-radius: 8; -fx-text-fill: #334155; -fx-font-weight: bold; -fx-padding: 8 14;");
-        backBtn.setOnAction(e -> {
-            restoreMainContent();
-            if (onBack != null) onBack.run();
-        });
-
-        Label titleLbl = new Label(title);
-        titleLbl.setStyle("-fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #0f172a;");
-
-        HBox header = new HBox(10, backBtn, titleLbl);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(12, 16, 12, 16));
-        header.setStyle("-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;");
-
-        ScrollPane body = new ScrollPane(content);
-        body.setFitToWidth(true);
-        body.setFitToHeight(true);
-        body.setStyle("-fx-background-color: #f1f5f9;");
-        VBox.setVgrow(body, Priority.ALWAYS);
-
-        VBox page = new VBox(header, body);
-        rootPane.setCenter(page);
-        return true;
-    }
-
-    private void restoreMainContent() {
-        if (rootPane != null && mainContent != null) {
-            rootPane.setCenter(mainContent);
-            if (mainContent instanceof ScrollPane scrollPane) {
-                scrollPane.setVvalue(0.0);
-            }
-        }
-    }
-
-    private String formatDate(LocalDateTime dt) {
-        if (dt == null) return "-";
-        return dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-    }
-
-    private String safe(String value) {
-        return value == null ? "" : value;
-    }
-
-    private String csv(String value) {
-        if (value == null) return "";
-        return value.replace(";", ",").replace("\r", " ").replace("\n", " ");
-    }
-
-    private void showError(String title, String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
-    }
-
-    private void showInfo(String title, String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
     }
 }
